@@ -1,0 +1,368 @@
+# College of Business and Entrepreneurship
+# Source: CBE Curricula and Faculty Loading Plan (steady state).
+# See ccjps.yaml for the course entry forms.
+college: CBE
+name: College of Business and Entrepreneurship
+
+courses:
+  BUS 101: Basic Microeconomics
+  BUS 102: Fundamentals of Accounting
+  BUS 110: Principles of Management and Organization
+  BUS 120: Principles of Marketing
+  BUS 121: Basic Finance
+  BUS 201: "Business Law: Obligations and Contracts"
+  BUS 202: Income Taxation
+  BUS 210: Human Resource Management
+  BUS 211: Managerial Accounting
+  BUS 213: {title: Management Information Systems, lab: cbe_computer_lab}
+  BUS 214: Entrepreneurial Management
+  BUS 220: Good Governance and Corporate Social Responsibility
+  BUS 230: International Business and Trade
+  BUS 301: Operations Management and Total Quality Management
+  BUS 302: Strategic Management
+  BUS 303: Business Research
+  BUS 304: Thesis or Feasibility Study
+  BUS 490: {title: Business Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  ACC 101: Financial Accounting and Reporting
+  ACC 102: Conceptual Framework and Accounting Standards
+  ACC 201: Intermediate Accounting 1
+  ACC 202: Intermediate Accounting 2
+  ACC 203: Intermediate Accounting 3
+  ACC 210: Cost Accounting and Control
+  ACC 211: Strategic Cost Management
+  ACC 220: Law on Obligations and Contracts
+  ACC 221: Business Laws and Regulations
+  ACC 222: Regulatory Framework and Legal Issues in Business
+  ACC 230: Income Taxation
+  ACC 231: Business and Transfer Taxation
+  ACC 240: Financial Management
+  ACC 241: Management Science
+  ACC 250: {title: Accounting Information Systems, lab: cbe_computer_lab}
+  ACC 301: Auditing and Assurance Principles
+  ACC 302: "Auditing and Assurance: Concepts and Applications 1"
+  ACC 303: "Auditing and Assurance: Concepts and Applications 2"
+  ACC 304: "Auditing and Assurance: Specialized Industries"
+  ACC 311: Accounting for Business Combinations
+  ACC 312: Accounting for Special Transactions
+  ACC 313: Accounting for Government and Non-Profit Organizations
+  ACC 320: "Governance, Business Ethics, Risk Management, and Internal Control"
+  ACC 321: {title: Data Analytics for Accountants, lab: cbe_computer_lab}
+  ACC 340: Accounting Research Methods
+  ACC 341: Accounting Research
+  ACC 410: "Integrated Review: Financial and Advanced Financial Accounting"
+  ACC 411: "Integrated Review: Auditing and Taxation"
+  ACC 412: "Integrated Review: Management Services and Business Law"
+  ACC 490: {title: Accounting Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  ENT 101: Entrepreneurial Behavior
+  ENT 110: Opportunity Seeking and Ideation
+  ENT 201: Market Research and Consumer Behavior
+  ENT 202: Innovation Management
+  ENT 203: Pricing and Costing
+  ENT 210: Financial Management for Entrepreneurs
+  ENT 211: Digital Marketing and E-Commerce
+  ENT 301: Business Plan Preparation
+  ENT 302: Social Entrepreneurship
+  ENT 303: Family Business and SME Management
+  ENT 304: Franchising and Business Expansion
+  ENT 310: Supply Chain and Logistics for Small Business
+  ENT 401: Business Plan Implementation 1
+  ENT 490: {title: Business Plan Implementation 2, kind: field, credits: 6, placement: [Mon, Tue, Wed, Thu, Fri]}
+  BAN 301: {title: Business Analytics Fundamentals, lab: cbe_computer_lab}
+  BAN 302: {title: Data Management and Visualization, lab: cbe_computer_lab}
+  BAN 303: {title: Predictive Analytics, lab: cbe_computer_lab}
+  BAN 304: {title: Spreadsheet Modeling and Decision Analysis, lab: cbe_computer_lab}
+  BAN 401: {title: Prescriptive Analytics and Optimization, lab: cbe_computer_lab}
+  BAN 402: {title: Marketing and Customer Analytics, lab: cbe_computer_lab}
+  BAN 403: {title: Financial and Operations Analytics, lab: cbe_computer_lab}
+  BAN 404: Data Ethics and Governance
+  FM 301: Financial Management
+  FM 302: Investments and Portfolio Management
+  FM 303: Banking and Financial Institutions
+  FM 304: Financial Analysis and Reporting
+  FM 401: Capital Markets
+  FM 402: Risk Management and Insurance
+  FM 403: Credit and Collection
+  FM 404: Public Finance
+  MKT 301: Professional Salesmanship
+  MKT 302: Consumer Behavior
+  MKT 303: Marketing Research
+  MKT 304: Advertising and Brand Management
+  MKT 401: Product Management
+  MKT 402: Retail Management
+  MKT 403: Digital and Social Media Marketing
+  MKT 404: Marketing Management
+  THM 101: Macro Perspective of Tourism and Hospitality
+  THM 102: Micro Perspective of Tourism and Hospitality
+  THM 110: {title: Kitchen Essentials and Basic Food Preparation, lab: kitchen}
+  THM 111: "Risk Management as Applied to Safety, Security, and Sanitation"
+  THM 120: Philippine Culture and Tourism Geography
+  THM 201: {title: Fundamentals in Lodging Operations, lab: mock_hotel}
+  THM 202: {title: Food and Beverage Service Operations, lab: bar_lab}
+  THM 203: Quality Service Management in Tourism and Hospitality
+  THM 204: Tourism and Hospitality Marketing
+  THM 210: Legal Aspects in Tourism and Hospitality
+  THM 211: {title: Applied Business Tools and Technologies, lab: [front_office_lab, cbe_computer_lab]}
+  THM 212: {title: Travel and Tour Operations, lab: travel_lab}
+  THM 220: Multicultural Diversity in the Workplace
+  THM 230: Foreign Language 1 (Korean)
+  THM 231: Foreign Language 2 (Korean)
+  THM 301: Events Management
+  THM 302: Sustainable Tourism and Ecotourism Management
+  THM 303: "Cost Control in Food, Beverage, and Lodging"
+  THM 304: {title: Front Office and Rooms Division Management, lab: front_office_lab}
+  THM 305: {title: Bar and Beverage Management, lab: bar_lab}
+  THM 310: Entrepreneurship in Tourism and Hospitality
+  THM 311: Strategic Management in Tourism and Hospitality
+  THM 320: Research in Tourism and Hospitality
+  THM 321: Professional Development and Applied Ethics
+  THM 490: {title: Tourism and Hospitality Practicum, kind: field, credits: 6, placement: [Mon, Tue, Wed, Thu, Fri]}
+
+programs:
+  BSA:
+    name: Bachelor of Science in Accountancy
+    department: Accountancy
+    blocks: [A, B]
+    curriculum:
+      1-1: [ACC 101, BUS 101, MATH 180, SOCS 195, PE 101, CWTS 101, UNI 103]
+      1-2: [ACC 102, BUS 110, ACC 220, COMM 120, FIL 207, HIST 220, PE 102, CWTS 102]
+      2-1: [ACC 201, ACC 210, ACC 221, MATH 350, PSYC 160, GAD 171, PE 201]
+      2-2: [ACC 202, ACC 211, ACC 230, ACC 240, STS 180, PE 202]
+      3-1: [ACC 203, ACC 231, ACC 241, ACC 250, ACC 301, ACC 222, PHIL 190]
+      3-2: [ACC 311, ACC 302, ACC 320, ACC 321, ACC 340, PHIL 220, ARTS 101]
+      4-1: [ACC 312, ACC 303, ACC 313, ACC 341, ACC 410, HIST 201, ENGL 302]
+      4-2: [ACC 304, ACC 411, ACC 412, ACC 490]
+  BSEntrep:
+    name: Bachelor of Science in Entrepreneurship
+    department: Entrepreneurship
+    blocks: [A, B]
+    curriculum:
+      1-1: [ENT 101, BUS 101, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103]
+      1-2: [ENT 110, BUS 102, BUS 110, COMM 120, SOCS 195, PE 102, CWTS 102]
+      2-1: [ENT 201, ENT 203, BUS 201, MATH 350, FIL 207, PE 201]
+      2-2: [ENT 202, ENT 211, BUS 210, BUS 202, STS 180, PE 202]
+      3-1: [ENT 210, ENT 301, BUS 220, BUS 230, ENT 310, PHIL 190, ARTS 101]
+      3-2: [ENT 302, ENT 303, BUS 301, ENT 304, PHIL 220, ENGL 302, HIST 201]
+      4-1: [ENT 401, BUS 302, HIST 220, GAD 171]
+      4-2: [ENT 490]
+  BSBA:
+    name: Bachelor of Science in Business Administration
+    department: Business Administration
+    blocks: [A, B]
+    # Years 3 and 4: major courses run in three major groups drawn from both
+    # blocks; "CODE @FM" means the course runs once for the FM group.
+    tracks: {3: [FM, MKT, BAN], 4: [FM, MKT, BAN]}
+    curriculum:
+      1-1: [BUS 101, BUS 110, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103]
+      1-2: [BUS 102, BUS 120, COMM 120, SOCS 195, FIL 207, PE 102, CWTS 102]
+      2-1: [BUS 121, BUS 201, BUS 210, STS 180, PE 201]
+      2-2: [BUS 211, BUS 202, BUS 213, MATH 350, GAD 171, PHIL 190, PE 202]
+      3-1: [BUS 220, BUS 230, FM 301 @FM, FM 303 @FM, MKT 301 @MKT, MKT 302 @MKT, BAN 301 @BAN, BAN 302 @BAN, PHIL 220, ARTS 101]
+      3-2: [BUS 301, BUS 303, BUS 214, FM 302 @FM, FM 304 @FM, MKT 303 @MKT, MKT 304 @MKT, BAN 303 @BAN, BAN 304 @BAN, ENGL 302, HIST 201]
+      4-1: [BUS 302, BUS 304, FM 401 @FM, FM 402 @FM, MKT 401 @MKT, MKT 402 @MKT, BAN 401 @BAN, BAN 402 @BAN, HIST 220]
+      4-2: [FM 403 @FM, FM 404 @FM, MKT 403 @MKT, MKT 404 @MKT, BAN 403 @BAN, BAN 404 @BAN, BUS 490]
+  BSTHM:
+    name: Bachelor of Science in Tourism and Hospitality Management
+    department: Tourism and Hospitality Management
+    blocks: [A, B]
+    curriculum:
+      1-1: [THM 101, THM 110, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103]
+      1-2: [THM 102, THM 111, THM 120, SOCS 195, COMM 120, PE 102, CWTS 102]
+      2-1: [THM 201, THM 202, THM 203, FIL 207, PE 201]
+      2-2: [THM 204, THM 210, THM 211, THM 230, MATH 350, STS 180, PE 202]
+      3-1: [THM 212, THM 220, THM 231, THM 301, THM 303, PHIL 190, ARTS 101]
+      3-2: [THM 302, THM 304, THM 305, THM 310, THM 320, PHIL 220, ENGL 302]
+      4-1: [THM 311, THM 321, HIST 201, HIST 220, GAD 171]
+      4-2: [THM 490]
+
+faculty:
+  A1: {name: Dr. Leonora B. Velasco, rank: Associate Professor I, department: Accountancy, designation: Department Chair, max_lu: 15}
+  A2: {name: Atty. Ronaldo P. Marquez, rank: Assistant Professor II, department: Accountancy, designation: Faculty}
+  A3: {name: Ms. Charmaine D. Uy, rank: Assistant Professor I, department: Accountancy, designation: Review Coordinator}
+  A4: {name: Mr. Jerico M. Valencia, rank: Assistant Professor I, department: Accountancy, designation: Internship Coordinator}
+  A5: {name: Ms. Abigail T. Flores, rank: Instructor III, department: Accountancy, designation: Faculty}
+  N1: {name: Dr. Ramil S. Gonzales, rank: Associate Professor I, department: Entrepreneurship, designation: Department Chair, max_lu: 15}
+  N2: {name: Ms. Kristel A. Rivera, rank: Assistant Professor I, department: Entrepreneurship, designation: Faculty}
+  N3: {name: Mr. Joel C. Aguilar, rank: Instructor III, department: Entrepreneurship, designation: Faculty}
+  N4: {name: Ms. Aileen R. Javier, rank: Instructor III, department: Entrepreneurship, designation: Incubation Coordinator}
+  B1: {name: Dr. Estela M. Torres, rank: Associate Professor I, department: Business Administration, designation: Department Chair, max_lu: 15}
+  B2: {name: Mr. Rodel P. Morales, rank: Assistant Professor I, department: Business Administration, designation: Financial Management Coordinator}
+  B3: {name: Ms. Liezl G. Castro, rank: Assistant Professor I, department: Business Administration, designation: Marketing Coordinator}
+  B4: {name: Mr. Adrian V. Ramirez, rank: Instructor III, department: Business Administration, designation: Business Analytics Coordinator}
+  B5: {name: Ms. Josephine L. Delos Reyes, rank: Instructor III, department: Business Administration, designation: "Department GE Handler; Internship Coordinator"}
+  B6: {name: Mr. Francis Noel D. Galang, rank: Instructor III, department: Business Administration, designation: Faculty}
+  H1: {name: Dr. Marilou C. Padilla, rank: Associate Professor I, department: Tourism and Hospitality Management, designation: Department Chair, max_lu: 15}
+  H2: {name: Mr. Paolo R. Gutierrez, rank: Instructor III, department: Tourism and Hospitality Management, designation: Kitchen Laboratory Coordinator}
+  H3: {name: Ms. Trisha M. Samonte, rank: Assistant Professor I, department: Tourism and Hospitality Management, designation: Faculty}
+  H4: {name: Mr. Lorenzo D. Buenaventura, rank: Assistant Professor I, department: Tourism and Hospitality Management, designation: Practicum Coordinator}
+  H5: {name: Ms. Jasmin L. Sarmiento, rank: Instructor II, department: Tourism and Hospitality Management, designation: Faculty}
+
+loads:
+  1:
+    A1:
+      - ACC 101: BSA 1A, BSA 1B
+      - ACC 341: BSA 4A, BSA 4B
+      - UNI 103: BSA 1A, BSA 1B
+    A2:
+      - ACC 221: BSA 2A, BSA 2B
+      - ACC 222: BSA 3A, BSA 3B
+      - ACC 231: BSA 3A, BSA 3B
+    A3:
+      - ACC 201: BSA 2A, BSA 2B
+      - ACC 203: BSA 3A, BSA 3B
+      - ACC 312: BSA 4A, BSA 4B
+      - ACC 313: BSA 4A, BSA 4B
+    A4:
+      - ACC 250: BSA 3A, BSA 3B
+      - ACC 301: BSA 3A, BSA 3B
+      - ACC 303: BSA 4A, BSA 4B
+    A5:
+      - ACC 210: BSA 2A, BSA 2B
+      - ACC 241: BSA 3A, BSA 3B
+      - ACC 410: BSA 4A, BSA 4B
+      - BUS 101: BSA 1A, BSA 1B
+    N1:
+      - ENT 301: BSEntrep 3A, BSEntrep 3B
+      - ENT 401: BSEntrep 4A, BSEntrep 4B
+    N2:
+      - BUS 230: BSEntrep 3A, BSEntrep 3B
+      - ENT 101: BSEntrep 1A, BSEntrep 1B
+      - ENT 201: BSEntrep 2A, BSEntrep 2B
+      - UNI 103: BSEntrep 1A, BSEntrep 1B
+    N3:
+      - BUS 101: BSEntrep 1A, BSEntrep 1B
+      - BUS 201: BSEntrep 2A, BSEntrep 2B
+      - ENT 203: BSEntrep 2A, BSEntrep 2B
+      - ENT 210: BSEntrep 3A, BSEntrep 3B
+    N4:
+      - BUS 220: BSEntrep 3A, BSEntrep 3B
+      - BUS 302: BSEntrep 4A, BSEntrep 4B
+      - ENT 310: BSEntrep 3A, BSEntrep 3B
+    B1:
+      - BUS 110: BSBA 1A, BSBA 1B
+      - BUS 302: BSBA 4A, BSBA 4B
+    B2:
+      - BUS 101: BSBA 1A, BSBA 1B
+      - FM 301: BSBA 3-FM
+      - FM 303: BSBA 3-FM
+      - FM 401: BSBA 4-FM
+      - FM 402: BSBA 4-FM
+    B3:
+      - BUS 201: BSBA 2A, BSBA 2B
+      - BUS 304: BSBA 4A, BSBA 4B
+      - MKT 301: BSBA 3-MKT
+      - MKT 302: BSBA 3-MKT
+    B4:
+      - BAN 301: BSBA 3-BAN
+      - BAN 302: BSBA 3-BAN
+      - BAN 402: BSBA 4-BAN
+      - UNI 103: BSBA 1A, BSBA 1B
+    B5:
+      - BUS 210: BSBA 2A, BSBA 2B
+      - BUS 220: BSBA 3A, BSBA 3B
+      - BUS 230: BSBA 3A, BSBA 3B
+    B6:
+      - BAN 401: BSBA 4-BAN
+      - BUS 121: BSBA 2A, BSBA 2B
+      - MKT 401: BSBA 4-MKT
+      - MKT 402: BSBA 4-MKT
+    H1:
+      - THM 101: BSTHM 1A, BSTHM 1B
+      - THM 311: BSTHM 4A, BSTHM 4B
+    H2:
+      - THM 202: BSTHM 2A, BSTHM 2B
+      - THM 203: BSTHM 2A, BSTHM 2B
+      - THM 303: BSTHM 3A, BSTHM 3B
+    H3:
+      - THM 212: BSTHM 3A, BSTHM 3B
+      - THM 321: BSTHM 4A, BSTHM 4B
+      - UNI 103: BSTHM 1A, BSTHM 1B
+    H4:
+      - THM 110: BSTHM 1A, BSTHM 1B
+      - THM 201: BSTHM 2A, BSTHM 2B
+    H5:
+      - THM 220: BSTHM 3A, BSTHM 3B
+      - THM 231: BSTHM 3A, BSTHM 3B
+      - THM 301: BSTHM 3A, BSTHM 3B
+  2:
+    A1:
+      - ACC 340: BSA 3A, BSA 3B
+      - BUS 110: BSA 1A, BSA 1B
+    A2:
+      - ACC 220: BSA 1A, BSA 1B
+      - ACC 230: BSA 2A, BSA 2B
+      - ACC 411: BSA 4A, BSA 4B
+      - ACC 412: BSA 4A, BSA 4B
+    A3:
+      - ACC 102: BSA 1A, BSA 1B
+      - ACC 202: BSA 2A, BSA 2B
+      - ACC 311: BSA 3A, BSA 3B
+    A4:
+      - ACC 302: BSA 3A, BSA 3B
+      - ACC 304: BSA 4A, BSA 4B
+      - ACC 320: BSA 3A, BSA 3B
+      - ACC 490: BSA 4A, BSA 4B
+    A5:
+      - ACC 211: BSA 2A, BSA 2B
+      - ACC 240: BSA 2A, BSA 2B
+      - ACC 321: BSA 3A, BSA 3B
+    N1:
+      - ENT 304: BSEntrep 3A, BSEntrep 3B
+      - ENT 490: BSEntrep 4A, BSEntrep 4B
+    N2:
+      - BUS 110: BSEntrep 1A, BSEntrep 1B
+      - ENT 110: BSEntrep 1A, BSEntrep 1B
+      - ENT 211: BSEntrep 2A, BSEntrep 2B
+    N3:
+      - BUS 102: BSEntrep 1A, BSEntrep 1B
+      - BUS 202: BSEntrep 2A, BSEntrep 2B
+      - BUS 301: BSEntrep 3A, BSEntrep 3B
+    N4:
+      - BUS 210: BSEntrep 2A, BSEntrep 2B
+      - ENT 202: BSEntrep 2A, BSEntrep 2B
+      - ENT 302: BSEntrep 3A, BSEntrep 3B
+      - ENT 303: BSEntrep 3A, BSEntrep 3B
+    B1:
+      - BUS 301: BSBA 3A, BSBA 3B
+      - BUS 303: BSBA 3A, BSBA 3B
+    B2:
+      - FM 302: BSBA 3-FM
+      - FM 304: BSBA 3-FM
+      - FM 403: BSBA 4-FM
+      - FM 404: BSBA 4-FM
+    B3:
+      - BUS 102: BSBA 1A, BSBA 1B
+      - BUS 120: BSBA 1A, BSBA 1B
+      - MKT 303: BSBA 3-MKT
+      - MKT 403: BSBA 4-MKT
+    B4:
+      - BAN 304: BSBA 3-BAN
+      - BAN 403: BSBA 4-BAN
+      - BAN 404: BSBA 4-BAN
+      - BUS 202: BSBA 2A, BSBA 2B
+    B5:
+      - BUS 211: BSBA 2A, BSBA 2B
+      - BUS 214: BSBA 3A, BSBA 3B
+      - BUS 490: BSBA 4A, BSBA 4B
+    B6:
+      - BAN 303: BSBA 3-BAN
+      - BUS 213: BSBA 2A, BSBA 2B
+      - MKT 304: BSBA 3-MKT
+      - MKT 404: BSBA 4-MKT
+    H1:
+      - THM 102: BSTHM 1A, BSTHM 1B
+      - THM 320: BSTHM 3A, BSTHM 3B
+    H2:
+      - THM 211: BSTHM 2A, BSTHM 2B
+      - THM 305: BSTHM 3A, BSTHM 3B
+    H3:
+      - THM 120: BSTHM 1A, BSTHM 1B
+      - THM 204: BSTHM 2A, BSTHM 2B
+      - THM 302: BSTHM 3A, BSTHM 3B
+    H4:
+      - THM 210: BSTHM 2A, BSTHM 2B
+      - THM 304: BSTHM 3A, BSTHM 3B
+      - THM 310: BSTHM 3A, BSTHM 3B
+    H5:
+      - THM 111: BSTHM 1A, BSTHM 1B
+      - THM 230: BSTHM 2A, BSTHM 2B
+      - THM 490: BSTHM 4A, BSTHM 4B

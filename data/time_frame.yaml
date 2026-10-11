@@ -1,0 +1,54 @@
+# University Class Time Frame (basis for scheduling).
+# Source: University Class Time Frame document.
+
+days: [Mon, Tue, Wed, Thu, Fri, Sat]
+
+# I. Standard daily periods. Lunch (11:30-12:30 MWF, 12:00-1:30 TTh) is
+# protected simply by having no period that covers it.
+periods:
+  MWF:
+    M1: ["07:30", "08:30"]
+    M2: ["08:30", "09:30"]
+    M3: ["09:30", "10:30"]
+    M4: ["10:30", "11:30"]
+    M5: ["12:30", "13:30"]
+    M6: ["13:30", "14:30"]
+    M7: ["14:30", "15:30"]
+    M8: ["15:30", "16:30"]
+  TTh:
+    T1: ["07:30", "09:00"]
+    T2: ["09:00", "10:30"]
+    T3: ["10:30", "12:00"]
+    T4: ["13:30", "15:00"]
+    T5: ["15:00", "16:30"]
+
+# III. Three-hour laboratory blocks (one day each).
+lab_blocks:
+  LA: {days: MWF, time: ["07:30", "10:30"]}
+  LB: {days: MWF, time: ["08:30", "11:30"]}
+  LC: {days: MWF, time: ["12:30", "15:30"]}
+  LD: {days: MWF, time: ["13:30", "16:30"]}
+  LE: {days: TTh, time: ["07:30", "10:30"]}
+  LF: {days: TTh, time: ["09:00", "12:00"]}
+  LG: {days: TTh, time: ["13:30", "16:30"]}
+
+# CWTS (NSTP) meets on Saturday morning.
+nstp: {day: Sat, time: ["08:00", "11:00"]}
+
+# Rule 3: faculty limits. More than the preferred hours in one day is
+# penalised; the maximum is never exceeded.
+faculty_preferred_max_hours_per_day: 6
+faculty_max_hours_per_day: 8
+
+# CISC guidance: give each year level a fixed lab day so labs of the same
+# year never collide. Used as a preference, not a rule (Year 2 BSCS has three
+# lab courses in the first semester, more than two blocks on one day).
+lab_day_preferences:
+  - {college: CISC, year: 1, days: [Fri], blocks: [LA, LC]}
+  - {college: CISC, year: 2, days: [Tue], blocks: [LE, LG]}
+  - {college: CISC, year: 3, days: [Thu], blocks: [LE, LG]}
+  - {college: CISC, year: 4, days: [Fri], blocks: [LB, LD]}
+
+# Times individual faculty cannot teach, by faculty key (college-ID).
+# Example:  CSS-P1: [{day: Fri, from: "12:30", to: "16:30"}]
+faculty_unavailable: {}

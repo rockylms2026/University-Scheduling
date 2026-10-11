@@ -1,0 +1,412 @@
+# College of Education
+# Source: COE Curricula and Faculty Loading Plan (steady state).
+# Generated layout; see ccjps.yaml for the course entry forms.
+college: COE
+name: College of Education
+# Year 1 introductory courses (excluded from the 4-preparation cap).
+intro_courses: [ED 101, ED 102, SEE 101, SEM 101, SES 101, SEF 101]
+
+courses:
+  ED 101: The Child and Adolescent Learners and Learning Principles
+  ED 102: The Teaching Profession
+  ED 201: Facilitating Learner-Centered Teaching
+  ED 202: Foundation of Special and Inclusive Education
+  ED 203: {title: Technology for Teaching and Learning 1, lab: edtech_lab}
+  ED 204: "The Teacher and the Community, School Culture, and Organizational Leadership"
+  ED 301: Assessment in Learning 1
+  ED 302: Assessment in Learning 2
+  ED 303: Building and Enhancing New Literacies Across the Curriculum
+  ED 304: The Teacher and the School Curriculum
+  ED 401: {title: "Field Study 1: Observation of Teaching-Learning in Actual School Environment", kind: field, credits: 3, placement: [Fri]}
+  ED 402: {title: "Field Study 2: Participation and Teaching Assistantship", kind: field, credits: 3, placement: [Fri]}
+  ED 490: {title: Teaching Internship, kind: field, credits: 6, placement: [Mon, Tue, Wed, Thu, Fri]}
+  EED 101: "Teaching Science in the Elementary Grades: Biology and Chemistry"
+  EED 102: "Teaching Science in the Elementary Grades: Physics, Earth, and Space Science"
+  EED 110: Teaching Mathematics in the Primary Grades
+  EED 111: Teaching Mathematics in the Intermediate Grades
+  EED 120: "Pagtuturo ng Filipino sa Elementarya 1: Estruktura at Gamit ng Wikang Filipino"
+  EED 121: "Pagtuturo ng Filipino sa Elementarya 2: Panitikan ng Pilipinas"
+  EED 130: "Teaching English in the Elementary Grades: Language Arts"
+  EED 131: Teaching English in the Elementary Grades through Literature
+  EED 140: "Teaching Social Studies in the Elementary Grades: Philippine History and Government"
+  EED 141: "Teaching Social Studies in the Elementary Grades: Culture and Geography"
+  EED 150: Teaching Music in the Elementary Grades
+  EED 151: Teaching Arts in the Elementary Grades
+  EED 152: Teaching Physical Education and Health in the Elementary Grades
+  EED 160: Edukasyong Pantahanan at Pangkabuhayan
+  EED 161: {title: Edukasyong Pantahanan at Pangkabuhayan with ICT, lab: edtech_lab}
+  EED 170: Good Manners and Right Conduct (Edukasyon sa Pagpapakatao)
+  EED 180: Reading and Literacy Instruction in the Primary Grades
+  EED 181: Teaching Multigrade Classes
+  EED 190: Research in Education
+  SEE 101: Introduction to Linguistics
+  SEE 102: Children and Adolescent Literature
+  SEE 103: "Language, Culture, and Society"
+  SEE 104: Mythology and Folklore
+  SEE 201: Structures of English
+  SEE 202: Principles and Theories of Language Acquisition and Learning
+  SEE 203: Survey of Philippine Literature in English
+  SEE 204: Language Programs and Policies in Multilingual Societies
+  SEE 205: Survey of Afro-Asian Literature
+  SEE 301: Speech and Theater Arts
+  SEE 302: Survey of English and American Literature
+  SEE 303: Teaching and Assessment of Grammar
+  SEE 304: Teaching and Assessment of the Macroskills
+  SEE 305: Literary Criticism
+  SEE 306: Teaching and Assessment of Literature Studies
+  SEE 307: Language Learning Materials Development
+  SEE 401: "Contemporary, Popular, and Emergent Literature"
+  SEE 402: Language Education Research
+  SEE 403: {title: "Technology for Teaching and Learning 2: Technology in Language Education", lab: edtech_lab}
+  SEE 404: Campus Journalism
+  SEE 405: Stylistics and Discourse Analysis
+  SEM 101: History of Mathematics
+  SEM 102: College and Advanced Algebra
+  SEM 103: Trigonometry
+  SEM 104: Logic and Set Theory
+  SEM 201: Plane and Solid Geometry
+  SEM 202: "Calculus 1: Differential Calculus"
+  SEM 203: Probability and Statistics
+  SEM 204: "Calculus 2: Integral Calculus"
+  SEM 205: Number Theory
+  SEM 301: Linear Algebra
+  SEM 302: "Calculus 3: Multivariable Calculus"
+  SEM 303: Modern Geometry
+  SEM 304: Abstract Algebra
+  SEM 305: Principles and Strategies in Teaching Mathematics
+  SEM 306: Advanced Statistics
+  SEM 307: Mathematics of Investment
+  SEM 401: Discrete Mathematics
+  SEM 402: Assessment and Evaluation in Mathematics
+  SEM 403: "Problem Solving, Mathematical Investigation, and Modeling"
+  SEM 404: Research in Mathematics Education
+  SEM 405: {title: "Technology for Teaching and Learning 2: Instrumentation and Technology in Mathematics", lab: edtech_lab}
+  SES 101: Foundations of Social Studies
+  SES 102: Geography of the World and the Philippines
+  SES 103: Introduction to Sociology and Anthropology
+  SES 104: World History and Civilizations 1
+  SES 201: "Philippine History: Pre-Colonial to Contemporary"
+  SES 202: Economics and Philippine Economic Development
+  SES 203: World History and Civilizations 2
+  SES 204: Asian Studies
+  SES 205: Philippine Government and Constitution
+  SES 301: Philippine Culture and Society
+  SES 302: Comparative Government and Politics
+  SES 303: Teaching Approaches in Secondary Social Studies
+  SES 304: Peace and Human Rights Education
+  SES 305: Disaster Risk Reduction and Environmental Education
+  SES 306: Assessment in Social Studies Education
+  SES 307: Social Studies Curriculum and Materials Development
+  SES 401: Philosophy of Social Science
+  SES 402: Research Methods in Social Studies
+  SES 403: Trends and Issues in Social Studies
+  SES 404: {title: "Technology for Teaching and Learning 2: Technology in Social Studies Education", lab: edtech_lab}
+  SES 405: Local History and Heritage Studies
+  SEF 101: Introduksyon sa Pag-aaral ng Wika
+  SEF 102: Sanaysay at Talumpati
+  SEF 103: Estruktura ng Wikang Filipino
+  SEF 104: Panimulang Linggwistika
+  SEF 201: "Ugnayan ng Wika, Kultura, at Lipunan"
+  SEF 202: Barayti at Baryasyon ng Wika
+  SEF 203: Maikling Kuwento at Nobelang Filipino
+  SEF 204: Mga Teorya at Simulain ng Pagkatuto ng Wika
+  SEF 205: Panulaang Filipino
+  SEF 301: Dulaang Filipino
+  SEF 302: Pagtuturo at Pagtataya ng Makrong Kasanayang Pangwika
+  SEF 303: Pagtuturo at Pagtataya ng Gramatika
+  SEF 304: Panunuring Pampanitikan
+  SEF 305: Panitikang Popular
+  SEF 306: Pagtuturo at Pagtataya ng Panitikan
+  SEF 307: Paghahanda at Ebalwasyon ng Kagamitang Panturo
+  SEF 401: Panitikan ng Rehiyon
+  SEF 402: Introduksyon sa Pananaliksik sa Wika at Panitikan
+  SEF 403: Malikhaing Pagsulat
+  SEF 404: Pagsasaling-Wika
+  SEF 405: {title: "Teknolohiya sa Pagtuturo at Pagkatuto 2: Teknolohiya sa Pagtuturo ng Filipino", lab: edtech_lab}
+
+programs:
+  BEEd:
+    name: Bachelor of Elementary Education
+    department: Elementary Education
+    blocks: [""]
+    curriculum:
+      1-1: [ED 101, ED 102, MATH 180, SOCS 195, PE 101, CWTS 101, PSYC 160, UNI 103]
+      1-2: [EED 110, EED 130, EED 120, COMM 120, FIL 207, PE 102, CWTS 102]
+      2-1: [ED 201, ED 202, ED 204, EED 101, EED 140, EED 150, PE 201]
+      2-2: [ED 203, EED 111, EED 131, EED 121, EED 141, MATH 350, PE 202]
+      3-1: [ED 301, ED 303, ED 304, EED 102, EED 151, EED 160, EED 180, PHIL 190]
+      3-2: [ED 302, EED 152, EED 161, EED 170, EED 190, PHIL 220, ARTS 101, STS 180]
+      4-1: [ED 401, ED 402, EED 181, ENGL 302, HIST 201, HIST 220, GAD 171]
+      4-2: [ED 490]
+  BSEd-E:
+    name: Bachelor of Secondary Education, Major in English
+    department: Secondary Education
+    blocks: [""]
+    curriculum:
+      1-1: [ED 101, SEE 101, MATH 180, PSYC 160, COMM 120, CWTS 101, PE 101, UNI 103]
+      1-2: [ED 102, SEE 102, SEE 103, SEE 104, SOCS 195, CWTS 102, PE 102]
+      2-1: [ED 201, ED 202, ED 204, SEE 201, SEE 202, MATH 350, PHIL 190, PE 201]
+      2-2: [ED 203, SEE 203, SEE 204, SEE 205, FIL 207, STS 180, PE 202]
+      3-1: [ED 301, ED 303, ED 304, SEE 301, SEE 302, SEE 303, PHIL 220, ENGL 302]
+      3-2: [ED 302, SEE 304, SEE 305, SEE 306, SEE 307, ARTS 101, HIST 201, HIST 220]
+      4-1: [ED 401, ED 402, SEE 401, SEE 402, SEE 403, SEE 404, SEE 405, GAD 171]
+      4-2: [ED 490]
+  BSEd-M:
+    name: Bachelor of Secondary Education, Major in Mathematics
+    department: Secondary Education
+    blocks: [""]
+    curriculum:
+      1-1: [ED 101, SEM 101, MATH 180, PSYC 160, COMM 120, CWTS 101, PE 101, UNI 103]
+      1-2: [ED 102, SEM 102, SEM 103, SEM 104, SOCS 195, CWTS 102, PE 102]
+      2-1: [ED 201, ED 202, ED 204, SEM 201, SEM 202, MATH 350, PHIL 190, PE 201]
+      2-2: [ED 203, SEM 203, SEM 204, SEM 205, FIL 207, STS 180, PE 202]
+      3-1: [ED 301, ED 303, ED 304, SEM 301, SEM 302, SEM 303, PHIL 220, ENGL 302]
+      3-2: [ED 302, SEM 304, SEM 305, SEM 306, SEM 307, ARTS 101, HIST 201, HIST 220]
+      4-1: [ED 401, ED 402, SEM 401, SEM 402, SEM 403, SEM 404, SEM 405, GAD 171]
+      4-2: [ED 490]
+  BSEd-SS:
+    name: Bachelor of Secondary Education, Major in Social Sciences
+    department: Secondary Education
+    blocks: [""]
+    curriculum:
+      1-1: [ED 101, SES 101, MATH 180, PSYC 160, COMM 120, CWTS 101, PE 101, UNI 103]
+      1-2: [ED 102, SES 102, SES 103, SES 104, SOCS 195, CWTS 102, PE 102]
+      2-1: [ED 201, ED 202, ED 204, SES 201, SES 202, MATH 350, PHIL 190, PE 201]
+      2-2: [ED 203, SES 203, SES 204, SES 205, FIL 207, STS 180, PE 202]
+      3-1: [ED 301, ED 303, ED 304, SES 301, SES 302, SES 303, PHIL 220, ENGL 302]
+      3-2: [ED 302, SES 304, SES 305, SES 306, SES 307, ARTS 101, HIST 201, HIST 220]
+      4-1: [ED 401, ED 402, SES 401, SES 402, SES 403, SES 404, SES 405, GAD 171]
+      4-2: [ED 490]
+  BSEd-F:
+    name: Bachelor of Secondary Education, Major in Filipino
+    department: Secondary Education
+    blocks: [""]
+    curriculum:
+      1-1: [ED 101, SEF 101, MATH 180, PSYC 160, COMM 120, CWTS 101, PE 101, UNI 103]
+      1-2: [ED 102, SEF 102, SEF 103, SEF 104, SOCS 195, CWTS 102, PE 102]
+      2-1: [ED 201, ED 202, ED 204, SEF 201, SEF 202, MATH 350, PHIL 190, PE 201]
+      2-2: [ED 203, SEF 203, SEF 204, SEF 205, FIL 207, STS 180, PE 202]
+      3-1: [ED 301, ED 303, ED 304, SEF 301, SEF 302, SEF 303, PHIL 220, ENGL 302]
+      3-2: [ED 302, SEF 304, SEF 305, SEF 306, SEF 307, ARTS 101, HIST 201, HIST 220]
+      4-1: [ED 401, ED 402, SEF 401, SEF 402, SEF 403, SEF 404, SEF 405, GAD 171]
+      4-2: [ED 490]
+
+faculty:
+  S1: {name: Dr. Teresa G. Evangelista, rank: Associate Professor II, department: Secondary Education, designation: Department Chair, max_lu: 15}
+  S2: {name: Dr. Manuel A. Francisco, rank: Associate Professor I, department: Secondary Education, designation: Field Study and Internship Coordinator}
+  S4: {name: Mr. Julius B. Natividad, rank: Instructor III, department: Secondary Education, designation: Faculty}
+  S5: {name: Dr. Rebecca L. Medina, rank: Assistant Professor II, department: Secondary Education, designation: English Major Coordinator}
+  S6: {name: Mr. Nathaniel C. Ortega, rank: Instructor III, department: Secondary Education, designation: Faculty}
+  S7: {name: Dr. Rodolfo M. Umali, rank: Assistant Professor II, department: Secondary Education, designation: Mathematics Major Coordinator}
+  S8: {name: Ms. Kimberly D. Saldana, rank: Instructor III, department: Secondary Education, designation: "Department GE Handler (MATH 180, MATH 350)"}
+  S9: {name: Mr. Rogelio O. Legaspi, rank: Assistant Professor I, department: Secondary Education, designation: "Department GE Handler (HIST 201, HIST 220)"}
+  S10: {name: Ms. Divina P. Magbanua, rank: Instructor III, department: Secondary Education, designation: Social Sciences Major Coordinator}
+  S11: {name: Dr. Amado T. Nepomuceno, rank: Assistant Professor II, department: Secondary Education, designation: Filipino Major Coordinator}
+  S12: {name: Ms. Liwayway C. Salvador, rank: Instructor III, department: Secondary Education, designation: Department GE Handler (FIL 207)}
+  S13: {name: Mr. Emilio D. Arceo, rank: Instructor II, department: Secondary Education, designation: Faculty}
+  S14: {name: Ms. Rosario F. Guevarra, rank: Instructor II, department: Secondary Education, designation: Faculty}
+  S15: {name: Ms. Bianca Mae T. Villanueva, rank: Instructor II, department: Secondary Education, designation: Faculty}
+  S16: {name: Mr. Jonathan R. Belmonte, rank: Instructor II, department: Secondary Education, designation: Faculty}
+  E1: {name: Dr. Remedios A. Tamayo, rank: Associate Professor I, department: Elementary Education, designation: Department Chair, max_lu: 15}
+  E2: {name: Ms. Analyn F. Vasquez, rank: Assistant Professor I, department: Elementary Education, designation: Faculty}
+  E3: {name: Mr. Virgilio S. Quijano, rank: Assistant Professor I, department: Elementary Education, designation: Field Study and Internship Coordinator}
+  E4: {name: Ms. Josefina R. Obispo, rank: Instructor III, department: Elementary Education, designation: Faculty}
+  E5: {name: Mr. Ariel M. Baltazar, rank: Instructor III, department: Elementary Education, designation: Faculty}
+
+loads:
+  1:
+    S1:
+      - ED 204: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 2
+    S2:
+      - ED 301: BSEd-M 3, BEEd 3
+      - ED 304: BSEd-F 3
+      - ED 402: BSEd-E 4, BEEd 4
+      - GAD 171: BSEd-E 4, BSEd-M 4, BSEd-F 4
+    S4:
+      - ED 402: BSEd-M 4, BSEd-SS 4, BSEd-F 4
+      - SEE 403: BSEd-E 4
+      - SEM 405: BSEd-M 4
+      - SES 404: BSEd-SS 4
+    S5:
+      - ED 101: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1
+      - SEE 101: BSEd-E 1
+      - SEE 201: BSEd-E 2
+      - SEE 401: BSEd-E 4
+    S6:
+      - ED 303: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3, BEEd 3
+      - SEE 301: BSEd-E 3
+      - SEE 303: BSEd-E 3
+      - SEE 402: BSEd-E 4
+    S7:
+      - ED 301: BSEd-SS 3, BSEd-F 3
+      - SEM 302: BSEd-M 3
+      - SEM 403: BSEd-M 4
+      - MATH 180: BSEd-M 1
+      - MATH 180: BSBA 1B, BSTHM 1A, BSTHM 1B
+    S8:
+      - SEM 101: BSEd-M 1
+      - SEM 201: BSEd-M 2
+      - SEM 401: BSEd-M 4
+      - SEM 402: BSEd-M 4
+      - MATH 350: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2
+    S9:
+      - SES 301: BSEd-SS 3
+      - SES 302: BSEd-SS 3
+      - SES 303: BSEd-SS 3
+      - SES 401: BSEd-SS 4
+      - HIST 201: BEEd 4
+      - HIST 201: BSIT 4B, BSA 4B, BSCrim 4B
+    S10:
+      - SES 101: BSEd-SS 1
+      - SES 402: BSEd-SS 4
+      - SES 405: BSEd-SS 4
+      - HIST 220: BEEd 4
+      - HIST 220: ABC 4A, ABEcon 4A, ABEcon 4B, BSEntrep 4A
+    S11:
+      - SEF 101: BSEd-F 1
+      - SEF 202: BSEd-F 2
+      - SEF 302: BSEd-F 3
+      - SEF 401: BSEd-F 4
+      - FIL 207: BSTHM 2A, BSTHM 2B
+    S12:
+      - SEF 301: BSEd-F 3
+      - SEF 303: BSEd-F 3
+      - SEF 403: BSEd-F 4
+      - FIL 207: BSEntrep 2A, BSEntrep 2B, BSCrim 3A, BSCrim 3B
+    S13:
+      - SEF 201: BSEd-F 2
+      - SEF 402: BSEd-F 4
+      - SEF 404: BSEd-F 4
+      - SEF 405: BSEd-F 4
+      - UNI 103: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
+    S14:
+      - SES 201: BSEd-SS 2
+      - SES 202: BSEd-SS 2
+      - SES 403: BSEd-SS 4
+      - SOCS 195: BEEd 1
+      - HIST 220: BSBA 4B, BSTHM 4A, BSTHM 4B, BSCrim 4A
+    S15:
+      - SEE 202: BSEd-E 2
+      - SEE 302: BSEd-E 3
+      - SEE 404: BSEd-E 4
+      - SEE 405: BSEd-E 4
+      - COMM 120: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
+    S16:
+      - SEM 202: BSEd-M 2
+      - SEM 301: BSEd-M 3
+      - SEM 303: BSEd-M 3
+      - SEM 404: BSEd-M 4
+      - MATH 180: BSEd-E 1, BSEd-SS 1, BSEd-F 1, BEEd 1
+    E1:
+      - ED 304: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BEEd 3
+      - EED 181: BEEd 4
+    E2:
+      - EED 180: BEEd 3
+      - GAD 171: BSEd-SS 4, BEEd 4
+      - PSYC 160: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1
+    E3:
+      - ED 301: BSEd-E 3
+      - ED 401: BSEd-E 4, BSEd-M 4, BSEd-SS 4, BSEd-F 4, BEEd 4
+      - EED 101: BEEd 2
+      - EED 102: BEEd 3
+    E4:
+      - ED 102: BEEd 1
+      - ED 201: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 2
+      - EED 140: BEEd 2
+      - UNI 103: BEEd 1
+    E5:
+      - ED 202: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 2
+      - EED 150: BEEd 2
+      - EED 151: BEEd 3
+      - EED 160: BEEd 3
+  2:
+    S1:
+      - ED 490: BSEd-M 4, BSEd-SS 4
+    S2:
+      - ED 302: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3, BEEd 3
+    S4:
+      - ED 203: BSEd-E 2, BSEd-M 2, BEEd 2
+      - STS 180: BSEd-E 2
+    S5:
+      - SEE 102: BSEd-E 1
+      - SEE 103: BSEd-E 1
+      - SEE 104: BSEd-E 1
+      - SEE 305: BSEd-E 3
+      - COMM 120: BEEd 1
+    S6:
+      - ED 102: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
+      - SEE 203: BSEd-E 2
+      - SEE 204: BSEd-E 2
+    S7:
+      - SEM 102: BSEd-M 1
+      - SEM 204: BSEd-M 2
+      - SEM 305: BSEd-M 3
+      - SEM 306: BSEd-M 3
+    S8:
+      - SEM 104: BSEd-M 1
+      - SEM 205: BSEd-M 2
+      - MATH 350: BEEd 2
+    S9:
+      - SES 204: BSEd-SS 2
+      - SES 307: BSEd-SS 3
+      - HIST 201: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3
+      - HIST 201: ABEcon 3A, ABEcon 3B
+    S10:
+      - SES 103: BSEd-SS 1
+      - SES 104: BSEd-SS 1
+      - SES 203: BSEd-SS 2
+      - SES 205: BSEd-SS 2
+      - HIST 220: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3
+    S11:
+      - SEF 102: BSEd-F 1
+      - SEF 103: BSEd-F 1
+      - SEF 204: BSEd-F 2
+      - SEF 304: BSEd-F 3
+      - FIL 207: BSEd-E 2, BSEd-M 2, BSEd-F 2, BEEd 1
+    S12:
+      - SEF 203: BSEd-F 2
+      - SEF 205: BSEd-F 2
+      - SEF 305: BSEd-F 3
+      - FIL 207: BSEd-SS 2
+      - FIL 207: BSP 1A, BSA 1B, ABPA 1, BSSW 1
+    S13:
+      - SEF 104: BSEd-F 1
+      - SEF 306: BSEd-F 3
+      - SEF 307: BSEd-F 3
+      - FIL 207: ABC 1B, ABEcon 1A, BSIT 2A, BSIT 2B, BLIS 1A
+    S14:
+      - SES 102: BSEd-SS 1
+      - SES 304: BSEd-SS 3
+      - SES 305: BSEd-SS 3
+      - SES 306: BSEd-SS 3
+      - SOCS 195: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
+    S15:
+      - SEE 205: BSEd-E 2
+      - SEE 304: BSEd-E 3
+      - SEE 306: BSEd-E 3
+      - SEE 307: BSEd-E 3
+    S16:
+      - SEM 103: BSEd-M 1
+      - SEM 203: BSEd-M 2
+      - SEM 304: BSEd-M 3
+      - SEM 307: BSEd-M 3
+    E1:
+      - ED 490: BSEd-E 4, BSEd-F 4, BEEd 4
+      - EED 190: BEEd 3
+    E2:
+      - EED 130: BEEd 1
+      - EED 131: BEEd 2
+    E3:
+      - EED 110: BEEd 1
+      - EED 111: BEEd 2
+      - STS 180: BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 3
+    E4:
+      - EED 120: BEEd 1
+      - EED 121: BEEd 2
+      - EED 141: BEEd 2
+      - EED 170: BEEd 3
+      - FIL 207: BLIS 1B, BSA 1A, BSBA 1A, BSBA 1B
+    E5:
+      - ED 203: BSEd-SS 2, BSEd-F 2
+      - EED 152: BEEd 3
+      - EED 161: BEEd 3

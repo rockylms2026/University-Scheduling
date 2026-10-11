@@ -1,0 +1,362 @@
+<title>University Class Schedule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: registrar's board. A finder list on the left, the week on the right; the grid is the hero. */
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --ink: #18202b;
+  --muted: #5d6877;
+  --line: #dde2e9;
+  --accent: #1f4fd1;
+  --accent-soft: #e5ecfd;
+  --lunch: #eef0f4;
+  --warn: #9a6400;
+  --warn-soft: #fff3cf;
+  --good: #1d7a46;
+  --good-soft: #def4e6;
+  --c-css: #d8e6fb;   --c-css-ink: #1b4a8f;
+  --c-cisc: #d5f0de;  --c-cisc-ink: #17643a;
+  --c-cbe: #fde6c8;   --c-cbe-ink: #8a4c05;
+  --c-coe: #e8dcfa;   --c-coe-ink: #5a2f9a;
+  --c-ccjps: #f9d9d9; --c-ccjps-ink: #8f2424;
+  --c-core: #e7e9ee;  --c-core-ink: #3c4553;
+  --f-display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --row: 26px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151b; --panel: #181e26; --ink: #e6eaf0; --muted: #9aa5b4; --line: #2a323d;
+    --accent: #8fb0ff; --accent-soft: #1d2a4a; --lunch: #1c222b;
+    --warn: #f2c35b; --warn-soft: #3a2f12; --good: #6fd39a; --good-soft: #15301f;
+    --c-css: #1d3352; --c-css-ink: #b9d3ff;
+    --c-cisc: #183a27; --c-cisc-ink: #a9e8c0;
+    --c-cbe: #43301a; --c-cbe-ink: #f8d3a3;
+    --c-coe: #33244d; --c-coe-ink: #d8c4fa;
+    --c-ccjps: #4a2222; --c-ccjps-ink: #f6c0c0;
+    --c-core: #262d37; --c-core-ink: #ccd3dd;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151b; --panel: #181e26; --ink: #e6eaf0; --muted: #9aa5b4; --line: #2a323d;
+  --accent: #8fb0ff; --accent-soft: #1d2a4a; --lunch: #1c222b;
+  --warn: #f2c35b; --warn-soft: #3a2f12; --good: #6fd39a; --good-soft: #15301f;
+  --c-css: #1d3352; --c-css-ink: #b9d3ff;
+  --c-cisc: #183a27; --c-cisc-ink: #a9e8c0;
+  --c-cbe: #43301a; --c-cbe-ink: #f8d3a3;
+  --c-coe: #33244d; --c-coe-ink: #d8c4fa;
+  --c-ccjps: #4a2222; --c-ccjps-ink: #f6c0c0;
+  --c-core: #262d37; --c-core-ink: #ccd3dd;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+.wrap { max-width: 1400px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 40px; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.sub { color: var(--muted); margin: 2px 0 0; font-size: .92rem; }
+.status { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-size: .8rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid transparent; white-space: nowrap; }
+.chip.good { background: var(--good-soft); color: var(--good); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.info { background: var(--accent-soft); color: var(--accent); }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.seg button { font: inherit; font-size: .9rem; border: 0; background: transparent; color: var(--muted); padding: 7px 14px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.seg button:focus-visible, input:focus-visible, .item:focus-visible, .block:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.main { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: start; }
+.finder { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100vh - 140px); position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.finder input { font: inherit; margin: 10px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
+.list { overflow-y: auto; padding: 0 6px 10px; }
+.grp { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 10px 8px 4px; font-weight: 600; }
+.item { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; font: inherit; font-size: .9rem; border: 0; background: transparent; color: var(--ink); padding: 5px 8px; border-radius: 6px; cursor: pointer; }
+.item:hover { background: var(--bg); }
+.item[aria-current="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.item small { color: var(--muted); font-family: var(--f-mono); font-size: .75rem; font-variant-numeric: tabular-nums; }
+.board { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 14px; min-width: 0; }
+.who h2 { font-family: var(--f-display); font-weight: 700; font-size: 1.3rem; margin: 0; }
+.who p { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font-size: .85rem; }
+.facts b { font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+.week { display: grid; grid-template-columns: 52px repeat(var(--days), minmax(96px, 1fr)); min-width: 640px; }
+.dayhead { font-family: var(--f-display); font-weight: 500; font-size: .85rem; text-align: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.dayhead.off { color: var(--muted); text-decoration: line-through; }
+.times { position: relative; }
+.times span { position: absolute; right: 6px; transform: translateY(-50%); font-family: var(--f-mono); font-size: .68rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.col { position: relative; border-left: 1px solid var(--line); background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px); background-size: 100% calc(var(--row) * 2); }
+.col.off { background-color: var(--bg); }
+.lunch { position: absolute; left: 0; right: 0; background: var(--lunch); display: flex; align-items: center; justify-content: center; font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.away { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: .78rem; color: var(--muted); }
+.block { position: absolute; left: 3px; right: 3px; border-radius: 6px; padding: 3px 6px; overflow: hidden; font-size: .74rem; line-height: 1.25; cursor: pointer; border: 1px solid transparent; text-align: left; font-family: var(--f-body); }
+.block strong { display: block; font-family: var(--f-mono); font-size: .74rem; font-weight: 600; }
+.block span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.block.sel { box-shadow: 0 0 0 2px var(--accent); }
+.block.ex { border: 1.5px dashed var(--warn); background-image: repeating-linear-gradient(135deg, transparent 0 6px, var(--warn-soft) 6px 9px); }
+.k-CSS { background-color: var(--c-css); color: var(--c-css-ink); }
+.k-CISC { background-color: var(--c-cisc); color: var(--c-cisc-ink); }
+.k-CBE { background-color: var(--c-cbe); color: var(--c-cbe-ink); }
+.k-COE { background-color: var(--c-coe); color: var(--c-coe-ink); }
+.k-CCJPS { background-color: var(--c-ccjps); color: var(--c-ccjps-ink); }
+.k-CORE { background-color: var(--c-core); color: var(--c-core-ink); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .78rem; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+.detail { border-top: 1px solid var(--line); padding-top: 12px; font-size: .9rem; min-height: 3.2em; }
+.detail dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 6px 0 0; }
+.detail dt { color: var(--muted); }
+.detail dd { margin: 0; }
+.hint { color: var(--muted); }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .74rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.note { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 10px 12px; font-size: .9rem; }
+@media (max-width: 860px) {
+  .main { grid-template-columns: minmax(0, 1fr); }
+  .finder { position: static; max-height: 260px; }
+}
+@media (prefers-reduced-motion: no-preference) { .block { transition: box-shadow .12s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>University Class Schedule</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <div class="status" id="status"></div>
+  </header>
+
+  <div class="controls">
+    <div class="seg" id="semSeg" role="group" aria-label="Semester"></div>
+    <div class="seg" id="viewSeg" role="group" aria-label="View"></div>
+  </div>
+
+  <div class="main" id="main">
+    <aside class="finder">
+      <input id="q" type="search" placeholder="Search" aria-label="Search the list">
+      <div class="list" id="list"></div>
+    </aside>
+    <section class="board" id="board"></section>
+  </div>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const DAYS = DATA.days;
+const ROW_MIN = DATA.slot;
+const LUNCH = { Mon: [690, 750], Wed: [690, 750], Fri: [690, 750], Tue: [720, 810], Thu: [720, 810] };
+const VIEWS = [["groups", "Student groups"], ["teachers", "Teachers"], ["rooms", "Rooms"], ["approval", "Needs approval"]];
+const COLLEGE_ORDER = ["CSS", "CISC", "CBE", "COE", "CCJPS", "GE"];
+
+const state = { sem: Object.keys(DATA.sems)[0], view: "groups", pick: {}, q: "", sel: null };
+try { Object.assign(state, JSON.parse(localStorage.getItem("ucs-state") || "{}"), { sel: null, q: "" }); } catch (e) {}
+if (!DATA.sems[state.sem]) state.sem = Object.keys(DATA.sems)[0];
+function save() { try { localStorage.setItem("ucs-state", JSON.stringify({ sem: state.sem, view: state.view, pick: state.pick })); } catch (e) {} }
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function hm(m) { const h = Math.floor(m / 60), mm = m % 60; return `${h % 12 || 12}:${String(mm).padStart(2, "0")}`; }
+function S(row) {
+  const [code, part, section, groups, tkey, tba, room, day, start, end, label, exception] = row;
+  const c = DATA.courses[code];
+  return { code, part, section, groups, tkey, tba, room, day, start, end, label, exception,
+           title: c[0], college: c[1] === "GE" ? "CORE" : c[1] };
+}
+function sessions() { return DATA.sems[state.sem].sessions.map(S); }
+function teacherName(s) { return s.tkey ? DATA.teachers[s.tkey].name : s.tba; }
+function shortName(key) { const p = DATA.teachers[key].name.split(" "); return p[0] + " " + p[p.length - 1]; }
+
+function entities() {
+  const all = sessions();
+  if (state.view === "groups") {
+    const count = {};
+    all.forEach((s) => s.groups.forEach((g) => count[g] = (count[g] || 0) + (s.end - s.start)));
+    return Object.keys(count).map((g) => ({ id: g, name: g, group: DATA.groups[g].college, meta: `${Math.round(count[g] / 60)} h` }));
+  }
+  if (state.view === "teachers") {
+    return Object.entries(DATA.teachers).map(([k, t]) => ({ id: k, name: t.name, group: t.college, meta: `${t.lu[state.sem] ?? 0} LU` }));
+  }
+  if (state.view === "rooms") {
+    const mins = {};
+    all.forEach((s) => { if (s.room && s.day !== "Sat") mins[s.room] = (mins[s.room] || 0) + (s.end - s.start); });
+    return Object.entries(DATA.rooms).map(([r, info]) => ({
+      id: r, name: r, group: roomGroup(info.pool),
+      meta: `${Math.round(100 * (mins[r] || 0) / (39 * 60 * info.cap))}%` }));
+  }
+  return [];
+}
+function roomGroup(pool) {
+  if (pool.startsWith("classrooms:")) return pool.split(":")[1] + " classrooms";
+  if (pool === "shared") return "Lingkod Hall overflow";
+  if (pool.startsWith("seminar:")) return "Seminar rooms";
+  if (pool === "pe") return "PE venues";
+  return "Laboratories";
+}
+
+function renderControls() {
+  $("semSeg").innerHTML = Object.keys(DATA.sems).map((s) =>
+    `<button type="button" data-sem="${s}" aria-pressed="${s === state.sem}">${s === "1" ? "1st" : "2nd"} semester</button>`).join("");
+  $("viewSeg").innerHTML = VIEWS.map(([v, label]) => {
+    const n = v === "approval" ? ` (${approvals().length})` : "";
+    return `<button type="button" data-view="${v}" aria-pressed="${v === state.view}">${label}${n}</button>`;
+  }).join("");
+  const sem = DATA.sems[state.sem];
+  const q = sem.quality || {};
+  const chips = [];
+  chips.push(sem.problems.length ? `<span class="chip warn">${sem.problems.length} rule problems</span>`
+                                 : `<span class="chip good">No double bookings</span>`);
+  const ap = approvals().length;
+  if (ap) chips.push(`<span class="chip warn">${ap} need approval</span>`);
+  if (q.avg_idle_hours_per_student_group_per_week !== undefined)
+    chips.push(`<span class="chip info">Idle time ${q.avg_idle_hours_per_student_group_per_week} h per group per week</span>`);
+  $("status").innerHTML = chips.join("");
+  $("sub").textContent = `${sessions().length} weekly sessions, ${Object.keys(DATA.groups).length} student groups, `
+    + `${Object.keys(DATA.teachers).length} teachers. Generated ${DATA.generated}.`;
+}
+
+function approvals() {
+  const seen = new Map();
+  sessions().forEach((s) => { if (s.exception) seen.set(s.code + s.section + s.part, s); });
+  return [...seen.values()];
+}
+
+function renderList() {
+  const finder = document.querySelector(".finder");
+  finder.hidden = state.view === "approval";
+  if (state.view === "approval") return;
+  const q = state.q.trim().toLowerCase();
+  const items = entities().filter((e) => !q || e.name.toLowerCase().includes(q) || e.group.toLowerCase().includes(q));
+  const groups = {};
+  items.forEach((e) => (groups[e.group] = groups[e.group] || []).push(e));
+  const keys = Object.keys(groups).sort((a, b) => {
+    const ia = COLLEGE_ORDER.indexOf(a.split(" ")[0]), ib = COLLEGE_ORDER.indexOf(b.split(" ")[0]);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || a.localeCompare(b);
+  });
+  const cur = state.pick[state.view];
+  $("list").innerHTML = keys.map((g) => `<div class="grp">${esc(DATA.colleges[g] || g)}</div>` +
+    groups[g].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+      .map((e) => `<button type="button" class="item" data-id="${esc(e.id)}" aria-current="${e.id === cur}"><span>${esc(e.name)}</span><small>${esc(e.meta)}</small></button>`).join("")
+  ).join("") || `<p class="hint" style="padding:8px">Nothing matches “${esc(state.q)}”.</p>`;
+}
+
+function renderBoard() {
+  const board = $("board");
+  if (state.view === "approval") return renderApproval(board);
+  let list = entities();
+  let id = state.pick[state.view];
+  if (!list.find((e) => e.id === id)) { id = list.sort((a, b) => a.name.localeCompare(b.name))[0]?.id; state.pick[state.view] = id; }
+  const all = sessions();
+  let mine, head, offDays = [];
+  if (state.view === "groups") {
+    mine = all.filter((s) => s.groups.includes(id));
+    const g = DATA.groups[id];
+    const pl = DATA.sems[state.sem].placements[id] || [];
+    pl.forEach(([, days]) => offDays.push(...days));
+    const hours = mine.reduce((a, s) => a + s.end - s.start, 0) / 60;
+    head = `<h2>${esc(id)}</h2><p>${esc(g.program)}, Year ${g.year} · ${esc(DATA.colleges[g.college])}</p>
+      <div class="facts"><span><b>${hours.toFixed(1)}</b> class hours a week</span>
+      ${pl.map(([c, d]) => `<span>${esc(c)} placement: <b>${d.join(", ")}</b></span>`).join("")}</div>`;
+  } else if (state.view === "teachers") {
+    mine = all.filter((s) => s.tkey === id);
+    const t = DATA.teachers[id];
+    const perDay = {};
+    mine.forEach((s) => { if (s.part !== "NSTP") perDay[s.day] = (perDay[s.day] || 0) + (s.end - s.start) / 60; });
+    head = `<h2>${esc(t.name)}</h2><p>${esc(t.rank)} · ${esc(t.dept)} (${esc(t.college)})${t.role ? " · " + esc(t.role) : ""}</p>
+      <div class="facts"><span><b>${t.lu[state.sem] ?? 0}</b> of ${t.max} LU</span>
+      ${DAYS.filter((d) => perDay[d]).map((d) => `<span>${d} <b>${perDay[d].toFixed(1)}</b> h</span>`).join("")}</div>`;
+  } else {
+    mine = all.filter((s) => s.room === id);
+    const r = DATA.rooms[id];
+    const mins = mine.filter((s) => s.day !== "Sat").reduce((a, s) => a + s.end - s.start, 0);
+    head = `<h2>${esc(id)}</h2><p>${esc(roomGroup(r.pool))}${r.pool.startsWith("lab:") ? " · " + esc(r.pool.slice(4).replace(/_/g, " ")) : ""}${r.cap > 1 ? ` · holds ${r.cap} classes at once` : ""}</p>
+      <div class="facts"><span><b>${(mins / 60).toFixed(1)}</b> of ${39 * r.cap} teaching hours booked</span></div>`;
+  }
+  board.innerHTML = `<div class="who">${head}</div>
+    <div class="scroll">${weekGrid(mine, offDays)}</div>
+    <div class="legend">${["CSS", "CISC", "CBE", "COE", "CCJPS"].map((c) => `<span><i class="k-${c}"></i>${c}</span>`).join("")}
+      <span><i class="k-CORE"></i>General education</span><span><i class="k-CORE ex block" style="position:static;display:inline-block;width:12px;height:12px;padding:0"></i>Needs approval</span></div>
+    <div class="detail" id="detail"><span class="hint">Select a class to see its details.</span></div>`;
+}
+
+function weekGrid(list, offDays) {
+  const rows = (DATA.end - DATA.start) / ROW_MIN;
+  const px = (m) => `calc(var(--row) * ${(m - DATA.start) / ROW_MIN})`;
+  const len = (a, b) => `calc(var(--row) * ${(b - a) / ROW_MIN})`;
+  let html = `<div class="week" style="--days:${DAYS.length}"><div></div>`;
+  html += DAYS.map((d) => `<div class="dayhead${offDays.includes(d) ? " off" : ""}">${d}</div>`).join("");
+  html += `<div class="times" style="height:calc(var(--row) * ${rows})">`;
+  for (let m = DATA.start; m <= DATA.end; m += 60) html += `<span style="top:${px(m)}">${hm(m)}</span>`;
+  html += `</div>`;
+  DAYS.forEach((d) => {
+    html += `<div class="col${offDays.includes(d) ? " off" : ""}" style="height:calc(var(--row) * ${rows})">`;
+    if (LUNCH[d]) html += `<div class="lunch" style="top:${px(LUNCH[d][0])};height:${len(...LUNCH[d])}">Lunch</div>`;
+    if (offDays.includes(d)) html += `<div class="away">At placement</div>`;
+    list.filter((s) => s.day === d).forEach((s) => {
+      const idx = DATA.sems[state.sem].sessions.findIndex((r) => r[0] === s.code && r[2] === s.section && r[1] === s.part && r[7] === s.day);
+      const line2 = state.view === "groups" ? (s.room || "") : s.section;
+      const line3 = state.view === "teachers" ? (s.room || "") : (s.tkey ? shortName(s.tkey) : "TBA");
+      const part = s.part === "Lec" ? "" : " · " + s.part;
+      html += `<button type="button" class="block k-${s.college}${s.exception ? " ex" : ""}${state.sel === idx ? " sel" : ""}" data-idx="${idx}"
+        style="top:${px(s.start)};height:calc(${len(s.start, s.end)} - 2px)" title="${esc(s.code + " " + s.title)}">
+        <strong>${esc(s.code)}${esc(part)}</strong><span>${esc(line2)}</span><span>${esc(line3)}</span></button>`;
+    });
+    html += `</div>`;
+  });
+  return html + `</div>`;
+}
+
+function renderDetail(idx) {
+  const row = DATA.sems[state.sem].sessions[idx];
+  if (!row) return;
+  const s = S(row);
+  const others = sessions().filter((x) => x.code === s.code && x.section === s.section && x.part === s.part).map((x) => x.day);
+  $("detail").innerHTML = `<strong>${esc(s.code)} ${esc(s.title)}</strong>
+    <dl><dt>Section</dt><dd>${esc(s.section)}</dd>
+    <dt>Meets</dt><dd>${esc(s.part === "Lec" ? "Lecture" : s.part)} · ${others.join(", ")} ${hm(s.start)}–${hm(s.end)} (${esc(s.label)})</dd>
+    <dt>Room</dt><dd>${esc(s.room || (s.part === "Supervision" ? "Placement supervision, no room" : "Not assigned"))}</dd>
+    <dt>Teacher</dt><dd>${esc(teacherName(s))}</dd>
+    ${s.exception ? `<dt>Needs approval</dt><dd>${esc(s.exception)}</dd>` : ""}</dl>`;
+}
+
+function renderApproval(board) {
+  const list = approvals();
+  const sem = DATA.sems[state.sem];
+  board.innerHTML = `<div class="who"><h2>Needs approval</h2>
+    <p>These classes could only be placed by bending the University Class Time Frame. Each one comes from a conflict in the plans; see the notes for the decision needed.</p></div>
+    ${list.length ? `<div class="scroll"><table><thead><tr><th>Course</th><th>Section</th><th>When</th><th>Room</th><th>Teacher</th><th>Reason</th></tr></thead><tbody>
+    ${list.map((s) => `<tr><td><b>${esc(s.code)}</b> ${esc(s.title)}</td><td>${esc(s.section)}</td><td class="num">${esc(s.label)} ${hm(s.start)}–${hm(s.end)}</td>
+      <td>${esc(s.room || "")}</td><td>${esc(teacherName(s))}</td><td>${esc(s.exception)}</td></tr>`).join("")}</tbody></table></div>`
+    : `<p class="hint">Every class follows the time frame this semester.</p>`}
+    ${sem.problems.length ? `<div class="note"><b>Rule problems found by the independent check:</b><br>${sem.problems.map(esc).join("<br>")}</div>` : ""}`;
+}
+
+function render() { renderControls(); renderList(); renderBoard(); save(); }
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("button");
+  if (!t) return;
+  if (t.dataset.sem) { state.sem = t.dataset.sem; state.sel = null; render(); }
+  else if (t.dataset.view) { state.view = t.dataset.view; state.sel = null; render(); }
+  else if (t.dataset.id !== undefined && t.classList.contains("item")) { state.pick[state.view] = t.dataset.id; state.sel = null; renderList(); renderBoard(); save(); }
+  else if (t.dataset.idx !== undefined) {
+    state.sel = Number(t.dataset.idx);
+    document.querySelectorAll(".block.sel").forEach((b) => b.classList.remove("sel"));
+    const row = DATA.sems[state.sem].sessions[state.sel];
+    document.querySelectorAll(".block").forEach((b) => {
+      const r = DATA.sems[state.sem].sessions[Number(b.dataset.idx)];
+      if (r && r[0] === row[0] && r[2] === row[2] && r[1] === row[1]) b.classList.add("sel");
+    });
+    renderDetail(state.sel);
+  }
+});
+$("q").addEventListener("input", (e) => { state.q = e.target.value; renderList(); });
+render();
+</script>

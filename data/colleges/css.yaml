@@ -1,0 +1,357 @@
+# College of Social Sciences
+# Source: CSS Curricula and Faculty Loading Plan (steady state).
+# See ccjps.yaml for the course entry forms.
+college: CSS
+name: College of Social Sciences
+
+courses:
+  PSYC 101: Introduction to Psychology
+  PSYC 120: Developmental Psychology
+  PSYC 130: Biological Psychology
+  PSYC 150: Psychology of Learning
+  PSYC 210: {title: Psychological Statistics, lab: css_computer_lab}
+  PSYC 220: Theories of Personality
+  PSYC 230: Social Psychology
+  PSYC 240: Cognitive Psychology
+  PSYC 250: Abnormal Psychology
+  PSYC 260: {title: Experimental Psychology, lab: psych_lab}
+  PSYC 270: Industrial/Organizational Psychology
+  PSYC 280: Sikolohiyang Pilipino (Filipino Psychology)
+  PSYC 310: Psychological Assessment
+  PSYC 320: Field Methods in Psychology
+  PSYC 330: Cultural Psychology
+  PSYC 340: Research in Psychology 1
+  PSYC 410: Research in Psychology 2
+  PSYC 420: Professional Ethics in Psychology
+  PSYC 490: {title: Practicum in Psychology (track-based placement), kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  PSYC 351: Theories and Techniques of Counseling
+  PSYC 352: Counseling Skills and Interviewing
+  PSYC 361: "Personnel Psychology: Recruitment, Selection, and Placement"
+  PSYC 362: Organizational Behavior and Development
+  PSYC 451: Group Processes and Group Counseling
+  PSYC 452: Crisis Intervention and Mental Health Promotion
+  PSYC 453: Career Development and Counseling
+  PSYC 461: Training and Development
+  PSYC 462: Performance Management and Compensation
+  PSYC 463: Workplace Well-Being and Occupational Health
+  POLS 101: Introduction to Political Science
+  POLS 110: Philippine Government and Politics
+  POLS 120: Classical Political Theory
+  POLS 210: Modern Political Theory
+  POLS 220: Comparative Politics
+  POLS 230: International Relations
+  POLS 240: Public Administration and Governance
+  POLS 250: Philippine Political Economy
+  POLS 260: Political Analysis and Research Methods
+  POLS 310: Local Governance and Decentralization
+  POLS 320: Philippine Foreign Policy
+  POLS 410: Thesis 1
+  POLS 420: Thesis 2
+  POLS 490: {title: Legal and Public Service Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  LGLS 201: Introduction to Law and the Philippine Legal System
+  LGLS 202: Legal Research and Writing
+  LGLS 301: "Constitutional Law 1: Structure and Powers of Government"
+  LGLS 302: "Constitutional Law 2: Bill of Rights"
+  LGLS 303: Fundamentals of Criminal Law
+  LGLS 304: Obligations and Contracts
+  LGLS 401: Administrative Law and Law on Public Officers
+  LGLS 402: Public International Law and Human Rights
+  LGLS 403: Jurisprudence and Legal Philosophy
+  LGLS 404: Legal Reasoning and Advocacy
+  COMM 101: Introduction to Communication Theory
+  COMM 110: Media and Society
+  COMM 111: Writing for Media
+  COMM 112: {title: Visual Communication and Design, lab: editing_lab}
+  COMM 210: News Writing and Reporting
+  COMM 211: {title: Audio Production and Broadcasting, lab: audio_studio}
+  COMM 212: {title: Video Production, lab: video_studio}
+  COMM 213: {title: Photography and Photojournalism, lab: photo_lab}
+  COMM 220: Communication Research Methods
+  COMM 221: Speech Communication
+  COMM 230: Development Communication
+  COMM 240: Communication and Media Law and Ethics
+  COMM 241: Philippine Media Systems and History
+  COMM 310: Organizational and Corporate Communication
+  COMM 311: Public Relations and Strategic Communication
+  COMM 312: Advertising and Integrated Marketing Communication
+  COMM 320: {title: Digital Media and Online Communication, lab: editing_lab}
+  COMM 321: Intercultural Communication
+  COMM 330: Communication Planning and Campaigns
+  COMM 331: Risk and Crisis Communication
+  COMM 340: Media Management and Entrepreneurship
+  COMM 410: Thesis or Media Production 1
+  COMM 420: Thesis or Media Production 2
+  COMM 490: {title: Media and Communication Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  ECON 101: Principles of Economics
+  ECON 102: Mathematics for Economists
+  ECON 120: Intermediate Microeconomics
+  ECON 121: Intermediate Macroeconomics
+  ECON 130: Philippine Economic History
+  ECON 201: Economic Statistics
+  ECON 210: Mathematical Economics
+  ECON 211: "Money, Banking, and Monetary Policy"
+  ECON 212: Public Finance
+  ECON 213: History of Economic Thought
+  ECON 220: {title: Econometrics, lab: css_computer_lab}
+  ECON 221: International Economics
+  ECON 222: Development Economics
+  ECON 230: Labor Economics
+  ECON 231: Agricultural and Environmental Economics
+  ECON 310: Industrial Organization and Competition Policy
+  ECON 311: The Philippine Economy and Policy Issues
+  ECON 312: Economic Research Methods
+  ECON 320: Project Evaluation and Cost-Benefit Analysis
+  ECON 321: Behavioral Economics
+  ECON 330: Regional and Urban Economics
+  ECON 410: Thesis 1
+  ECON 420: Thesis 2
+  ECON 490: {title: Economics Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+
+programs:
+  BSP:
+    name: Bachelor of Science in Psychology
+    department: Psychology
+    # Years 3 and 4 regroup by track: Section C (Counseling) and IO
+    # (Industrial-Organizational). "CODE @C" runs for that section only.
+    blocks: {1: [A, B], 2: [A, B], 3: [C, IO], 4: [C, IO]}
+    curriculum:
+      1-1: [PSYC 101, PSYC 160, MATH 180, STS 180, PE 101, CWTS 101, UNI 103]
+      1-2: [PSYC 120, PSYC 150, MATH 350, COMM 120, FIL 207, PE 102, CWTS 102]
+      2-1: [PSYC 130, PSYC 210, PSYC 220, SOCS 195, PHIL 190, PE 201]
+      2-2: [PSYC 230, PSYC 270, PSYC 250, PSYC 260, PHIL 220, PE 202]
+      3-1: [PSYC 240, PSYC 280, PSYC 310, PSYC 320, PSYC 351 @C, PSYC 361 @IO, HIST 201, ARTS 101]
+      3-2: [PSYC 330, PSYC 340, PSYC 352 @C, PSYC 362 @IO, GAD 171, ENGL 302, HIST 220]
+      4-1: [PSYC 410, PSYC 451 @C, PSYC 452 @C, PSYC 461 @IO, PSYC 462 @IO]
+      4-2: [PSYC 420, PSYC 453 @C, PSYC 463 @IO, PSYC 490]
+  ABPS:
+    name: Bachelor of Arts in Political Science (Legal Studies)
+    department: Political Science
+    blocks: [A, B]
+    curriculum:
+      1-1: [POLS 101, SOCS 195, COMM 120, MATH 180, PE 101, CWTS 101, UNI 103]
+      1-2: [POLS 110, POLS 120, FIL 207, ARTS 101, PE 102, CWTS 102]
+      2-1: [POLS 210, POLS 220, LGLS 201, PSYC 160, PHIL 190, PE 201]
+      2-2: [POLS 230, POLS 240, LGLS 202, LGLS 301, PHIL 220, MATH 350, PE 202]
+      3-1: [POLS 250, POLS 260, LGLS 302, LGLS 303, ENGL 302, HIST 201, HIST 220]
+      3-2: [POLS 310, POLS 320, LGLS 304, LGLS 401, STS 180, GAD 171]
+      4-1: [POLS 410, LGLS 402, LGLS 403, LGLS 404]
+      4-2: [POLS 420, POLS 490]
+  ABC:
+    name: Bachelor of Arts in Communication
+    department: Communication
+    blocks: [A, B]
+    curriculum:
+      1-1: [COMM 101, COMM 120, MATH 180, ARTS 101, PE 101, CWTS 101, UNI 103]
+      1-2: [COMM 110, COMM 111, PSYC 160, FIL 207, PE 102, CWTS 102]
+      2-1: [COMM 112, COMM 210, COMM 221, SOCS 195, STS 180, HIST 201, PE 201]
+      2-2: [COMM 211, COMM 213, COMM 230, COMM 241, MATH 350, PE 202]
+      3-1: [COMM 212, COMM 220, COMM 240, COMM 310, COMM 311, PHIL 190, GAD 171]
+      3-2: [COMM 312, COMM 320, COMM 321, COMM 330, ENGL 302, PHIL 220]
+      4-1: [COMM 410, COMM 331, COMM 340, HIST 220]
+      4-2: [COMM 420, COMM 490]
+  ABEcon:
+    name: Bachelor of Arts in Economics
+    department: Economics
+    blocks: [A, B]
+    curriculum:
+      1-1: [ECON 101, ECON 130, COMM 120, MATH 180, PE 101, CWTS 101, UNI 103]
+      1-2: [ECON 102, ECON 213, PSYC 160, FIL 207, PE 102, CWTS 102]
+      2-1: [ECON 120, ECON 121, ECON 210, MATH 350, SOCS 195, ARTS 101, PE 201]
+      2-2: [ECON 201, ECON 211, ECON 212, ECON 230, PHIL 190, PE 202]
+      3-1: [ECON 220, ECON 221, ECON 222, ECON 231, ECON 310, PHIL 220, ENGL 302]
+      3-2: [ECON 311, ECON 312, ECON 320, ECON 321, HIST 201, STS 180]
+      4-1: [ECON 410, ECON 330, GAD 171, HIST 220]
+      4-2: [ECON 420, ECON 490]
+
+faculty:
+  P1: {name: Dr. Rowena C. Dalisay, rank: Associate Professor II, department: Psychology, designation: Department Chair, max_lu: 15}
+  P2: {name: Ms. Kristine Joy M. Lacsamana, rank: Assistant Professor I, department: Psychology, designation: "Faculty; second GE handler"}
+  P3: {name: Mr. Joaquin R. Esguerra, rank: Assistant Professor I, department: Psychology, designation: I-O Track Coordinator}
+  P4: {name: Dr. Benedict A. Manalastas, rank: Assistant Professor III, department: Psychology, designation: Research Coordinator}
+  P5: {name: Ms. Angelica P. Tolentino, rank: Instructor III, department: Psychology, designation: Department GE Handler}
+  L1: {name: Dr. Ernesto V. Dimaculangan, rank: Associate Professor I, department: Political Science, designation: Department Chair, max_lu: 15}
+  L2: {name: Atty. Mariel S. Agustin, rank: Assistant Professor II, department: Political Science, designation: "Legal Studies Coordinator; second GE handler"}
+  L3: {name: Atty. Rafael T. Bautista, rank: Assistant Professor I, department: Political Science, designation: Internship Coordinator}
+  L4: {name: Mr. Paolo D. Ilagan, rank: Instructor III, department: Political Science, designation: Department GE Handler}
+  L5: {name: Ms. Liza Marie G. Soriano, rank: Instructor III, department: Political Science, designation: Department GE Handler}
+  M1: {name: Dr. Teresita L. Valdez, rank: Associate Professor I, department: Communication, designation: Department Chair, max_lu: 15}
+  M2: {name: Mr. Gabriel N. Ocampo, rank: Assistant Professor I, department: Communication, designation: Faculty}
+  M3: {name: Mr. Daniel F. Robles, rank: Instructor III, department: Communication, designation: Media Laboratory Coordinator}
+  M4: {name: Ms. Patricia Anne E. Yap, rank: Assistant Professor I, department: Communication, designation: "Internship Coordinator; second GE handler"}
+  M5: {name: Ms. Camille R. Navarro, rank: Instructor II, department: Communication, designation: Department GE Handler}
+  E1: {name: Dr. Florante S. Mangubat, rank: Associate Professor I, department: Economics, designation: Department Chair, max_lu: 15}
+  E2: {name: Dr. Imelda R. Cabrera, rank: Assistant Professor III, department: Economics, designation: Research Coordinator}
+  E3: {name: Mr. Ronnel T. Salonga, rank: Assistant Professor I, department: Economics, designation: Faculty}
+  E4: {name: Ms. Katrina V. Lucero, rank: Instructor III, department: Economics, designation: "Department GE Handler; Internship Coordinator"}
+  E5: {name: Mr. Jose Emmanuel P. Sison, rank: Instructor II, department: Economics, designation: Department GE Handler}
+
+loads:
+  1:
+    P1:
+      - PSYC 220: BSP 2A, BSP 2B
+      - PSYC 351: BSP 3C
+      - PSYC 451: BSP 4C
+      - PSYC 461: BSP 4IO
+    P2:
+      - PSYC 280: BSP 3C, BSP 3IO
+      - PSYC 310: BSP 3C, BSP 3IO
+      - PSYC 452: BSP 4C
+      - PSYC 160: BSCS 2A, BSA 2A, BSBA 1A
+    P3:
+      - PSYC 101: BSP 1A, BSP 1B
+      - PSYC 240: BSP 3C, BSP 3IO
+      - PSYC 361: BSP 3IO
+      - PSYC 410: BSP 4C, BSP 4IO
+      - PSYC 462: BSP 4IO
+    P4:
+      - PSYC 130: BSP 2A, BSP 2B
+      - PSYC 210: BSP 2A, BSP 2B
+      - PSYC 320: BSP 3C, BSP 3IO
+      - UNI 103: BSP 1A, BSP 1B
+    P5:
+      - PSYC 160: BSP 1A, BSP 1B, ABPS 2A, ABPS 2B
+      - GAD 171: ABC 3A, ABC 3B, ABEcon 4A, ABEcon 4B
+    L1:
+      - POLS 210: ABPS 2A, ABPS 2B
+      - LGLS 403: ABPS 4A, ABPS 4B
+    L2:
+      - LGLS 201: ABPS 2A, ABPS 2B
+      - LGLS 302: ABPS 3A, ABPS 3B
+      - LGLS 402: ABPS 4A, ABPS 4B
+    L3:
+      - LGLS 303: ABPS 3A, ABPS 3B
+      - POLS 410: ABPS 4A, ABPS 4B
+      - LGLS 404: ABPS 4A, ABPS 4B
+    L4:
+      - POLS 101: ABPS 1A, ABPS 1B
+      - POLS 220: ABPS 2A, ABPS 2B
+      - POLS 250: ABPS 3A, ABPS 3B
+    L5:
+      - UNI 103: ABPS 1A, ABPS 1B
+      - POLS 260: ABPS 3A, ABPS 3B
+      - SOCS 195: BSCS 1A, BSCS 1B, BSIT 2A, BSIT 2B, BLIS 2A
+    M1:
+      - COMM 220: ABC 3A, ABC 3B
+      - COMM 310: ABC 3A
+      - COMM 410: ABC 4A, ABC 4B
+    M2:
+      - COMM 101: ABC 1A, ABC 1B
+      - COMM 210: ABC 2A, ABC 2B
+      - COMM 240: ABC 3A, ABC 3B
+      - COMM 340: ABC 4A, ABC 4B
+    M3:
+      - UNI 103: ABC 1A, ABC 1B
+      - COMM 112: ABC 2A, ABC 2B
+      - COMM 212: ABC 3A, ABC 3B
+    M4:
+      - COMM 310: ABC 3B
+      - COMM 311: ABC 3A, ABC 3B
+      - COMM 331: ABC 4A, ABC 4B
+      - COMM 120: BLIS 1B, BSCrim 1B, ABPA 1
+    M5:
+      - COMM 120: ABPS 1A, ABPS 1B, ABC 1A, ABC 1B, ABEcon 1A, ABEcon 1B
+      - COMM 221: ABC 2A, ABC 2B
+    E1:
+      - ECON 130: ABEcon 1A
+      - ECON 121: ABEcon 2A, ABEcon 2B
+      - ECON 330: ABEcon 4A, ABEcon 4B
+    E2:
+      - UNI 103: ABEcon 1A, ABEcon 1B
+      - ECON 120: ABEcon 2A, ABEcon 2B
+      - ECON 220: ABEcon 3A, ABEcon 3B
+      - ECON 410: ABEcon 4A, ABEcon 4B
+    E3:
+      - ECON 210: ABEcon 2A, ABEcon 2B
+      - ECON 222: ABEcon 3A, ABEcon 3B
+      - ECON 231: ABEcon 3A, ABEcon 3B
+      - ECON 310: ABEcon 3A, ABEcon 3B
+    E4:
+      - SOCS 195: ABC 2A, ABC 2B, ABEcon 2A, ABEcon 2B
+      - ECON 101: ABEcon 1A, ABEcon 1B
+      - ECON 221: ABEcon 3A, ABEcon 3B
+    E5:
+      - SOCS 195: BSP 2A, BSP 2B, ABPS 1A, ABPS 1B
+      - ECON 130: ABEcon 1B
+      - SOCS 195: BLIS 2B, BSA 1A, BSA 1B
+  2:
+    P1:
+      - PSYC 250: BSP 2A, BSP 2B
+      - PSYC 352: BSP 3C
+      - PSYC 490: BSP 4C, BSP 4IO
+    P2:
+      - PSYC 120: BSP 1A, BSP 1B
+      - PSYC 330: BSP 3C, BSP 3IO
+      - PSYC 420: BSP 4C, BSP 4IO
+      - PSYC 160: ABEcon 1A, ABEcon 1B
+    P3:
+      - PSYC 230: BSP 2A, BSP 2B
+      - PSYC 270: BSP 2A, BSP 2B
+      - PSYC 362: BSP 3IO
+      - PSYC 463: BSP 4IO
+      - GAD 171: ABPS 3A, ABPS 3B
+    P4:
+      - PSYC 150: BSP 1A, BSP 1B
+      - PSYC 260: BSP 2A, BSP 2B
+      - PSYC 340: BSP 3C, BSP 3IO
+    P5:
+      - GAD 171: BSP 3C, BSP 3IO
+      - PSYC 453: BSP 4C
+      - PSYC 160: ABC 1A, ABC 1B
+      - PSYC 160: BSIT 2A, BSIT 2B, BLIS 1A
+    L1:
+      - POLS 120: ABPS 1A, ABPS 1B
+      - POLS 490: ABPS 4A, ABPS 4B
+    L2:
+      - LGLS 202: ABPS 2A, ABPS 2B
+      - LGLS 301: ABPS 2A, ABPS 2B
+      - LGLS 401: ABPS 3A, ABPS 3B
+    L3:
+      - POLS 110: ABPS 1A, ABPS 1B
+      - LGLS 304: ABPS 3A, ABPS 3B
+      - POLS 420: ABPS 4A, ABPS 4B
+    L4:
+      - POLS 230: ABPS 2A, ABPS 2B
+      - POLS 320: ABPS 3A, ABPS 3B
+    L5:
+      - POLS 240: ABPS 2A, ABPS 2B
+      - POLS 310: ABPS 3A, ABPS 3B
+    M1:
+      - COMM 110: ABC 1B
+      - COMM 230: ABC 2A, ABC 2B
+      - COMM 330: ABC 3A, ABC 3B
+    M2:
+      - COMM 111: ABC 1A, ABC 1B
+      - COMM 213: ABC 2A, ABC 2B
+      - COMM 241: ABC 2B
+      - COMM 320: ABC 3A
+    M3:
+      - COMM 211: ABC 2A, ABC 2B
+      - COMM 241: ABC 2A
+      - COMM 320: ABC 3B
+      - COMM 420: ABC 4A, ABC 4B
+    M4:
+      - COMM 120: BSP 1A, BSP 1B
+      - COMM 312: ABC 3A, ABC 3B
+      - COMM 321: ABC 3A, ABC 3B
+      - COMM 490: ABC 4A, ABC 4B
+    M5:
+      - COMM 110: ABC 1A
+      - COMM 120: BSA 1A, BSA 1B, BSEntrep 1A, BSEntrep 1B, BSBA 1A, BSBA 1B, BSTHM 1A
+    E1:
+      - ECON 311: ABEcon 3A, ABEcon 3B
+      - ECON 420: ABEcon 4A, ABEcon 4B
+    E2:
+      - ECON 201: ABEcon 2A, ABEcon 2B
+      - ECON 230: ABEcon 2A, ABEcon 2B
+      - ECON 312: ABEcon 3A, ABEcon 3B
+    E3:
+      - ECON 102: ABEcon 1A, ABEcon 1B
+      - ECON 212: ABEcon 2A, ABEcon 2B
+      - ECON 320: ABEcon 3A, ABEcon 3B
+    E4:
+      - ECON 490: ABEcon 4A, ABEcon 4B
+      - SOCS 195: BSEntrep 1A, BSEntrep 1B, BSBA 1A, BSBA 1B, BSTHM 1A, BSTHM 1B
+    E5:
+      - ECON 213: ABEcon 1A, ABEcon 1B
+      - ECON 211: ABEcon 2A, ABEcon 2B
+      - ECON 321: ABEcon 3A, ABEcon 3B

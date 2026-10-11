@@ -1,0 +1,283 @@
+# College of Information and Computing Sciences
+# Source: CISC Curricula and Faculty Loading Plan (steady state).
+# See ccjps.yaml for the course entry forms.
+college: CISC
+name: College of Information and Computing Sciences
+
+courses:
+  CCS 101: {title: Introduction to Computing, lab: [cisc_computer_lab, lib_tech_lab]}
+  CCS 102: {title: Computer Programming 1, lab: [cisc_computer_lab, lib_tech_lab]}
+  CCS 103: {title: Computer Programming 2, lab: [cisc_computer_lab, lib_tech_lab]}
+  CCS 201: {title: Data Structures and Algorithms, lab: [cisc_computer_lab, lib_tech_lab]}
+  CCS 202: {title: Information Management, lab: [cisc_computer_lab, lib_tech_lab]}
+  CCS 301: {title: Applications Development and Emerging Technologies, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 110: Discrete Structures 1
+  CS 120: Calculus for Computing
+  CS 210: Discrete Structures 2
+  CS 220: Linear Algebra for Computing
+  CS 230: {title: Object-Oriented Programming, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 240: {title: Computer Architecture and Organization, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 250: Algorithms and Complexity
+  CS 310: Automata Theory and Formal Languages
+  CS 320: {title: Operating Systems, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 330: {title: Networks and Communications, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 340: Programming Languages
+  CS 350: {title: Software Engineering 1, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 360: {title: Software Engineering 2, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 370: Human-Computer Interaction
+  CS 380: {title: Information Assurance and Security, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 390: {title: Intelligent Systems, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 391: {title: Machine Learning, lab: [cisc_computer_lab, lib_tech_lab]}
+  CS 410: Social Issues and Professional Practice
+  CS 430: Thesis 1
+  CS 440: Thesis 2
+  CS 490: {title: Practicum (Industry Immersion), kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  IT 110: Discrete Mathematics
+  IT 120: Introduction to Human-Computer Interaction
+  IT 130: {title: Platform Technologies, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 210: {title: Object-Oriented Programming, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 220: {title: Web Systems and Technologies, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 230: {title: Networking 1, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 240: {title: Networking 2, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 250: {title: Advanced Database Systems, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 310: {title: Integrative Programming and Technologies, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 320: {title: Systems Integration and Architecture, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 330: {title: Information Assurance and Security 1, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 340: Information Assurance and Security 2
+  IT 350: {title: Systems Administration and Maintenance, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 360: Quantitative Methods and Simulation
+  IT 370: {title: Mobile Application Development, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 380: {title: Cloud Computing, lab: [cisc_computer_lab, lib_tech_lab]}
+  IT 390: IT Project Management
+  IT 410: Social and Professional Issues in IT
+  IT 430: Capstone Project 1
+  IT 440: Capstone Project 2
+  IT 490: {title: Practicum (Industry Immersion), kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  LIS 101: Introduction to Library and Information Science
+  LIS 102: {title: Information Technology for Libraries, lab: [lib_tech_lab, cisc_computer_lab]}
+  LIS 110: "Collection Management: Selection and Acquisition"
+  LIS 201: {title: "Cataloging and Classification 1: Descriptive Cataloging", lab: [lib_tech_lab, cisc_computer_lab]}
+  LIS 202: {title: "Cataloging and Classification 2: Subject Analysis", lab: [lib_tech_lab, cisc_computer_lab]}
+  LIS 210: Reference and Information Services
+  LIS 211: Information Sources in the Humanities
+  LIS 212: Information Sources in the Social Sciences
+  LIS 213: Information Sources in Science and Technology
+  LIS 220: Indexing and Abstracting
+  LIS 230: Library Materials for Children and Young Adults
+  LIS 240: Library Organization and Management
+  LIS 250: Preservation and Conservation of Library Materials
+  LIS 301: {title: Integrated Library Systems and Automation, lab: [lib_tech_lab, cisc_computer_lab]}
+  LIS 302: {title: Digital Libraries and Repositories, lab: [lib_tech_lab, cisc_computer_lab]}
+  LIS 303: {title: Database Design and Information Retrieval, lab: [lib_tech_lab, cisc_computer_lab]}
+  LIS 304: Records and Archives Management
+  LIS 310: Information Literacy Instruction
+  LIS 311: Library Services for Diverse Users
+  LIS 320: "Library Legislation, Ethics, and Professional Practice"
+  LIS 330: Research Methods in Library and Information Science
+  LIS 410: Thesis 1
+  LIS 420: Thesis 2
+  LIS 490: {title: Library Practicum, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+
+programs:
+  BSCS:
+    name: Bachelor of Science in Computer Science
+    department: Computer Science
+    blocks: [A, B]
+    curriculum:
+      1-1: [CCS 101, CCS 102, CS 110, SOCS 195, MATH 180, PE 101, CWTS 101, UNI 103]
+      1-2: [CCS 103, CS 120, CS 210, COMM 120, PE 102, CWTS 102]
+      2-1: [CCS 201, CS 230, CS 220, CS 240, PSYC 160, PE 201]
+      2-2: [CCS 202, CS 250, CS 320, CS 340, FIL 207, PE 202]
+      3-1: [CS 310, CS 330, CS 350, CS 390, MATH 350, ARTS 101, PHIL 190]
+      3-2: [CS 360, CCS 301, CS 380, CS 391, CS 370, PHIL 220, STS 180]
+      4-1: [CS 430, CS 410, HIST 201, HIST 220, ENGL 302, GAD 171]
+      4-2: [CS 440, CS 490]
+  BSIT:
+    name: Bachelor of Science in Information Technology
+    department: Information Technology
+    blocks: [A, B]
+    curriculum:
+      1-1: [CCS 101, CCS 102, IT 110, COMM 120, MATH 180, PE 101, CWTS 101, UNI 103]
+      1-2: [CCS 103, IT 130, IT 220, PE 102, CWTS 102]
+      2-1: [CCS 201, IT 210, IT 230, STS 180, MATH 350, SOCS 195, PE 201]
+      2-2: [CCS 202, IT 240, IT 120, PSYC 160, FIL 207, PE 202]
+      3-1: [IT 250, IT 310, IT 330, IT 360, IT 370, ENGL 302, PHIL 190]
+      3-2: [IT 320, IT 340, IT 350, CCS 301, IT 380, PHIL 220, ARTS 101]
+      4-1: [IT 430, IT 390, IT 410, HIST 201, HIST 220, GAD 171]
+      4-2: [IT 440, IT 490]
+  BLIS:
+    name: Bachelor of Library and Information Science
+    department: Library and Information Science
+    blocks: [A, B]
+    curriculum:
+      1-1: [LIS 101, LIS 102, COMM 120, MATH 180, PE 101, CWTS 101, UNI 103]
+      1-2: [LIS 110, LIS 210, PSYC 160, FIL 207, PE 102, CWTS 102]
+      2-1: [LIS 201, LIS 211, LIS 230, SOCS 195, MATH 350, ENGL 302, PE 201]
+      2-2: [LIS 202, LIS 212, LIS 213, LIS 303, STS 180, PE 202]
+      3-1: [LIS 220, LIS 240, LIS 301, LIS 304, LIS 330, PHIL 190, ARTS 101]
+      3-2: [LIS 302, LIS 250, LIS 310, LIS 311, PHIL 220, HIST 201]
+      4-1: [LIS 410, LIS 320, HIST 220, GAD 171]
+      4-2: [LIS 420, LIS 490]
+
+faculty:
+  C1: {name: Dr. Arnel P. Macaraeg, rank: Associate Professor I, department: Computer Science, designation: Department Chair, max_lu: 15}
+  C2: {name: Mr. Carlo Miguel D. Santiago, rank: Assistant Professor I, department: Computer Science, designation: Thesis and Practicum Coordinator}
+  C3: {name: Dr. Jasmine T. Lorenzo, rank: Assistant Professor II, department: Computer Science, designation: "Research Coordinator; second GE handler"}
+  C4: {name: Mr. Noel B. Ferrer, rank: Instructor III, department: Computer Science, designation: Laboratory Coordinator}
+  C5: {name: Ms. Rhea Anne L. Cruz, rank: Assistant Professor I, department: Computer Science, designation: Department GE Handler}
+  C6: {name: Mr. Kevin S. Domingo, rank: Instructor II, department: Computer Science, designation: Faculty}
+  T1: {name: Dr. Marivic S. Pascual, rank: Associate Professor I, department: Information Technology, designation: Department Chair, max_lu: 15}
+  T2: {name: Mr. Ramon J. Villareal, rank: Assistant Professor I, department: Information Technology, designation: "Laboratory Coordinator; second GE handler"}
+  T3: {name: Ms. Diane Mae R. Caballero, rank: Instructor III, department: Information Technology, designation: Faculty}
+  T4: {name: Mr. Francis G. Ignacio, rank: Assistant Professor I, department: Information Technology, designation: Capstone and Practicum Coordinator}
+  T5: {name: Ms. Jennifer C. Salazar, rank: Instructor III, department: Information Technology, designation: Faculty}
+  T6: {name: Mr. Antonio L. Mendoza, rank: Instructor II, department: Information Technology, designation: Department GE Handler}
+  B1: {name: Dr. Evelyn M. Lim, rank: Associate Professor I, department: Library and Information Science, designation: Department Chair, max_lu: 15}
+  B2: {name: Ms. Rosalind T. Garcia, rank: Assistant Professor I, department: Library and Information Science, designation: "Faculty; second GE handler"}
+  B3: {name: Ms. Pauline A. de Guzman, rank: Instructor III, department: Library and Information Science, designation: Department GE Handler}
+  B4: {name: Mr. Arvin C. Tan, rank: Assistant Professor I, department: Library and Information Science, designation: Library Technology Coordinator}
+  B5: {name: Ms. Grace L. Bernardo, rank: Instructor III, department: Library and Information Science, designation: Practicum Coordinator}
+
+loads:
+  1:
+    C1:
+      - CCS 201: BSCS 2A
+      - CS 310: BSCS 3A, BSCS 3B
+      - CS 410: BSCS 4B
+    C2:
+      - CS 230: BSCS 2A, BSCS 2B
+      - CS 350: BSCS 3A, BSCS 3B
+      - CS 430: BSCS 4B
+      - UNI 103: BSCS 1A
+    C3:
+      - CCS 201: BSCS 2B
+      - CS 220: BSCS 2A, BSCS 2B
+      - CS 390: BSCS 3A, BSCS 3B
+      - MATH 350: BSEntrep 2B
+    C4:
+      - CS 240: BSCS 2A, BSCS 2B
+      - CS 330: BSCS 3A, BSCS 3B
+      - CS 430: BSCS 4A
+    C5:
+      - CS 110: BSCS 1A, BSCS 1B
+      - MATH 350: BSCS 3A, BSCS 3B, BSIT 2A, BSIT 2B, BLIS 2A, BLIS 2B
+    C6:
+      - CCS 101: BSCS 1A, BSCS 1B
+      - CCS 102: BSCS 1A, BSCS 1B
+      - CS 410: BSCS 4A
+      - UNI 103: BSCS 1B
+    T1:
+      - CCS 201: BSIT 2A, BSIT 2B
+      - IT 250: BSIT 3A
+    T2:
+      - IT 230: BSIT 2A, BSIT 2B
+      - IT 330: BSIT 3A, BSIT 3B
+      - STS 180: BSBA 2B
+    T3:
+      - CCS 102: BSIT 1A, BSIT 1B
+      - IT 110: BSIT 1B
+      - IT 370: BSIT 3A, BSIT 3B
+      - UNI 103: BSIT 1A
+    T4:
+      - IT 390: BSIT 4A, BSIT 4B
+      - IT 410: BSIT 4A, BSIT 4B
+      - IT 430: BSIT 4A, BSIT 4B
+      - STS 180: BSIT 2A, BSIT 2B
+    T5:
+      - IT 110: BSIT 1A
+      - IT 210: BSIT 2B
+      - IT 250: BSIT 3B
+      - IT 310: BSIT 3A, BSIT 3B
+      - UNI 103: BSIT 1B
+    T6:
+      - CCS 101: BSIT 1A, BSIT 1B
+      - IT 210: BSIT 2A
+      - IT 360: BSIT 3A, BSIT 3B
+      - STS 180: BSP 1A
+    B1:
+      - LIS 240: BLIS 3A, BLIS 3B
+      - LIS 320: BLIS 4A, BLIS 4B
+    B2:
+      - LIS 220: BLIS 3A, BLIS 3B
+      - LIS 330: BLIS 3A, BLIS 3B
+      - LIS 410: BLIS 4A, BLIS 4B
+    B3:
+      - LIS 101: BLIS 1A, BLIS 1B
+      - LIS 211: BLIS 2A, BLIS 2B
+      - LIS 230: BLIS 2A, BLIS 2B
+    B4:
+      - LIS 102: BLIS 1A, BLIS 1B
+      - LIS 301: BLIS 3A, BLIS 3B
+    B5:
+      - LIS 201: BLIS 2A, BLIS 2B
+      - LIS 304: BLIS 3A, BLIS 3B
+      - UNI 103: BLIS 1A, BLIS 1B
+  2:
+    C1:
+      - CS 210: BSCS 1A, BSCS 1B
+      - CS 250: BSCS 2A, BSCS 2B
+      - CS 340: BSCS 2B
+    C2:
+      - CCS 202: BSCS 2A, BSCS 2B
+      - CS 360: BSCS 3A, BSCS 3B
+      - CS 490: BSCS 4A
+    C3:
+      - CCS 103: BSCS 1A
+      - CS 120: BSCS 1B
+      - CS 391: BSCS 3A, BSCS 3B
+      - CS 440: BSCS 4A, BSCS 4B
+    C4:
+      - CS 320: BSCS 2A, BSCS 2B
+      - CS 380: BSCS 3A, BSCS 3B
+      - CS 490: BSCS 4B
+    C5:
+      - CS 120: BSCS 1A
+      - MATH 350: ABPS 2B, ABC 2B, BSBA 2A, BSTHM 2A, BSTHM 2B, BSCrim 2A, BSCrim 2B
+    C6:
+      - CCS 103: BSCS 1B
+      - CCS 301: BSCS 3A, BSCS 3B
+      - CS 340: BSCS 2A
+      - CS 370: BSCS 3A, BSCS 3B
+    T1:
+      - CCS 301: BSIT 3A
+      - IT 320: BSIT 3A, BSIT 3B
+    T2:
+      - IT 350: BSIT 3A
+      - IT 380: BSIT 3A, BSIT 3B
+      - IT 490: BSIT 4A, BSIT 4B
+      - STS 180: BSCS 3A
+    T3:
+      - CCS 103: BSIT 1A
+      - IT 120: BSIT 2A, BSIT 2B
+      - IT 220: BSIT 1A, BSIT 1B
+      - IT 440: BSIT 4B
+    T4:
+      - IT 240: BSIT 2A, BSIT 2B
+      - IT 340: BSIT 3A, BSIT 3B
+      - IT 350: BSIT 3B
+      - IT 440: BSIT 4A
+    T5:
+      - CCS 103: BSIT 1B
+      - CCS 202: BSIT 2A, BSIT 2B
+      - STS 180: ABPS 3A, BSA 2A, BSTHM 2A
+    T6:
+      - CCS 301: BSIT 3B
+      - IT 130: BSIT 1A, BSIT 1B
+      - STS 180: BSCS 3B, BLIS 2A, BLIS 2B
+    B1:
+      - LIS 212: BLIS 2A, BLIS 2B
+      - LIS 420: BLIS 4A, BLIS 4B
+    B2:
+      - LIS 202: BLIS 2A, BLIS 2B
+      - LIS 303: BLIS 2A, BLIS 2B
+    B3:
+      - LIS 210: BLIS 1A, BLIS 1B
+      - LIS 310: BLIS 3A, BLIS 3B
+      - LIS 311: BLIS 3A, BLIS 3B
+    B4:
+      - LIS 213: BLIS 2A, BLIS 2B
+      - LIS 302: BLIS 3A, BLIS 3B
+    B5:
+      - LIS 110: BLIS 1A, BLIS 1B
+      - LIS 250: BLIS 3A, BLIS 3B
+      - LIS 490: BLIS 4A, BLIS 4B

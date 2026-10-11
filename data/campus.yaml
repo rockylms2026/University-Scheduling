@@ -1,0 +1,74 @@
+# Campus Space Plan: classrooms, laboratories, and PE venues.
+# Source: Campus Space Plan and University Class Time Frame documents.
+
+# Departments housed in each building. Classes are placed in their
+# department's building when possible.
+buildings:
+  DIW: {name: Diwa Hall, college: CSS, departments: [Psychology, Economics]}
+  MAL: {name: Malaya Hall, college: CSS, departments: [Political Science]}
+  TIN: {name: Tinig Hall, college: CSS, departments: [Communication]}
+  SIN: {name: Sinag Hall, college: CISC, departments: [Computer Science]}
+  TAL: {name: Tala Hall, college: CISC, departments: [Information Technology]}
+  LIW: {name: Liwanag Hall, college: CISC, departments: [Library and Information Science]}
+  SIP: {name: Sipag Hall, college: CBE, departments: [Accountancy]}
+  TIY: {name: Tiyaga Hall, college: CBE, departments: [Business Administration, Entrepreneurship]}
+  YAM: {name: Yaman Hall, college: CBE, departments: [Tourism and Hospitality Management]}
+  DUN: {name: Dunong Hall, college: COE, departments: [Secondary Education]}
+  GAB: {name: Gabay Hall, college: COE, departments: [Elementary Education]}
+  TAN: {name: Tanglaw Hall, college: COE, departments: [Secondary Education]}
+  KAT: {name: Katarungan Hall, college: CCJPS, departments: [Criminology]}
+  DAN: {name: Dangal Hall, college: CCJPS, departments: [Public Administration, Social Work]}
+  LIN: {name: Lingkod Hall, college: CCJPS, departments: [General Education]}
+
+# Each college's classrooms (45 seats). A section's classes, including its
+# GE classes, use its own college's classrooms.
+classrooms:
+  CSS: [DIW 201, DIW 202, DIW 203, DIW 301, DIW 302, DIW 303, DIW 304,
+        MAL 201, MAL 202, MAL 203, MAL 301, TIN 203, TIN 204, TIN 301, TIN 302]
+  CISC: [SIN 202, SIN 203, SIN 302, SIN 303, TAL 202, TAL 203, TAL 302, TAL 303, LIW 201, LIW 202]
+  CBE: [SIP 201, SIP 202, SIP 203, SIP 301, SIP 302, SIP 303,
+        TIY 201, TIY 202, TIY 203, TIY 301, TIY 302, YAM 203, YAM 204, YAM 302, YAM 303]
+  COE: [DUN 201, DUN 202, DUN 203, DUN 301, DUN 302, DUN 303,
+        GAB 201, GAB 202, GAB 301, GAB 302, TAN 104, TAN 201, TAN 202, TAN 301]
+  CCJPS: [KAT 301, KAT 302, KAT 303, DAN 201, DAN 202, DAN 203, DAN 301, DAN 302]
+
+# Lingkod Hall overflow classrooms and testing room, for any college that
+# runs short (used only when a college's own rooms are full).
+shared_classrooms: [LIN 203, LIN 204, LIN 301, LIN 302, LIN 303]
+
+# Seminar rooms (24 seats) for small groups such as the BSBA major groups.
+seminar_rooms:
+  CBE: [SIP 304]
+
+# Laboratory rooms. "blocks" are the lab blocks the time frame assigns to the
+# room; other blocks are allowed only when these are full (penalised).
+# Lecture parts of laboratory courses may also meet in the course's lab.
+labs:
+  css_computer_lab: {rooms: [DIW 204], blocks: [LA, LE]}
+  psych_lab: {rooms: [DIW 108], blocks: [LA, LE]}
+  audio_studio: {rooms: [TIN 104], blocks: [LC, LD, LG]}
+  video_studio: {rooms: [TIN 105], blocks: [LC, LD, LG]}
+  editing_lab: {rooms: [TIN 201], blocks: [LC, LD, LG]}
+  photo_lab: {rooms: [TIN 202], blocks: [LC, LD, LG]}
+  cisc_computer_lab: {rooms: [SIN 201, SIN 301, TAL 104, TAL 201, TAL 301]}
+  lib_tech_lab: {rooms: [LIW 104]}
+  cbe_computer_lab: {rooms: [SIP 204], blocks: [LB, LD, LF, LG]}
+  kitchen: {rooms: [YAM 104], blocks: [LA, LC]}
+  bar_lab: {rooms: [YAM 106], blocks: [LA, LC]}
+  mock_hotel: {rooms: [YAM 201]}
+  front_office_lab: {rooms: [YAM 202]}
+  travel_lab: {rooms: [YAM 301]}
+  edtech_lab: {rooms: [GAB 203], blocks: [LE, LG]}
+  crime_photo_lab: {rooms: [KAT 201], blocks: [LA, LC, LE, LG]}
+  crime_dactyloscopy_lab: {rooms: [KAT 202], blocks: [LA, LC, LE, LG]}
+  crime_chemistry_lab: {rooms: [KAT 203], blocks: [LA, LC, LE, LG]}
+  polygraph_room: {rooms: [KAT 204], blocks: [LA, LC, LE, LG]}
+  ballistics_room: {rooms: [KAT 205], blocks: [LA, LC, LE, LG]}
+
+# University PE facilities. "classes_at_once" is how many PE classes a
+# venue can hold at the same time (an assumption: the plans do not say).
+pe_venues:
+  - {name: Gymnasium, classes_at_once: 2}
+  - {name: Covered Court, classes_at_once: 1}
+  - {name: Field, classes_at_once: 2}
+  - {name: Dance Studio, classes_at_once: 1}

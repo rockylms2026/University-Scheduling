@@ -1,0 +1,26 @@
+# Institutional core (GE, PHIL 190, NSTP, UNI 103) shared by every program.
+# housed_by: the unit that normally teaches the course. A section that no
+# faculty member in data/colleges/*.yaml is loaded with is shown as taught by
+# this unit ("TBA") and is still scheduled so students have no conflicts.
+courses:
+  PSYC 160: {title: Understanding the Self, credits: 3, lec: 3, housed_by: Dept. of Psychology (CSS)}
+  HIST 201: {title: Readings in Philippine History, credits: 3, lec: 3, housed_by: Dept. of Secondary Education (COE)}
+  SOCS 195: {title: The Contemporary World, credits: 3, lec: 3, housed_by: Dept. of Economics (CSS)}
+  MATH 180: {title: Mathematics in the Modern World, credits: 3, lec: 3, housed_by: Dept. of Secondary Education (COE)}
+  COMM 120: {title: Purposive Communication, credits: 3, lec: 3, housed_by: Dept. of Communication (CSS)}
+  ARTS 101: {title: Art Appreciation, credits: 3, lec: 3, housed_by: GE Department}
+  STS 180: {title: "Science, Technology, and Society", credits: 3, lec: 3, housed_by: Dept. of Information Technology (CISC)}
+  PHIL 220: {title: Ethics, credits: 3, lec: 3, housed_by: GE Department}
+  HIST 220: {title: The Life and Works of Rizal, credits: 3, lec: 3, housed_by: Dept. of Secondary Education (COE)}
+  PE 101: {title: Physical Fitness and Wellness, credits: 2, lec: 2, kind: pe, housed_by: GE Department}
+  PE 102: {title: Individual and Dual Sports, credits: 2, lec: 2, kind: pe, housed_by: GE Department}
+  PE 201: {title: Team and Recreational Sports, credits: 2, lec: 2, kind: pe, housed_by: GE Department}
+  PE 202: {title: "Dance, Rhythmic, and Recreational Activities", credits: 2, lec: 2, kind: pe, housed_by: GE Department}
+  MATH 350: {title: Foundations of Statistics, credits: 3, lec: 3, housed_by: Dept. of Computer Science (CISC)}
+  GAD 171: {title: Gender and Society, credits: 3, lec: 3, housed_by: Dept. of Psychology (CSS)}
+  PHIL 190: {title: Introduction to Critical Thinking, credits: 3, lec: 3, housed_by: GE Department}
+  ENGL 302: {title: Research and Professional Writing, credits: 3, lec: 3, housed_by: GE Department}
+  FIL 207: {title: Kultura at Panitikang Pilipino, credits: 3, lec: 3, housed_by: Dept. of Secondary Education (COE)}
+  UNI 103: {title: Navigating University Life, credits: 1, lec: 1, housed_by: Program's own department}
+  CWTS 101: {title: Civic Welfare Training Service 1 (NSTP 1), credits: 3, lec: 3, kind: nstp, housed_by: GE Department}
+  CWTS 102: {title: Civic Welfare Training Service 2 (NSTP 2), credits: 3, lec: 3, kind: nstp, housed_by: GE Department}

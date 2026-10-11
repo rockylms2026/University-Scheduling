@@ -1,0 +1,115 @@
+# General Education Department (university-wide service department,
+# hosted in Lingkod Hall). Source: GE Department Faculty and Loading.
+# It has no programs; its faculty teach the institutional core.
+college: GE
+name: General Education Department
+# GE faculty teach only GE courses, so the 4-preparation cap does not apply;
+# at most 5 different courses per semester.
+prep_cap: null
+
+faculty:
+  G1: {name: Dr. Ma. Luisa T. Pangilinan, rank: Associate Professor I, department: General Education, designation: GE Department Coordinator, max_lu: 15}
+  G2: {name: Mr. Bernardo C. Aquino, rank: Instructor III, department: General Education, designation: Faculty}
+  G3: {name: Dr. Francis Xavier M. Tolentino, rank: Assistant Professor II, department: General Education, designation: Faculty}
+  G4: {name: Ms. Angelica R. Soriano, rank: Instructor III, department: General Education, designation: Faculty}
+  G5: {name: Ms. Hannah Grace V. Alvarez, rank: Instructor II, department: General Education, designation: Humanities Coordinator}
+  G6: {name: Mr. Lorenzo P. Galvez, rank: Instructor III, department: General Education, designation: Faculty}
+  G7: {name: Ms. Bea Katrina L. Navarro, rank: Instructor II, department: General Education, designation: Faculty}
+  G8: {name: Dr. Rosemarie D. Aguilar, rank: Assistant Professor I, department: General Education, designation: Writing Coordinator}
+  G9: {name: Mr. Joshua M. Cabanilla, rank: Instructor III, department: General Education, designation: Faculty}
+  G10: {name: Ms. Kathleen T. Robles, rank: Instructor III, department: General Education, designation: Faculty}
+  G11: {name: Ms. Danica F. Salvador, rank: Instructor II, department: General Education, designation: Faculty}
+  G12: {name: Mr. Dennis A. Cortez, rank: Instructor II, department: General Education, designation: PE Coordinator}
+  G13: {name: Ms. Rowena J. Manzano, rank: Instructor III, department: General Education, designation: Faculty}
+  G14: {name: Mr. Mark Joseph L. Tuazon, rank: Instructor II, department: General Education, designation: Faculty}
+  G15: {name: Ms. Irene C. Mallari, rank: Instructor II, department: General Education, designation: Faculty}
+  G16: {name: Mr. Paulo V. Sison, rank: Instructor II, department: General Education, designation: Faculty}
+  G17: {name: Ms. Maricar L. Bacani, rank: Instructor II, department: General Education, designation: NSTP Coordinator}
+  G18: {name: Mr. Ramon D. Esteban, rank: Instructor II, department: General Education, designation: Faculty}
+  G19: {name: Ms. Liezel P. Corpuz, rank: Instructor II, department: General Education, designation: Faculty}
+
+loads:
+  1:
+    G1:
+      - PHIL 190: BSP 2A, BSP 2B, ABPS 2A, ABPS 2B, ABC 3B
+    G2:
+      - PHIL 220: ABEcon 3A, ABEcon 3B, BSBA 3A, BSBA 3B, BSEd-E 3, BSEd-SS 3, BSEd-F 3, ABPA 3
+    G3:
+      - PHIL 190: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 3, BSCrim 4A, BSCrim 4B, ABPA 2
+    G4:
+      - PHIL 190: BSCS 3A, BSCS 3B, BSIT 3A, BSIT 3B, BLIS 3A, BLIS 3B, BSSW 3
+      - PHIL 220: BSEd-M 3
+    G5:
+      - ARTS 101: BSCS 3A, BSCS 3B, BLIS 3A, BLIS 3B, BSCrim 4A, BSCrim 4B, ABPA 3, BSSW 3
+    G6:
+      - CWTS 101: BSCS 1A, BSIT 1A, BSIT 1B, BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1
+    G7:
+      - CWTS 101: BSCS 1B, BLIS 1A, BLIS 1B, BSCrim 1A, BSCrim 1B, ABPA 1, BSSW 1
+    G8:
+      - ARTS 101: BSP 3C, BSP 3IO, ABC 1A, ABC 1B, ABEcon 2A, ABEcon 2B
+      - ENGL 302: BSA 4A, BSA 4B
+    G9:
+      - ENGL 302: ABPS 3A, ABPS 3B, ABEcon 3A, ABEcon 3B, BSEd-E 3, BSEd-SS 3, BEEd 4, BSSW 3
+    G10:
+      - ENGL 302: BSCS 4A, BSCS 4B, BSIT 3A, BSIT 3B, BLIS 2A, BLIS 2B, BSEd-M 3, BSEd-F 3
+    G11:
+      - CWTS 101: BSP 1A, BSP 1B, ABPS 1A, ABPS 1B, ABC 1A, ABC 1B, ABEcon 1A, ABEcon 1B
+    G12:
+      - PE 201: BSCS 2A, BSCS 2B, BSIT 2A, BSIT 2B, BLIS 2A, BLIS 2B, BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 2
+    G13:
+      - PE 201: BSA 2A, BSA 2B, BSEntrep 2A, BSEntrep 2B, BSBA 2A, BSBA 2B, BSTHM 2A, BSTHM 2B, BSCrim 2A, BSCrim 2B, ABPA 2, BSSW 2
+    G14:
+      - PE 101: BSA 1A, BSA 1B, BSEntrep 1A, BSBA 1B
+      - PE 201: BSP 2A, BSP 2B, ABPS 2A, ABPS 2B, ABC 2A, ABC 2B, ABEcon 2A, ABEcon 2B
+    G15:
+      - ARTS 101: BSEntrep 3A, BSEntrep 3B, BSBA 3A, BSBA 3B, BSTHM 3A, BSTHM 3B
+      - PE 101: BSCS 1B, BSIT 1B, BLIS 1B
+    G16:
+      - PE 101: BSP 1A, BSP 1B, ABPS 1A, ABPS 1B, ABC 1A, ABC 1B, ABEcon 1A, ABEcon 1B, BSEntrep 1B, BSBA 1A, BSTHM 1A, BSTHM 1B
+    G17:
+      - CWTS 101: BSA 1A, BSA 1B, BSEntrep 1A, BSEntrep 1B, BSBA 1A, BSBA 1B, BSTHM 1A, BSTHM 1B
+    G18:
+      - PE 101: BSCS 1A, BSIT 1A, BLIS 1A, BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1, BSCrim 1A, BSCrim 1B, ABPA 1, BSSW 1
+    G19:
+      - PHIL 190: ABC 3A, BSA 3A, BSA 3B, BSEntrep 3A, BSEntrep 3B, BSTHM 3A, BSTHM 3B
+  2:
+    G1:
+      - PHIL 220: BSIT 3A, BSIT 3B, BLIS 3A, BLIS 3B
+    G2:
+      - PHIL 220: BSCS 3A, BSCS 3B, BEEd 3, BSCrim 4A, BSCrim 4B, BSSW 3
+    G3:
+      - PHIL 220: BSP 2A, BSP 2B, ABPS 2A, ABPS 2B, ABC 3A, ABC 3B
+    G4:
+      - PHIL 220: BSA 3A, BSA 3B, BSEntrep 3A, BSEntrep 3B, BSTHM 3A, BSTHM 3B
+    G5:
+      - ARTS 101: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3, BEEd 3
+      - ENGL 302: ABC 3B
+    G6:
+      - CWTS 102: BSCS 1A, BSCS 1B, BSIT 1A, BSIT 1B, BLIS 1A, BLIS 1B
+    G7:
+      - CWTS 102: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1, BSSW 1
+    G8:
+      - ENGL 302: BSEntrep 3A, BSEntrep 3B, BSBA 3A, BSBA 3B, BSTHM 3A, BSTHM 3B
+    G9:
+      - ENGL 302: BSP 3C, BSP 3IO, ABC 3A, BSCrim 4A, BSCrim 4B, ABPA 3
+    G10:
+      - ARTS 101: ABPS 1A, ABPS 1B, BSIT 3A, BSIT 3B, BSA 3A, BSA 3B
+    G11:
+      - CWTS 102: BSP 1A, BSP 1B, ABPS 1A, ABPS 1B, ABC 1A, ABC 1B, ABEcon 1A, ABEcon 1B
+    G12:
+      - PE 102: BSP 1A, BSP 1B, ABPS 1A, ABPS 1B, ABC 1A, ABC 1B, ABEcon 1A, ABEcon 1B, BLIS 1A, BLIS 1B
+    G13:
+      - PE 102: BSA 1A, BSA 1B, BSEntrep 1A, BSEntrep 1B, BSBA 1A, BSBA 1B, BSTHM 1A, BSTHM 1B, BSCrim 1A, BSCrim 1B, ABPA 1, BSSW 1
+    G14:
+      - PE 202: BSA 2A, BSA 2B, BSEntrep 2A, BSEntrep 2B, BSBA 2A, BSBA 2B, BSTHM 2A, BSTHM 2B, BSCrim 2A, ABPA 2, BSSW 2
+    G15:
+      - PE 202: BSCS 2A, BSCS 2B, BSIT 2A, BSIT 2B, BLIS 2A, BLIS 2B, BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 2
+    G16:
+      - PE 102: BSCS 1A, BSCS 1B, BSIT 1A, BSIT 1B, BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1
+    G17:
+      - CWTS 102: BSA 1A, BSA 1B, BSEntrep 1A, BSEntrep 1B, BSBA 1A, BSBA 1B, BSTHM 1A, BSTHM 1B
+    G18:
+      - PE 202: BSP 2A, BSP 2B, ABPS 2A, ABPS 2B, ABC 2A, ABC 2B, ABEcon 2A, ABEcon 2B, BSCrim 2B
+    G19:
+      - CWTS 102: BSCrim 1A, BSCrim 1B, ABPA 1
+      - PHIL 190: ABEcon 2A, ABEcon 2B, BSBA 2A, BSBA 2B

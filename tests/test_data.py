@@ -1,0 +1,54 @@
+"""Checks that the data files match the college loading plans."""
+
+from scheduler.model import load_university
+from scheduler.solver import build_meetings, time_options
+from scheduler.validate import faculty_load_summary, validate
+
+UNI = load_university()
+
+
+def test_no_data_errors():
+    errors = [i.message for i in validate(UNI) if i.level == "error"]
+    assert errors == []
+
+
+def test_counts():
+    assert len(UNI.faculty) == 110            # CSS 20, CISC 17, CBE 20, COE 20, CCJPS 14, GE 19
+    assert len(UNI.programs) == 19
+    assert len(UNI.campus.pool("classrooms:CSS")) == 15
+    assert len(UNI.campus.pool("classrooms:CCJPS")) == 8
+
+
+def test_loads_match_plan_summaries():
+    # (faculty, semester) -> LU from the plans' load summary tables
+    expected = {
+        ("CSS-P5", 1): 24, ("CSS-L5", 1): 23, ("CISC-C3", 1): 24, ("CISC-B4", 2): 16,
+        ("CBE-B4", 1): 17, ("CBE-H4", 2): 22, ("CCJPS-D2", 1): 7, ("CCJPS-W4", 2): 18,
+        ("COE-S13", 1): 18, ("COE-E2", 2): 6, ("GE-G13", 1): 24, ("GE-G19", 2): 21,
+    }
+    for (key, sem), lu in expected.items():
+        assert faculty_load_summary(UNI, sem)[key]["lu"] == lu, key
+
+
+def test_time_frame_patterns():
+    assert len(time_options(UNI, "lecture")) == 8 + 5            # M1-M8 MWF, T1-T5 TTh
+    assert len([o for o in time_options(UNI, "lab") if not o.exception]) == 4 * 3 + 3 * 2
+    for o in time_options(UNI, "lecture") + time_options(UNI, "pe"):
+        for day, start, end in o.intervals:   # nothing runs through lunch
+            lunch = (690, 750) if day in ("Mon", "Wed", "Fri") else (720, 810)
+            assert end <= lunch[0] or start >= lunch[1], o.label
+
+
+def test_bsba_major_groups_conflict_with_both_blocks():
+    fm = UNI.sections["BSBA 3-FM"].subcohorts
+    assert fm & UNI.sections["BSBA 3A"].subcohorts
+    assert fm & UNI.sections["BSBA 3B"].subcohorts
+    assert not fm & UNI.sections["BSBA 3-MKT"].subcohorts
+
+
+def test_every_class_has_meetings():
+    for sem in (1, 2):
+        ids = {m.klass.id for m in build_meetings(UNI.classes_for(sem))}
+        for k in UNI.classes_for(sem):
+            if k.course.kind != "field" or k.faculty:
+                assert k.id in ids, (k.course.code, k.section.name)

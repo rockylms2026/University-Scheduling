@@ -1,0 +1,295 @@
+# College of Criminal Justice and Public Service
+# Source: CCJPS Curricula and Faculty Loading Plan (steady state).
+#
+# Course entry forms:
+#   CODE: Title                                   lecture course, 3 credits, 3 h/week
+#   CODE: {title: ..., lab: <lab type>}           lab course, Lec 2 h + Lab 3 h (5 LU);
+#                                                 lab types are listed in data/campus.yaml
+#                                                 (a list gives fallbacks, best first)
+#   CODE: {title: ..., kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+#                                                 internship / practicum: students are off
+#                                                 campus on the placement days; the teacher
+#                                                 gets one weekly supervision period
+#
+# Curriculum entries "CODE @X" run only for block X, or once for major/track group X.
+# Loads list, per semester and faculty ID, "course: section, section, ...".
+college: CCJPS
+name: College of Criminal Justice and Public Service
+
+courses:
+  CRIM 101: Introduction to Criminology
+  CRIM 102: Theories of Crime Causation
+  CRIM 103: Human Behavior and Victimology
+  CRIM 104: Professional Conduct and Ethical Standards
+  CRIM 105: Juvenile Delinquency and the Juvenile Justice System
+  CRIM 107: Criminological Research 1
+  CRIM 108: Criminological Research 2 (Thesis)
+  CRIM 490: {title: "Criminology Internship (Law Enforcement, Corrections, and Courts)", kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  CLJ 101: Introduction to the Philippine Criminal Justice System
+  CLJ 102: Human Rights Education
+  CLJ 103: Criminal Law 1 (Book 1 of the Revised Penal Code)
+  CLJ 104: Criminal Law 2 (Book 2 of the Revised Penal Code)
+  CLJ 105: Criminal Procedure and Court Testimony
+  CLJ 106: Evidence
+  LEA 101: Law Enforcement Organization and Administration
+  LEA 103: Industrial Security Concepts and Management
+  LEA 104: Police Patrol Operations with Police Communication System
+  LEA 105: Police Intelligence
+  LEA 106: Police Personnel and Records Management
+  FOR 101: {title: Forensic Photography, lab: crime_photo_lab}
+  FOR 102: {title: Personal Identification Techniques, lab: crime_dactyloscopy_lab}
+  FOR 103: {title: Forensic Chemistry and Toxicology, lab: crime_chemistry_lab}
+  FOR 104: {title: Questioned Documents Examination, lab: crime_dactyloscopy_lab}
+  FOR 105: {title: Lie Detection Techniques, lab: polygraph_room}
+  FOR 106: {title: Forensic Ballistics, lab: ballistics_room}
+  CDI 101: Fundamentals of Criminal Investigation and Intelligence
+  CDI 102: Specialized Crime Investigation 1 with Legal Medicine
+  CDI 103: Specialized Crime Investigation 2 with Interrogation and Interview
+  CDI 104: Traffic Management and Accident Investigation
+  CDI 105: "Technical English: Investigative Report Writing"
+  CDI 106: Fire Protection and Arson Investigation
+  CDI 107: Vice and Drug Education and Control
+  CDI 108: Introduction to Cybercrime and Environmental Laws
+  CA 101: Institutional Corrections
+  CA 102: Non-Institutional Corrections
+  CA 103: Therapeutic Modalities
+  PAD 101: Introduction to Public Administration
+  PAD 102: Philippine Administrative System and Bureaucracy
+  PAD 104: Public Personnel Administration
+  PAD 105: Public Fiscal Administration
+  PAD 106: Organization and Management
+  PAD 201: Local Government Administration
+  PAD 202: Public Policy and Program Administration
+  PAD 203: Leadership and Ethics in Public Service
+  PAD 204: Research Methods in Public Administration
+  PAD 205: Government Accounting and Auditing
+  PAD 206: Development Administration
+  PAD 207: Human Resource Development in Government
+  PAD 301: "Project Planning, Monitoring, and Evaluation"
+  PAD 302: E-Governance and Public Sector Innovation
+  PAD 303: Disaster Risk Reduction and Management Administration
+  PAD 304: Public Enterprise and Public-Private Partnerships
+  PAD 305: Comparative Public Administration
+  PAD 306: Gender and Development in Governance
+  PAD 307: Administrative Law and Law on Public Officers
+  PAD 308: Public Procurement and Logistics Management
+  PAD 309: Citizen Participation and Civil Society
+  PAD 410: Thesis 1
+  PAD 420: Thesis 2
+  PAD 490: {title: Public Administration Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  SW 101: Introduction to Social Work
+  SW 102: Human Behavior and the Social Environment 1
+  SW 103: "Social Welfare Policies, Programs, and Services"
+  SW 104: Philippine Social Realities and Social Welfare History
+  SW 201: Human Behavior and the Social Environment 2
+  SW 202: Social Work Practice with Individuals
+  SW 203: Social Work Practice with Families
+  SW 204: Social Work Practice with Groups
+  SW 205: Community Organizing and Development
+  SW 206: Interviewing and Counseling Skills in Social Work
+  SW 207: Social Work Values and Ethics
+  SW 301: Social Work Research 1
+  SW 302: Social Work Research 2 (Thesis)
+  SW 303: Social Welfare Administration
+  SW 304: Social Legislation
+  SW 305: "Social Work with Children, Youth, and Families at Risk"
+  SW 306: Social Work in Mental Health and Disability
+  SW 307: Social Work in Disaster and Emergency Settings
+  SW 308: "Gender, Development, and Social Work"
+  SW 309: Social Work with Older Persons
+  SW 310: Social Work in Correctional and Justice Settings
+  SW 311: Social Work Supervision and Integration Seminar
+  SW 312: Project Development and Resource Mobilization
+  SW 313: Integrative Seminar in Social Work Practice
+  SW 490: {title: Field Instruction 1 (Agency and Community), kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+  SW 491: {title: Field Instruction 2 (Agency and Community), kind: field, credits: 6, placement: [Mon, Tue, Wed, Thu, Fri]}
+
+programs:
+  BSCrim:
+    name: Bachelor of Science in Criminology
+    department: Criminology
+    blocks: [A, B]
+    curriculum:
+      1-1: [CRIM 101, CLJ 101, CRIM 104, MATH 180, PSYC 160, COMM 120, PE 101, CWTS 101, UNI 103]
+      1-2: [CRIM 102, CRIM 103, CLJ 102, CLJ 103, FOR 101, SOCS 195, PE 102, CWTS 102]
+      2-1: [LEA 101, CDI 101, CA 101, CLJ 104, CLJ 105, FOR 102, PE 201]
+      2-2: [CRIM 105, LEA 103, CDI 102, CDI 103, CA 102, FOR 103, MATH 350, PE 202]
+      3-1: [LEA 104, CDI 104, CDI 105, CLJ 106, FOR 104, CRIM 107, FIL 207]
+      3-2: [LEA 105, CDI 106, CDI 107, CA 103, FOR 105, CRIM 108, STS 180]
+      4-1: [LEA 106, CDI 108, FOR 106, PHIL 190, ARTS 101, HIST 201, HIST 220, GAD 171]
+      4-2: [CRIM 490, PHIL 220, ENGL 302]
+  ABPA:
+    name: Bachelor of Arts in Public Administration
+    department: Public Administration
+    blocks: [""]
+    curriculum:
+      1-1: [PAD 101, SOCS 195, COMM 120, MATH 180, PE 101, CWTS 101, UNI 103]
+      1-2: [PAD 102, PAD 106, FIL 207, PSYC 160, PE 102, CWTS 102]
+      2-1: [PAD 104, PAD 105, PAD 201, MATH 350, PHIL 190, PE 201]
+      2-2: [PAD 202, PAD 207, PAD 307, PAD 203, PAD 302, STS 180, PE 202]
+      3-1: [PAD 204, PAD 206, PAD 205, PAD 305, PAD 309, PHIL 220, ARTS 101]
+      3-2: [PAD 301, PAD 303, PAD 304, PAD 306, PAD 308, ENGL 302, HIST 201]
+      4-1: [PAD 410, HIST 220, GAD 171]
+      4-2: [PAD 420, PAD 490]
+  BSSW:
+    name: Bachelor of Science in Social Work
+    department: Social Work
+    blocks: [""]
+    curriculum:
+      1-1: [SW 101, MATH 180, PSYC 160, COMM 120, SOCS 195, PE 101, CWTS 101, UNI 103]
+      1-2: [SW 102, SW 103, SW 104, SW 207, FIL 207, PE 102, CWTS 102]
+      2-1: [SW 201, SW 202, SW 205, MATH 350, PE 201]
+      2-2: [SW 203, SW 204, SW 206, SW 303, SW 304, STS 180, PE 202]
+      3-1: [SW 301, SW 305, SW 306, SW 308, SW 310, PHIL 190, ARTS 101, ENGL 302]
+      3-2: [SW 302, SW 307, SW 309, SW 311, SW 312, PHIL 220, HIST 201, GAD 171]
+      4-1: [SW 490, SW 313, HIST 220]
+      4-2: [SW 491]
+
+faculty:
+  R1: {name: Dr. Nestor B. Alcaraz, rank: Associate Professor I, department: Criminology, designation: Department Chair, max_lu: 15}
+  R2: {name: Atty. Celeste M. Rivera, rank: Assistant Professor II, department: Criminology, designation: Faculty}
+  R3: {name: Mr. Herminio D. Bagasbas, rank: Assistant Professor I, department: Criminology, designation: Internship Coordinator}
+  R4: {name: Ms. Janine F. Corpuz, rank: Instructor III, department: Criminology, designation: Crime Laboratory Coordinator}
+  R5: {name: Mr. Rodrigo P. Salvador, rank: Instructor III, department: Criminology, designation: Faculty}
+  R6: {name: Ms. Marjorie L. Pascual, rank: Instructor II, department: Criminology, designation: Faculty}
+  D1: {name: Dr. Reynaldo C. Villamor, rank: Associate Professor I, department: Public Administration, designation: Department Chair, max_lu: 15}
+  D2: {name: Ms. Lorna G. Fabian, rank: Assistant Professor I, department: Public Administration, designation: Faculty}
+  D3: {name: Mr. Joel R. Macapagal, rank: Instructor III, department: Public Administration, designation: "Internship Coordinator; Department GE Handler (SOCS 195)"}
+  D4: {name: Atty. Kristine D. Ramos, rank: Instructor III, department: Public Administration, designation: Department GE Handler (SOCS 195)}
+  W1: {name: Dr. Evangeline P. Soriano, rank: Associate Professor I, department: Social Work, designation: Department Chair, max_lu: 15}
+  W2: {name: Ms. Rhea Lyn C. Galang, rank: Assistant Professor I, department: Social Work, designation: "Field Instruction Coordinator; Department GE Handler (PSYC 160)"}
+  W3: {name: Mr. Emmanuel T. Dacanay, rank: Instructor III, department: Social Work, designation: Faculty}
+  W4: {name: Ms. Charisse M. Lopez, rank: Instructor II, department: Social Work, designation: "Department GE Handler (GAD 171, PSYC 160)"}
+
+# Teaching loads: faculty ID -> list of {course: sections}
+loads:
+  1:
+    R1:
+      - CRIM 101: BSCrim 1A, BSCrim 1B
+      - CRIM 107: BSCrim 3A, BSCrim 3B
+    R2:
+      - CLJ 101: BSCrim 1A, BSCrim 1B
+      - CLJ 104: BSCrim 2A, BSCrim 2B
+      - CLJ 105: BSCrim 2A, BSCrim 2B
+      - CLJ 106: BSCrim 3A, BSCrim 3B
+    R3:
+      - LEA 101: BSCrim 2A, BSCrim 2B
+      - LEA 104: BSCrim 3A, BSCrim 3B
+      - LEA 106: BSCrim 4A, BSCrim 4B
+      - UNI 103: BSCrim 1A, BSCrim 1B
+    R4:
+      - FOR 102: BSCrim 2A, BSCrim 2B
+      - FOR 106: BSCrim 4A, BSCrim 4B
+    R5:
+      - CDI 101: BSCrim 2A, BSCrim 2B
+      - CDI 104: BSCrim 3A, BSCrim 3B
+      - CDI 108: BSCrim 4A, BSCrim 4B
+      - FOR 104: BSCrim 3B
+    R6:
+      - CA 101: BSCrim 2A, BSCrim 2B
+      - CDI 105: BSCrim 3A, BSCrim 3B
+      - CRIM 104: BSCrim 1A, BSCrim 1B
+      - FOR 104: BSCrim 3A
+    D1:
+      - PAD 101: ABPA 1
+      - PAD 206: ABPA 3
+      - PAD 305: ABPA 3
+      - PAD 410: ABPA 4
+    D2:
+      - PAD 105: ABPA 2
+      - PAD 205: ABPA 3
+      - UNI 103: ABPA 1
+    D3:
+      - PAD 201: ABPA 2
+      - PAD 204: ABPA 3
+      - PAD 309: ABPA 3
+    D4:
+      - PAD 104: ABPA 2
+      - SOCS 195: ABPA 1, BSSW 1
+    W1:
+      - SW 101: BSSW 1
+      - SW 201: BSSW 2
+      - SW 301: BSSW 3
+      - SW 305: BSSW 3
+      - SW 308: BSSW 3
+    W2:
+      - SW 306: BSSW 3
+      - SW 313: BSSW 4
+      - PSYC 160: BSCrim 1A, BSCrim 1B, BSSW 1
+      - PSYC 160: BSBA 1B, BSTHM 1A, BSTHM 1B
+    W3:
+      - SW 202: BSSW 2
+      - SW 205: BSSW 2
+      - SW 310: BSSW 3
+      - SW 490: BSSW 4
+      - UNI 103: BSSW 1
+    W4:
+      - GAD 171: BSCrim 4A, BSCrim 4B, ABPA 4
+      - GAD 171: BLIS 4A, BSEntrep 4A, BSEntrep 4B, BSTHM 4A, BSTHM 4B
+  2:
+    R1:
+      - CRIM 102: BSCrim 1A, BSCrim 1B
+      - CRIM 108: BSCrim 3A, BSCrim 3B
+    R2:
+      - CDI 103: BSCrim 2A, BSCrim 2B
+      - CLJ 102: BSCrim 1A, BSCrim 1B
+      - CLJ 103: BSCrim 1A, BSCrim 1B
+    R3:
+      - CDI 106: BSCrim 3A, BSCrim 3B
+      - CRIM 490: BSCrim 4A, BSCrim 4B
+      - LEA 103: BSCrim 2A, BSCrim 2B
+      - LEA 105: BSCrim 3A, BSCrim 3B
+    R4:
+      - FOR 101: BSCrim 1A, BSCrim 1B
+      - FOR 103: BSCrim 2A, BSCrim 2B
+    R5:
+      - CDI 102: BSCrim 2A, BSCrim 2B
+      - CDI 107: BSCrim 3A, BSCrim 3B
+      - FOR 105: BSCrim 3A, BSCrim 3B
+    R6:
+      - CA 102: BSCrim 2A, BSCrim 2B
+      - CA 103: BSCrim 3A, BSCrim 3B
+      - CRIM 103: BSCrim 1A, BSCrim 1B
+      - CRIM 105: BSCrim 2A, BSCrim 2B
+    D1:
+      - PAD 102: ABPA 1
+      - PAD 202: ABPA 2
+      - PAD 420: ABPA 4
+    D2:
+      - PAD 106: ABPA 1
+      - PAD 304: ABPA 3
+      - PAD 308: ABPA 3
+    D3:
+      - PAD 203: ABPA 2
+      - PAD 301: ABPA 3
+      - PAD 303: ABPA 3
+      - PAD 490: ABPA 4
+      - SOCS 195: BSCrim 1A, BSCrim 1B
+    D4:
+      - PAD 207: ABPA 2
+      - PAD 302: ABPA 2
+      - PAD 306: ABPA 3
+      - PAD 307: ABPA 2
+    W1:
+      - SW 103: BSSW 1
+      - SW 104: BSSW 1
+      - SW 302: BSSW 3
+      - SW 304: BSSW 2
+    W2:
+      - SW 203: BSSW 2
+      - SW 206: BSSW 2
+      - SW 311: BSSW 3
+      - SW 491: BSSW 4
+      - PSYC 160: ABPA 1
+      - PSYC 160: BLIS 1B
+    W3:
+      - SW 204: BSSW 2
+      - SW 303: BSSW 2
+      - SW 307: BSSW 3
+      - SW 312: BSSW 3
+    W4:
+      - SW 102: BSSW 1
+      - SW 207: BSSW 1
+      - SW 309: BSSW 3
+      - GAD 171: BSSW 3
+      - GAD 171: BSBA 2A, BSBA 2B
