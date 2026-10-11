@@ -66,18 +66,26 @@ def _grid(ws, row: int, title: str, subtitle: str, sessions: list[Session], uni:
         c.font, c.border = Font(size=8, color="555555"), BOX
         for j in range(2, ncol + 1):
             ws.cell(head + 1 + i, j).border = BOX
-    for s in sessions:
+    taken: dict[tuple[int, int], int] = {}      # (row, col) -> anchor row of its block
+    for s in sorted(sessions, key=lambda x: (x.day, x.start)):
         if s.day not in days:
             continue
         col = days.index(s.day) + 2
         r0 = head + 1 + (s.start - uni.timeframe.day_start) // uni.timeframe.slot
         r1 = head + (s.end - uni.timeframe.day_start) // uni.timeframe.slot
+        overlap = next((taken[(r, col)] for r in range(r0, r1 + 1) if (r, col) in taken), None)
+        if overlap is not None:
+            # A venue holding two classes at once: list both in one block.
+            anchor = ws.cell(overlap, col)
+            anchor.value = f"{anchor.value}\n---\n{_cell_text(s, view)}"
+            continue
         cell = ws.cell(r0, col, _cell_text(s, view))
         cell.alignment = CENTER
         cell.font = Font(size=8, bold=bool(s.exception))
         color = "FFF2A8" if s.exception else COLLEGE_FILL.get(s.klass.course.college, "EEEEEE")
         for r in range(r0, r1 + 1):
             ws.cell(r, col).fill = PatternFill("solid", fgColor=color)
+            taken[(r, col)] = r0
         if r1 > r0:
             ws.merge_cells(start_row=r0, start_column=col, end_row=r1, end_column=col)
     return head + len(times) + 3
