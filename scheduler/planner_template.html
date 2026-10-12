@@ -264,6 +264,11 @@ dl.about dd { margin: 0; }
 .misslist h3 { font-size: .85rem; margin: 4px 0 2px; }
 .misslist li { font-size: .84rem; }
 .dialog textarea { font: inherit; font-size: .9rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-height: 70px; resize: vertical; }
+.avail th, .avail td { text-align: center; padding: 4px 3px; font-size: .74rem; }
+.avail th:first-child, .avail td:first-child { text-align: left; white-space: nowrap; font-size: .82rem; }
+.avail td.ok { background: var(--good-soft); color: var(--good); font-weight: 700; border: 2px solid var(--panel); border-radius: 4px; }
+.avail td.no { color: var(--line); }
+.avail tr.dept td { background: var(--bg); font-weight: 700; text-align: left; font-size: .82rem; }
 .legend i.pend::after { content: ""; position: absolute; left: 2px; top: 2px; width: 6px; height: 6px; border-radius: 50%; background: #c48a00; }
 .appr { display: inline-flex; gap: 4px; align-items: center; font-size: .78rem; white-space: nowrap; }
 .appr.ok { color: var(--good); }
@@ -338,7 +343,7 @@ const PART = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Superv
 const COLLEGE_KEYS = ["CSS", "CISC", "CBE", "COE", "CCJPS"];
 const SCOPES = [["ALL", "All colleges"], ["CSS", "CSS"], ["CISC", "CISC"], ["CBE", "CBE"], ["COE", "COE"], ["CCJPS", "CCJPS"], ["GE", "GE Department"]];
 const VIEWS = [["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["rooms", "Rooms"], ["sections", "Sections"],
-               ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["submissions", "Submissions"], ["reports", "Reports"], ["settings", "Settings"]];
+               ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["availability", "GE Availability"], ["submissions", "Submissions"], ["reports", "Reports"], ["settings", "Settings"]];
 const ROLE_NAME = { registrar: "Registrar", dean: "Dean", associate_dean: "Associate Dean", chair: "Department Chair", ge_coordinator: "GE Coordinator" };
 const TYPE_LABEL = { lec: "Lecture (major)", lab: "Laboratory block (3 h)", ge: "General education", pe: "PE", cwts: "CWTS (Saturday)", prac: "Practicum supervision" };
 const INTRO = new Set(DATA.intro || []);
@@ -508,7 +513,8 @@ function deptFree(dept, cls, opt) {
 // The departments a section may ask for a GE course, with their free teachers at a time option.
 function askable(cls, opt) {
   const own = progDept(cls.section);
-  return (geLists[cls.course] || []).filter((d) => d !== own).map((d) => ({ dept: d, college: DATA.deptCollege[d], free: opt ? deptFree(d, cls, opt) : [], left: ownGeLeft(d) }));
+  return (geLists[cls.course] || []).filter((d) => d !== own).map((d) => ({ dept: d, college: DATA.deptCollege[d], free: opt ? deptFree(d, cls, opt) : [],
+    left: ownGeLeft(d), submitted: !BACKEND || !!submissions?.[d] }));
 }
 
 // ---------- hosted version: Supabase ----------
@@ -978,7 +984,7 @@ function render() {
   renderShell(); remember();
   const page = $("page");
   const fn = { dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, rooms: renderRooms, sections: renderSections,
-               courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, submissions: renderSubmissions, reports: renderReports, settings: renderSettings }[state.view] || renderDashboard;
+               courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, settings: renderSettings }[state.view] || renderDashboard;
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
   fn(page);
   if (banner) page.insertAdjacentHTML("afterbegin", banner);
@@ -1206,6 +1212,35 @@ function renderSubmissions(page) {
     <div class="card"><div class="scroll"><table><thead><tr><th>Department</th><th>Status</th><th>Submitted</th><th class="num">Classes complete</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
+// ===== GE Availability: instructors of submitted departments, and when they are free =====
+function renderAvailability(page) {
+  const courses = Object.keys(geLists).filter((c) => (geLists[c] || []).length).sort();
+  if (!courses.includes(state.availCourse)) state.availCourse = courses[0];
+  const code = state.availCourse;
+  const underLoad = state.availUnderLoad !== false;
+  const opts = optionsFor("lecture").filter((o) => !o.ex);
+  const lu = 3;                                    // a GE lecture course carries 3 LU
+  const free = (k, o) => o.iv.every(([day, start, end]) => !teacherBusy(k, { day, start, end }, null).length);
+  const rows = (geLists[code] || []).slice().sort().map((dept) => {
+    const sub = !BACKEND || submissions?.[dept];
+    const head = `<tr class="dept"><td colspan="${opts.length + 2}">${esc(dept)} · ${esc(DATA.deptCollege[dept])} · ${BACKEND
+      ? (sub ? `submitted ${new Date(sub.submitted_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : "not submitted yet") : ""}</td></tr>`;
+    if (!sub) return head + `<tr><td colspan="${opts.length + 2}" class="muted small" style="text-align:left">Its instructors' free times show here once it submits its schedule.</td></tr>`;
+    const people = Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === dept && (!underLoad || luFor(k) + lu <= DATA.teachers[k].max))
+      .sort((a, b) => DATA.teachers[a].name.localeCompare(DATA.teachers[b].name));
+    if (!people.length) return head + `<tr><td colspan="${opts.length + 2}" class="muted small" style="text-align:left">Every instructor is at full load. Use “Request an instructor” when booking.</td></tr>`;
+    return head + people.map((k) => `<tr><td>${esc(DATA.teachers[k].name)}</td><td class="small muted">${luFor(k)}/${DATA.teachers[k].max}</td>${opts.map((o) =>
+      free(k, o) ? `<td class="ok" title="${esc(DATA.teachers[k].name)} is free ${esc(o.label)}">✓</td>` : `<td class="no" title="busy">·</td>`).join("")}</tr>`).join("");
+  }).join("");
+  page.innerHTML = `${head("GE Availability", "Instructors of the departments that may teach a GE course, and the periods each is free. Departments show their instructors once they submit their schedules. To ask one of them, open the class on the Timetable and choose the instructor.")}
+    <div class="card" style="gap:8px"><div class="row">
+      <label class="row small" style="gap:6px">GE course <select class="inp" id="availCourse">${courses.map((c) => `<option value="${esc(c)}"${c === code ? " selected" : ""}>${esc(c)} · ${esc(DATA.courses[c]?.title || "")}</option>`).join("")}</select></label>
+      <label class="row small" style="gap:6px"><input type="checkbox" id="availLoad"${underLoad ? " checked" : ""}> Only instructors with room in their load</label></div></div>
+    <div class="card"><div class="scroll"><table class="avail"><thead><tr><th>Instructor</th><th>LU</th>${opts.map((o) => `<th title="${esc(o.iv.map((i) => i[0]).join("/"))} ${hm(o.iv[0][1])}–${hm(o.iv[0][2])}">${esc(o.label.replace(" ", "<br>")).replace("&lt;br&gt;", "<br>")}</th>`).join("")}</tr></thead>
+      <tbody>${rows}</tbody></table></div>
+      <div class="legend"><span><i style="background:var(--good-soft)"></i>Free for that period on all its days</span><span>· busy</span></div></div>`;
+}
+
 function renderDashboard(page) {
   const { key, html: picker } = gridPicker();
   const g = gridSessions(key);
@@ -1340,18 +1375,19 @@ function editor(cls, part) {
   // against how many of its teachers are free, not against one teacher.
   const borrowed = classKind(cls) === "borrowed";
   const tRight = teacherRight(cls);
-  const checkTeacher = borrowed && tRight ? null : teacherKey || null;
+  // The requesting chair names the instructor; conflicts are checked against that instructor.
+  const checkTeacher = borrowed && tRight ? (d.askTeacher && d.askTeacher !== "*" ? d.askTeacher : null) : teacherKey || null;
   // Status of every allowed time, checked against students, teacher, and rooms.
   const rows = opts.map((o) => {
     const ev = evaluate(cls, m, o, null, checkTeacher).filter(([l, txt]) => l !== "info" && txt !== "Choose a room");
     const rooms = m.pools.some((p) => p) ? freeRooms(cls, m, o).length : -1;
-    const ask = borrowed ? askable(cls, o).filter((x) => !x.left && x.free.length) : null;
+    const ask = borrowed ? askable(cls, o).filter((x) => x.submitted && x.free.length) : null;
     const hf = borrowed ? ask.length : -1;
     const bad = ev.filter(([l]) => l === "bad");
     let chip, why;
     if (bad.length) { chip = `<span class="chip bad">Conflict</span>`; why = bad[0][1]; }
     else if (rooms === 0) { chip = `<span class="chip bad">No room</span>`; why = "Every suitable room is booked"; }
-    else if (hf === 0) { chip = `<span class="chip bad">No teacher</span>`; why = `No department that teaches ${cls.course} has a teacher free`; }
+    else if (hf === 0) { chip = `<span class="chip bad">No teacher</span>`; why = askable(cls, null).some((x) => x.submitted) ? `No instructor of a submitted department is free` : `No department that teaches ${cls.course} has submitted yet`; }
     else if (ev.length) { chip = `<span class="chip warn">Check</span>`; why = ev[0][1]; }
     else { chip = `<span class="chip good">Free</span>`; why = [rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed", hf > 0 && ask.map((x) => `${x.dept} ${x.free.length}`).join(", ") + " free"].filter(Boolean).join(" · "); }
     const when = `${o.iv.map((i) => i[0]).join("/")} ${hm(o.iv[0][1])}–${hm(o.iv[0][2])}`;
@@ -1375,7 +1411,7 @@ function editor(cls, part) {
     const ftSorted = ft.slice().sort((x, y) => (y.key === cls.planTeacher) - (x.key === cls.planTeacher));
     teacherChoices = { free: ftSorted.map((x) => ({ key: x.key, text: `${DATA.teachers[x.key].name} · ${DATA.teachers[x.key].dept} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}${x.key === cls.planTeacher && isGE(cls.course) ? " · loading plan" : ""}` })),
                        busy: teacherKey && !ft.some((x) => x.key === teacherKey) ? teacherKey : null, selected: teacherKey };
-    const teacherSel = tRight ? `<div style="display:grid;gap:4px"><span class="fieldlabel">Teacher</span>
+    const teacherSel = borrowed && tRight ? "" : tRight ? `<div style="display:grid;gap:4px"><span class="fieldlabel">Teacher</span>
       <div class="readonly">${esc(borrowed && (!teacherKey || DATA.teachers[teacherKey].dept !== d.askDept) ? "Not yet chosen" : teacherKey ? DATA.teachers[teacherKey].name : "Not yet chosen")}${!borrowed && teacherKey && t?.key === cls.teacher ? " (loading plan)" : ""}${tRight !== right ? `<br><span class="small muted">${esc(tRight.replace(/^View only: /, ""))}</span>` : ""}</div></div>`
       : `<div style="display:grid;gap:4px"><label for="teacherSel">Teacher (from the loading plan${t?.key ? `: ${esc(DATA.teachers[t.key].name)}` : ": none"})</label>
       <input id="teacherSearch" type="search" placeholder="Search teachers by name or department" value="${esc(teacherQuery)}" aria-label="Search teachers">
@@ -1383,17 +1419,28 @@ function editor(cls, part) {
       <span class="small muted" id="teacherCount"></span></div>`;
     const checks = evaluate(cls, m, opt, d.room || null, checkTeacher);
     let askSel = "";
-    if (borrowed) {
+    if (borrowed && tRight) {
+      // Instructors of departments that have submitted, free at this time and under their load limit.
+      // When nobody is available, a department can be asked to provide an instructor (value dept|*).
       const list = askable(cls, opt);
+      const full = (k) => luFor(k) + cls.lu > DATA.teachers[k].max;
+      const avail = list.filter((x) => x.submitted).flatMap((x) => x.free.filter((k) => !full(k)));
+      const val = d.askDept && d.askTeacher ? `${d.askDept}|${d.askTeacher}` : "";
+      const openReq = list.filter((x) => x.submitted).map((x) =>
+        `<option value="${esc(x.dept)}|*"${`${x.dept}|*` === val ? " selected" : ""}>Request an instructor from ${esc(x.dept)} (${esc(x.college)})</option>`).join("");
+      askSel = `<label for="askSel" style="grid-column:span 2">Ask an instructor to teach it
+        <select id="askSel"${right ? " disabled" : ""}><option value="">Choose an instructor</option>${list.map((x) => !x.submitted
+          ? `<optgroup label="${esc(x.dept)} (${esc(x.college)}): not submitted yet"></optgroup>`
+          : `<optgroup label="${esc(x.dept)} (${esc(x.college)})${x.free.length ? "" : ": nobody free then"}">${x.free.map((k) =>
+              `<option value="${esc(x.dept)}|${k}"${`${x.dept}|${k}` === val ? " selected" : ""}${full(k) ? " disabled" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${full(k) ? " · full load" : ""}${k === cls.planTeacher ? " · loading plan" : ""}</option>`).join("")}</optgroup>`).join("")}
+          ${!avail.length && openReq ? `<optgroup label="No instructor available: request one">${openReq}</optgroup>` : ""}</select></label>`;
       const pick = list.find((x) => x.dept === d.askDept);
-      askSel = `<label for="askSel">Ask a department to teach it
-        <select id="askSel"${right ? " disabled" : ""}><option value="">Choose a department</option>${list.map((x) =>
-          `<option value="${esc(x.dept)}"${x.dept === d.askDept ? " selected" : ""}${x.left || !x.free.length ? " disabled" : ""}>${esc(x.dept)} (${esc(x.college)}) · ${
-            x.left ? `still booking its own GE classes (${x.left} left)` : x.free.length ? `${x.free.length} teacher${x.free.length > 1 ? "s" : ""} free` : "no teacher free"}</option>`).join("")}</select></label>`;
-      if (!pick) checks.push(["bad", `Choose the department to ask for ${cls.course}`]);
-      else if (pick.left) checks.push(["bad", `${pick.dept} has not finished booking its own GE classes (${pick.left} left), so it cannot take requests yet`]);
-      else if (!pick.free.length) checks.push(["bad", `No ${pick.dept} teacher is free at ${opt.label}`]);
-      else checks.push(["good", `${pick.free.length} ${pick.dept} teacher${pick.free.length > 1 ? "s are" : " is"} free at ${opt.label}: ${pick.free.slice(0, 6).map(surname).join(", ")}${pick.free.length > 6 ? ", …" : ""}`]);
+      if (!list.some((x) => x.submitted)) checks.push(["bad", `No department that teaches ${cls.course} has submitted its schedule yet. Check the GE Availability page later.`]);
+      else if (!d.askTeacher) checks.push(["bad", avail.length ? `Choose the instructor to ask for ${cls.course}` : `No instructor is free and under load at ${opt.label}. Choose “Request an instructor” to ask a department to find one.`]);
+      else if (!pick?.submitted) checks.push(["bad", `${d.askDept} has not submitted its schedule yet`]);
+      else if (d.askTeacher === "*") checks.push(["info", `Requests an instructor from ${d.askDept}: it will find one when it approves`]);
+      else if (!pick.free.includes(d.askTeacher)) checks.push(["bad", `${DATA.teachers[d.askTeacher].name} is not free at ${opt.label}`]);
+      else checks.push(["good", `${DATA.teachers[d.askTeacher].name} (${d.askDept}) is free at ${opt.label}`]);
     }
     if (teacherKey) {
       const lu = luFor(teacherKey) + (t?.key === teacherKey ? 0 : cls.lu);
@@ -1410,9 +1457,10 @@ function editor(cls, part) {
       const cur = approvalOf(cls), r = requestOf(cls);
       const askDept = d.askDept || r?.department;
       const who = askDept ? (DATA.deptCollege[askDept] === progCollege(cls.section) ? `the ${askDept} chair` : `the ${DATA.deptCollege[askDept]} associate dean`) : "the department you ask";
-      checks.push(["info", `Request: the Department of ${progDept(cls.section)} does not teach ${cls.course}, so it asks a department that does. ${who[0].toUpperCase() + who.slice(1)} answers and picks the teacher.`
-        + (r && r.department === d.askDept ? (cur.state === "approved" ? " Now: approved." : cur.state === "rejected" ? ` Now: not approved${cur.row.note ? ` (“${cur.row.note}”)` : ""}. Ask another department or change the time.` : cur.state === "pending" ? " Now: waiting for an answer." : "")
-           : r ? ` Saving asks ${d.askDept || "the chosen department"} instead of ${r.department}.` : " Saving sends the request.")]);
+      const same = r && r.department === d.askDept && (teacherOf(cls)?.key || "*") === (d.askTeacher || "");
+      checks.push(["info", `Request: the Department of ${progDept(cls.section)} does not teach ${cls.course}, so it asks an instructor of a department that does. ${who[0].toUpperCase() + who.slice(1)} approves, and may give it to another of its instructors.`
+        + (same ? (cur.state === "approved" ? " Now: approved." : cur.state === "rejected" ? ` Now: not approved${cur.row.note ? ` (“${cur.row.note}”)` : ""}. Ask another instructor or change the time.` : cur.state === "pending" ? " Now: waiting for an answer." : "")
+           : r ? " Saving sends a new request." : " Saving sends the request.")]);
     }
     detail = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${askSel}${teacherSel}</div>
       ${borrowed && tRight ? "" : `<div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>
@@ -1731,10 +1779,9 @@ function openPick(clsId, part) {
   state.pick = { cls: clsId, part };
   teacherQuery = "";
   const t = teacherOf(cls);
-  state.draft = { pattern: b?.pattern || (m.kind === "nstp" ? optionsFor("nstp")[0]?.label : null), room: b?.room || "", teacher: t?.key || "", askDept: "" };
-  if (classKind(cls) === "borrowed") {          // the department asked before, or the plan teacher's, or the house
-    const can = askable(cls, null).map((x) => x.dept), planDept = cls.teacher ? DATA.teachers[cls.teacher].dept : null;
-    state.draft.askDept = requestOf(cls)?.department || [planDept, cls.house].find((x) => x && can.includes(x)) || can[0] || "";
+  state.draft = { pattern: b?.pattern || (m.kind === "nstp" ? optionsFor("nstp")[0]?.label : null), room: b?.room || "", teacher: t?.key || "", askDept: "", askTeacher: "" };
+  if (classKind(cls) === "borrowed" && requestOf(cls)) {    // the instructor asked before
+    state.draft.askDept = requestOf(cls).department; state.draft.askTeacher = t?.key || "*";
   }
   // Jump to the class's own section on the booking desk.
   const sec = DATA.sections[cls.section];
@@ -1748,12 +1795,9 @@ function choosePattern(label) {
   const opt = findOpt(m.kind, label);
   if (state.draft.room && !freeRooms(cls, m, opt).includes(state.draft.room)) state.draft.room = "";
   if (!state.draft.room && m.pools.some((p) => p)) state.draft.room = homeFirst(cls, freeRooms(cls, m, opt))[0] || "";
-  if (classKind(cls) === "borrowed" && !requestOf(cls)) {   // not asked yet: suggest a department that can take it then
-    const ok = askable(cls, opt).filter((x) => !x.left && x.free.length).map((x) => x.dept);
-    if (!ok.includes(state.draft.askDept)) {
-      const planDept = cls.teacher ? DATA.teachers[cls.teacher].dept : null;
-      state.draft.askDept = [planDept, cls.house].find((x) => x && ok.includes(x)) || ok[0] || state.draft.askDept;
-    }
+  if (classKind(cls) === "borrowed" && state.draft.askTeacher && state.draft.askTeacher !== "*") {   // keep the instructor only if still free then
+    const pick = askable(cls, opt).find((x) => x.dept === state.draft.askDept);
+    if (!pick?.submitted || !pick.free.includes(state.draft.askTeacher)) { state.draft.askDept = ""; state.draft.askTeacher = ""; }
   }
 }
 function openSection(s) {
@@ -1787,8 +1831,8 @@ async function save() {
       }
       const r = await sb.from("bookings").upsert({ class_id: cls.id, part, sem: DATA.semester, pattern: d.pattern, room: d.room || null });
       if (r.error) throw r.error;
-      if (classKind(cls) === "borrowed" && d.askDept && requestOf(cls)?.department !== d.askDept) {
-        const q = await sb.rpc("request_ge", { cid: cls.id, d: d.askDept });
+      if (classKind(cls) === "borrowed" && d.askTeacher && (requestOf(cls)?.department !== d.askDept || (teacherOf(cls)?.key || "*") !== d.askTeacher)) {
+        const q = await sb.rpc("request_ge", { cid: cls.id, d: d.askDept, t: d.askTeacher === "*" ? null : d.askTeacher });
         if (q.error) throw q.error;
       }
       await Promise.all([sbLoad.bookings(), sbLoad.teacher_changes(), sbLoad.ge_requests(), sbLoad.ge_decisions()]);
@@ -1966,6 +2010,8 @@ document.addEventListener("change", async (ev) => {
   if (id === "scopeSel") { state.scope = ev.target.value; state.pick = null; state.draft = null; render(); return; }
   if (id === "aySel") { printCfg.ay = ev.target.value.replace(/^SY /, ""); try { localStorage.setItem("cs-print", JSON.stringify(printCfg)); } catch (e) {} render(); return; }
   if (id === "gridKey") { state.gridKey[state.gridMode] = ev.target.value; render(); return; }
+  if (id === "availCourse") { state.availCourse = ev.target.value; render(); return; }
+  if (id === "availLoad") { state.availUnderLoad = ev.target.checked; render(); return; }
   if (id === "geOpen") {
     const { error } = await sb.from("settings").update({ ge_open: $("geOpen").checked }).eq("id", 1);
     if (error) toast(sbMessage(error)); await sbLoad.settings(); rebuild(); render(); return;
@@ -1978,7 +2024,7 @@ document.addEventListener("change", async (ev) => {
   if (!state.draft) return;
   if (id === "roomSel") { state.draft.room = ev.target.value; render(); }
   if (id === "teacherSel") { state.draft.teacher = ev.target.value; render(); }
-  if (id === "askSel") { state.draft.askDept = ev.target.value; render(); }
+  if (id === "askSel") { const [dept, k] = ev.target.value.split("|"); state.draft.askDept = dept || ""; state.draft.askTeacher = k || ""; render(); }
 });
 // Drag from the unscheduled list onto the dashboard timetable.
 document.addEventListener("dragstart", (ev) => {

@@ -66,7 +66,7 @@ psql("""insert into staff (email, full_name, role, college, department) values
   update settings set ge_open=false where id=1;
   delete from bookings where class_id in (select id from classes where department in ('Psychology','Social Work','Criminology','Entrepreneurship'));
   delete from teacher_changes where class_id in (select id from classes where department in ('Psychology','Social Work','Criminology','Entrepreneurship'));
-  delete from ge_requests; delete from ge_decisions;""")
+  delete from ge_requests; delete from ge_decisions; delete from submissions;""")
 
 
 def bk(cid, pat="M3 MWF"):
@@ -115,10 +115,12 @@ expect("Criminology must book its own GE classes first", False, bk(crim_psyc, "T
 expect("Criminology books its own GE classes", True, book_own_ge("Criminology") + "; select own_ge_left('Criminology')", "chair.crim@u.edu", contains="0")
 expect("then books the PSYC 160 time", True, bk(crim_psyc, "T1 TTh"), "chair.crim@u.edu")
 expect("cannot ask a department that does not teach it", False, f"select request_ge('{crim_psyc}','Accountancy')", "chair.crim@u.edu")
-expect("Social Work has GE classes of its own left", True, "select own_ge_left('Social Work') > 0", ADMIN, contains="t")
-expect("cannot ask Social Work before it books its own", False, f"select request_ge('{crim_psyc}','Social Work')", "chair.crim@u.edu")
+expect("cannot ask Social Work before it submits", False, f"select request_ge('{crim_psyc}','Social Work','{sw_teacher}')", "chair.crim@u.edu", contains="not submitted")
 expect("Social Work books its own GE classes", True, book_own_ge("Social Work") + "; select own_ge_left('Social Work')", "chair.sw@u.edu", contains="0")
-expect("Criminology asks Social Work", True, f"select request_ge('{crim_psyc}','Social Work')", "chair.crim@u.edu", contains="asked")
+psql("insert into submissions (department, college, complete) values ('Social Work','CCJPS',true), ('Psychology','CSS',true) on conflict do nothing")
+expect("cannot name an instructor of another department", False, f"select request_ge('{crim_psyc}','Social Work','{psy_teacher}')", "chair.crim@u.edu")
+expect("Criminology asks a Social Work instructor", True,
+       f"select request_ge('{crim_psyc}','Social Work','{sw_teacher}'); select class_teacher('{crim_psyc}')", "chair.crim@u.edu", contains=sw_teacher)
 expect("asked class needs approval", True, f"select needs_approval('{crim_psyc}')", ADMIN, contains="t")
 expect("Criminology cannot pick its teacher", False, tc(crim_psyc, sw_teacher), "chair.crim@u.edu")
 expect("Psychology chair cannot answer for Social Work", False, f"select decide_ge('{crim_psyc}','approve')", "chair.psy@u.edu")
@@ -132,13 +134,13 @@ expect("Social Work rejects the new time", True, f"select decide_ge('{crim_psyc}
 expect("Psychology has its own GE classes left", True, "select own_ge_left('Psychology') > 0", ADMIN, contains="t")
 psql(book_own_ge("Psychology"))
 expect("Criminology asks Psychology instead", True,
-       f"select request_ge('{crim_psyc}','Psychology'); select count(*) from ge_decisions where class_id='{crim_psyc}'", "chair.crim@u.edu", contains="0")
+       f"select request_ge('{crim_psyc}','Psychology','{psy_teacher}'); select count(*) from ge_decisions where class_id='{crim_psyc}'", "chair.crim@u.edu", contains="0")
 expect("the CSS associate dean answers (another college)", True, f"select can_decide('{crim_psyc}')", "adean.css@u.edu", contains="t")
 expect("the Psychology chair does not (another college)", True, f"select can_decide('{crim_psyc}')", "chair.psy@u.edu", contains="f")
 
 # Another college: Entrepreneurship (CBE) asks Social Work (CCJPS) for GAD 171
 psql(book_own_ge("Entrepreneurship"))
-expect("Entrepreneurship asks Social Work", True, bk(entrep_gad, "T3 TTh") + f"; select request_ge('{entrep_gad}','Social Work')", "chair.entrep@u.edu", contains="asked")
+expect("Entrepreneurship asks Social Work", True, bk(entrep_gad, "T3 TTh") + f"; select request_ge('{entrep_gad}','Social Work','{sw_teacher}')", "chair.entrep@u.edu", contains="asked")
 expect("the CCJPS associate dean answers", True, f"select can_decide('{entrep_gad}')", "adean.ccjps@u.edu", contains="t")
 expect("the Social Work chair does not", True, f"select can_decide('{entrep_gad}')", "chair.sw@u.edu", contains="f")
 expect("requests cannot be written directly", False, f"insert into ge_requests (class_id, department, college) values ('{entrep_gad}','Psychology','CSS')", "chair.entrep@u.edu")

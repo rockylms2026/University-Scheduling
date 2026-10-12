@@ -5,8 +5,8 @@
 --   registrar, dean    everything, manage staff and GE teaching lists, publish, open GE Department scheduling
 --   chair              major classes of their own department, with their own faculty.
 --                      GE classes of their own sections that their department may teach, with their own faculty.
---                      Other GE classes of their own sections: they book the time and ask a department that
---                      may teach the course, once all their own GE classes are booked.
+--                      Other GE classes of their own sections: they book the time and ask an instructor of a
+--                      department that may teach the course and has submitted, once their own GE classes are booked.
 --   associate_dean     the classes of the sections of their own college (as a chair would),
 --                      and approves requests to departments of their college from other colleges
 --   ge_coordinator     courses of the GE Department, once the Registrar or Dean opens them, with no approval
@@ -273,14 +273,14 @@ language sql stable security definer set search_path = public as $$
   select coalesce(public.class_kind(cid) = 'borrowed', false)
 $$;
 
--- Ask department d to teach a borrowed GE class. Any earlier answer is cleared. The teacher stays
--- only if the loading plan already gives the class to a teacher of d.
-create or replace function public.request_ge(cid text, d text) returns text
+-- Ask department d to teach a borrowed GE class, naming instructor t of d. Only a department that has
+-- submitted its schedule can be asked, so its free times are final. Any earlier answer is cleared.
+drop function if exists public.request_ge(text, text);
+create or replace function public.request_ge(cid text, d text, t text default null) returns text
 language plpgsql volatile security definer set search_path = public as $$
 declare
   c  public.classes;
   dc text;
-  pd text;
 begin
   if (public.my_staff()).email is null then raise exception 'Your account has no role yet'; end if;
   if public.class_kind(cid) is distinct from 'borrowed' then raise exception 'This class is not asked of another department'; end if;
@@ -289,19 +289,19 @@ begin
   end if;
   select * into c from public.classes where id = cid;
   if not public.may_teach(c.course, d) then raise exception 'The % department does not teach %', d, c.course; end if;
-  if public.own_ge_left(d) > 0 then raise exception 'The % department has not finished booking its own GE classes', d; end if;
+  if not exists (select 1 from public.submissions s where s.department = d) then
+    raise exception 'The % department has not submitted its schedule yet', d;
+  end if;
+  if t is not null and not exists (select 1 from public.faculty f where f.key = t and f.department = d) then
+    raise exception 'Choose an instructor of the % department', d;
+  end if;
   select college into dc from public.ge_teachers where course = c.course and department = d;
   insert into public.ge_requests (class_id, department, college, requested_by) values (cid, d, dc, (public.my_staff()).email)
     on conflict (class_id) do update set department = excluded.department, college = excluded.college,
       requested_by = excluded.requested_by, requested_at = now();
   delete from public.ge_decisions where class_id = cid;
-  select f.department into pd from public.faculty f where f.key = c.plan_teacher;
-  if pd is not distinct from d then
-    delete from public.teacher_changes where class_id = cid;
-  else
-    insert into public.teacher_changes (class_id, sem, teacher) values (cid, c.sem, null)
-      on conflict (class_id) do update set teacher = null;
-  end if;
+  insert into public.teacher_changes (class_id, sem, teacher) values (cid, c.sem, t)
+    on conflict (class_id) do update set teacher = excluded.teacher;
   return 'asked';
 end $$;
 
@@ -498,7 +498,7 @@ grant select, update on public.settings to authenticated;
 grant execute on function public.my_staff(), public.is_admin(), public.has_role(), public.class_teacher(text),
   public.class_schedule(text), public.may_teach(text, text), public.class_kind(text), public.own_ge_left(text),
   public.request_dept(text), public.request_college(text), public.can_edit_class(text), public.can_decide(text),
-  public.can_assign(text, text), public.needs_approval(text), public.request_ge(text, text),
+  public.can_assign(text, text), public.needs_approval(text), public.request_ge(text, text, text),
   public.decide_ge(text, text, text, text), public.dept_missing(text), public.submit_schedule(text, text, jsonb),
   public.publish_schedule(), public.stamp_row() to authenticated;
 revoke all on all tables in schema public from anon;

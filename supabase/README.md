@@ -9,7 +9,11 @@ The scheduling page in `web/index.html` signs people in with Supabase and limits
 | Associate Dean | the classes of their college's sections | requests to a department of their college from another college (and they pick the teacher) |
 | GE Coordinator | GE Department courses (PE, CWTS, PHIL 190, PHIL 220, ARTS 101, ENGL 302), last, once opened | none |
 
-**Who may teach each GE course** is a list on the Settings page, started from the loading plans: for example Psychology, Social Work, and Elementary Education for PSYC 160. A department on the list books that course for its own sections with its own instructors, with no approval. A section whose department is not on the list books the time and asks one of the listed departments; the page shows which of them have a teacher free then. The asked department answers and picks the teacher from its own faculty; if it says no, the section asks another. A department may ask, or answer requests, only after it has booked every GE class it teaches for its own sections.
+**Who may teach each GE course** is a list on the Settings page, started from the loading plans: for example Psychology, Social Work, and Elementary Education for PSYC 160. A department on the list books that course for its own sections with its own instructors, with no approval.
+
+**Submitting.** A chair submits the department's schedule when every class of its sections has a time, a room where needed, and a teacher, and every borrowed GE class is approved (GE Department courses are not counted). If anything is missing, a pop-up lists it and the submission is refused. Everyone sees submissions on the Submissions page and through the bell.
+
+**Asking for a GE instructor.** A section whose department is not on the list books the time and names an instructor of a listed department that has submitted, free then and with room in their load; the GE Availability page shows them all. When nobody is available, it can request an instructor from a department instead. The asked department answers (its chair in the same college, its college's associate dean otherwise) and may give the class to another of its instructors; if it says no, the section asks someone else.
 
 ## One-time setup
 
