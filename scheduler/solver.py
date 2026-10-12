@@ -421,7 +421,7 @@ def evaluate(uni: University, schedule: Schedule) -> dict:
                 stu[sub][s.day].append((s.start, s.end))
             if s.room is None and s.part != "NSTP":
                 no_room += 1
-            elif s.room.startswith("LIN"):
+            elif s.room and s.room.startswith("LIN"):
                 shared += 1
         if s.klass.faculty and s.part != "NSTP":
             fac[s.klass.faculty.key][s.day].append((s.start, s.end))
