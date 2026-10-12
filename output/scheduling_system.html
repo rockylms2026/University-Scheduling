@@ -543,11 +543,13 @@ function editor(cls, part) {
     const dept = t?.key ? DATA.teachers[t.key].dept : "";
     const usual = (course.usual || "").replace(/^GE Department$/, "General Education");
     const near = ft.filter((x) => { const td = DATA.teachers[x.key].dept; return td === dept || (usual && usual.includes(td)); });
-    const teacherSel = `<label for="teacherSel">Teacher (from the loading plan${t?.key ? `: ${esc(DATA.teachers[t.key].name)}` : ": none"})
-      <select id="teacherSel"><option value="">No teacher yet</option>
-      <optgroup label="Free at this time">${ft.map((x) => `<option value="${x.key}"${x.key === teacherKey ? " selected" : ""}>${esc(DATA.teachers[x.key].name)} · ${esc(DATA.teachers[x.key].dept)} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}</option>`).join("")}</optgroup>
-      ${teacherKey && !ft.some((x) => x.key === teacherKey) ? `<optgroup label="Busy at this time"><option value="${teacherKey}" selected>${esc(DATA.teachers[teacherKey].name)}</option></optgroup>` : ""}
-      </select></label>`;
+    teacherChoices = { free: ft.map((x) => ({ key: x.key, text: `${DATA.teachers[x.key].name} · ${DATA.teachers[x.key].dept} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}` })),
+                       busy: teacherKey && !ft.some((x) => x.key === teacherKey) ? teacherKey : null, selected: teacherKey };
+    const teacherSel = `<div style="display:grid;gap:4px"><label for="teacherSel">Teacher (from the loading plan${t?.key ? `: ${esc(DATA.teachers[t.key].name)}` : ": none"})</label>
+      <input id="teacherSearch" type="search" placeholder="Search teachers by name or department" value="${esc(teacherQuery)}" aria-label="Search teachers"
+        style="font:inherit;font-size:.9rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px">
+      <select id="teacherSel" style="font:inherit;font-size:.9rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:6px 8px">${teacherOptions()}</select>
+      <span class="small muted" id="teacherCount"></span></div>`;
     const checks = evaluate(cls, m, opt, d.room || null, teacherKey || null);
     if (teacherKey) {
       const lu = luFor(teacherKey) + (t?.key === teacherKey ? 0 : cls.lu);
@@ -567,6 +569,23 @@ function editor(cls, part) {
     <div class="facts"><span>${esc(course.title)}</span><span><b>${cls.lu}</b> LU</span>${b ? `<span>Booked: <b>${esc(b.pattern)}</b>${b.room ? ` in <b>${esc(b.room)}</b>` : ""}</span>` : ""}</div></div>
     <div><span class="fieldlabel">Choose a time (allowed by the University Class Time Frame)</span><div class="opts" style="margin-top:4px">${optHtml}</div></div>
     ${detail}</div>`;
+}
+
+// Teacher dropdown in the booking form, filtered by the search box.
+let teacherChoices = { free: [], busy: null, selected: "" };
+let teacherQuery = "";
+function teacherOptions() {
+  const q = teacherQuery.trim().toLowerCase();
+  const match = (txt) => !q || txt.toLowerCase().includes(q);
+  const sel = teacherChoices.selected;
+  const free = teacherChoices.free.filter((x) => match(x.text) || x.key === sel);
+  let html = `<option value="">No teacher yet</option>`;
+  html += `<optgroup label="Free at this time${q ? ` · matching “${esc(teacherQuery.trim())}”` : ""}">${free.map((x) =>
+    `<option value="${x.key}"${x.key === sel ? " selected" : ""}>${esc(x.text)}</option>`).join("")}</optgroup>`;
+  if (teacherChoices.busy) html += `<optgroup label="Busy at this time"><option value="${teacherChoices.busy}" selected>${esc(DATA.teachers[teacherChoices.busy].name)}</option></optgroup>`;
+  const count = teacherChoices.free.filter((x) => match(x.text)).length;
+  setTimeout(() => { const c = $("teacherCount"); if (c) c.textContent = q ? `${count} of ${teacherChoices.free.length} free teachers match` : `${teacherChoices.free.length} teachers free at this time`; });
+  return html;
 }
 
 function renderTeachers(page) {
@@ -635,6 +654,7 @@ function openPick(clsId, part) {
   const b = bookings[`${clsId}|${part}`];
   const m = cls.meetings.find((x) => x.part === part);
   state.pick = { cls: clsId, part };
+  teacherQuery = "";
   const t = teacherOf(cls);
   state.draft = { pattern: b?.pattern || (m.kind === "nstp" ? optionsFor("nstp")[0]?.label : null), room: b?.room || "", teacher: t?.key || "" };
   // Jump to the class's own section page.
@@ -688,6 +708,12 @@ document.addEventListener("click", async (ev) => {
   else if (ds.act === "remove") { await removeBooking(); return; }
   else return;
   render();
+});
+document.addEventListener("input", (ev) => {
+  if (ev.target.id !== "teacherSearch") return;
+  teacherQuery = ev.target.value;
+  const sel = $("teacherSel");
+  if (sel) sel.innerHTML = teacherOptions();     // filter without redrawing the page, so typing keeps focus
 });
 document.addEventListener("change", (ev) => {
   if (!state.draft) return;
