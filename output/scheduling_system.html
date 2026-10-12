@@ -1244,7 +1244,7 @@ function renderSubmissions(page) {
       : `<span class="chip ${wait.length ? "info" : "good"}">${wait.length ? "Submitted" : "Fully complete"}</span>${changedSince(dept) ? ` <span class="chip warn">Changed since</span>` : ""}${
           wait.length ? `<div class="small muted">${esc(waitingText(wait))}</div>` : ""}`;
     return `<tr><td><b>${esc(dept)}</b><div class="small muted">${esc(DATA.deptCollege[dept])}</div></td><td>${status}</td>
-      <td class="small">${esc(when)}${sub ? `<div class="muted">${esc((sub.submitted_by || "").split("@")[0])}</div>` : ""}</td>
+      <td class="small" style="white-space:nowrap">${esc(when)}${sub ? `<div class="muted">${esc((sub.submitted_by || "").split("@")[0])}</div>` : ""}</td>
       <td class="num">${total - miss}/${total}<div class="bar"><i style="width:${total ? (100 * (total - miss)) / total : 0}%"></i></div></td>
       <td>${canSubmit(dept) ? `<button type="button" class="btn${dept === myDept() ? " primary" : ""}" data-submit="${esc(dept)}">${sub ? "Submit again" : "Submit"}</button>` : ""}</td></tr>`;
   }).join("");
