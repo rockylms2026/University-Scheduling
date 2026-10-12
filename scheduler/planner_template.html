@@ -3,6 +3,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 /* Layout: registrar's desk. College > program > section on top; class list and booking form beside the week grid. */
 :root {
@@ -41,6 +43,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
 .wrap { max-width: 1440px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 40px; display: grid; gap: 14px; }
 header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 10px 24px; }
@@ -153,6 +156,13 @@ dl.about dt { color: var(--muted); }
 dl.about dd { margin: 0; }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .76rem; color: var(--muted); }
 .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+.headrow { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 8px; }
+.overlay { position: fixed; inset: 0; background: rgba(10, 14, 20, .45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 20; }
+.dialog { background: var(--panel); color: var(--ink); border-radius: 12px; border: 1px solid var(--line); padding: 18px; width: min(560px, 100%); max-height: 90vh; overflow-y: auto; display: grid; gap: 12px; }
+.dialog label { display: grid; gap: 3px; font-size: .82rem; color: var(--muted); font-weight: 600; }
+.dialog input { font: inherit; font-size: .92rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+.dialog .choice { display: flex; gap: 8px; align-items: center; font-weight: 400; color: var(--ink); font-size: .92rem; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
 @media (max-width: 980px) { .desk, .split { grid-template-columns: minmax(0, 1fr); } .list { max-height: 260px; } }
 </style>
 
@@ -168,6 +178,7 @@ dl.about dd { margin: 0; }
   <nav class="nav" id="nav" aria-label="College and program"></nav>
   <main id="page"></main>
 </div>
+<div class="overlay" id="printPanel" hidden></div>
 
 <script>
 const DATA = /*__DATA__*/null;
@@ -467,7 +478,7 @@ function renderSection(page) {
   page.innerHTML = `<div class="desk">
     <div class="card">
       <div><span class="navlabel">Section</span><div class="pills" style="margin-top:6px">${secPills}</div></div>
-      <div><h2>${esc(state.section)}</h2>
+      <div><div class="headrow"><h2>${esc(state.section)}</h2><button type="button" class="btn" data-print="section">Print…</button></div>
         <div class="facts"><span>Year ${sec.year}${sec.track ? ` · ${esc(sec.track)} major group` : ""}</span><span><b>${hours.toFixed(1)}</b> h a week booked</span>
         ${sec.placement.length ? `<span>Placement: <b>${sec.placement.join(", ")}</b></span>` : ""}</div></div>
       <div class="classes">${classes.map((c) => classRow(c, c.section !== state.section)).join("")}</div>
@@ -570,7 +581,7 @@ function renderTeachers(page) {
   page.innerHTML = `<div class="split">
     <div class="card"><h3>Department of ${esc(dept)}</h3><div class="list">${list.map(([key, x]) =>
       `<button type="button" class="item" data-teacher="${key}" aria-current="${key === k}"><span>${esc(x.name)}</span><small>${luFor(key)}/${x.max} LU</small></button>`).join("")}</div></div>
-    <div class="card">${t ? `<div><h2>${esc(t.name)}</h2></div>
+    <div class="card">${t ? `<div class="headrow"><h2>${esc(t.name)}</h2><button type="button" class="btn" data-print="teacher">Print…</button></div>
       <dl class="about"><dt>Rank</dt><dd>${esc(t.rank)}</dd><dt>Designation</dt><dd>${esc(t.role || "Faculty")}</dd>
         <dt>Department</dt><dd>${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}</dd>
         <dt>Office</dt><dd>${esc(t.office || "—")}</dd>
@@ -611,7 +622,7 @@ function renderRooms(page, college) {
     <div class="card"><h3>${college === "SHARED" ? "Shared facilities" : "Rooms of the " + esc(DATA.colleges[college])}</h3><div class="list">${list.map(([n, rr]) => {
       const h = sessions.filter((s) => s.room === n && s.day !== "Sat").reduce((a, s) => a + s.end - s.start, 0) / 60;
       return `<button type="button" class="item" data-room="${esc(n)}" aria-current="${n === state.room}"><span>${esc(n)}</span><small>${h.toFixed(0)} h</small></button>`; }).join("")}</div></div>
-    <div class="card">${r ? `<div><h2>${esc(state.room)}</h2><div class="facts"><span>${esc(kind(r))}</span><span>${esc(DATA.buildings[r.building] || r.building)}</span>
+    <div class="card">${r ? `<div><div class="headrow"><h2>${esc(state.room)}</h2><button type="button" class="btn" data-print="room">Print…</button></div><div class="facts"><span>${esc(kind(r))}</span><span>${esc(DATA.buildings[r.building] || r.building)}</span>
       ${r.cap > 1 ? `<span>Holds <b>${r.cap}</b> classes at once</span>` : ""}${r.blocks.length ? `<span>Lab blocks: <b>${r.blocks.join(", ")}</b></span>` : ""}
       <span><b>${(mins / 60).toFixed(1)}</b> of ${39 * r.cap} weekly teaching hours booked</span></div></div>
       <div class="scroll">${grid(mine)}</div>${legend()}` : `<p class="muted">No rooms listed.</p>`}</div></div>`;
@@ -671,6 +682,7 @@ document.addEventListener("click", async (ev) => {
     const opt = findOpt(m.kind, ds.opt);
     if (state.draft.room && !freeRooms(cls, m, opt).includes(state.draft.room)) state.draft.room = "";
     if (!state.draft.room && m.pools.some((p) => p)) state.draft.room = homeFirst(cls, freeRooms(cls, m, opt))[0] || ""; }
+  else if (ds.print) { openPrint(ds.print); return; }
   else if (ds.act === "close") { state.pick = null; state.draft = null; }
   else if (ds.act === "save") { t.disabled = true; await save(); return; }
   else if (ds.act === "remove") { await removeBooking(); return; }
@@ -682,6 +694,282 @@ document.addEventListener("change", (ev) => {
   if (ev.target.id === "roomSel") { state.draft.room = ev.target.value; render(); }
   if (ev.target.id === "teacherSel") { state.draft.teacher = ev.target.value; render(); }
 });
+
+// ---------- printing (PDF) ----------
+const PRINT_DEFAULTS = { university: "", office: "Office of the University Registrar", ay: "2026–2027", preparedBy: "", preparedTitle: "University Registrar" };
+let printCfg = { ...PRINT_DEFAULTS };
+try { Object.assign(printCfg, JSON.parse(localStorage.getItem("cs-print") || "{}")); } catch (e) {}
+let printJob = null;            // { kind, one, all, oneLabel, allLabel }
+
+const DAY_ABBR = { Mon: "M", Tue: "T", Wed: "W", Thu: "Th", Fri: "F", Sat: "Sat" };
+const hmap = (m) => `${hm(m)} ${m < 720 ? "AM" : "PM"}`;
+const timeRange = (s, e) => `${hm(s)}–${hmap(e)}`;
+function chairOf(dept) { const c = Object.values(DATA.teachers).find((t) => t.dept === dept && /Chair/.test(t.role)); return c ? c.name : ""; }
+
+function openPrint(kind) {
+  if (kind === "section") {
+    const prog = DATA.programs[state.program];
+    printJob = { kind, one: [state.section], all: prog.sections, oneLabel: `This section (${state.section})`, allLabel: `All ${prog.sections.length} sections of ${state.program}` };
+  } else if (kind === "teacher") {
+    const dept = DATA.programs[state.program].dept;
+    const all = Object.entries(DATA.teachers).filter(([, t]) => t.dept === dept).sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([k]) => k);
+    printJob = { kind, one: [state.teacher], all, oneLabel: `This teacher (${DATA.teachers[state.teacher].name})`, allLabel: `All ${all.length} teachers of the Department of ${dept}` };
+  } else {
+    const all = Object.entries(DATA.rooms).filter(([, r]) => r.college === (state.college === "SHARED" ? "SHARED" : state.college))
+      .sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true })).map(([n]) => n);
+    printJob = { kind, one: [state.room], all, oneLabel: `This room (${state.room})`, allLabel: `All ${all.length} rooms listed here` };
+  }
+  renderPrintPanel();
+}
+function renderPrintPanel(msg = "", bad = false) {
+  const el = $("printPanel");
+  if (!printJob) { el.hidden = true; el.innerHTML = ""; return; }
+  const what = { section: "Class schedule", teacher: "Faculty teaching schedule", room: "Room schedule" }[printJob.kind];
+  el.hidden = false;
+  el.innerHTML = `<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="printTitle">
+    <h2 id="printTitle">Print ${what.toLowerCase()}</h2>
+    <p class="small muted">Creates a black-and-white PDF (Letter, landscape) to save, print, or send.</p>
+    <div><span class="fieldlabel">Include</span>
+      <label class="choice"><input type="radio" name="pscope" id="pscopeOne" value="one" checked> ${esc(printJob.oneLabel)}</label>
+      <label class="choice"><input type="radio" name="pscope" id="pscopeAll" value="all"> ${esc(printJob.allLabel)}, one per page</label></div>
+    <div class="grid2">
+      <label for="pUniv">Name of the university<input id="pUniv" value="${esc(printCfg.university)}" placeholder="Printed at the top"></label>
+      <label for="pOffice">Office<input id="pOffice" value="${esc(printCfg.office)}"></label>
+      <label for="pAy">Academic year<input id="pAy" value="${esc(printCfg.ay)}"></label>
+      <label for="pPrep">Prepared by (name)<input id="pPrep" value="${esc(printCfg.preparedBy)}" placeholder="Left blank for signing"></label>
+      <label for="pPrepTitle">Prepared by (position)<input id="pPrepTitle" value="${esc(printCfg.preparedTitle)}"></label>
+    </div>
+    <div class="actions"><button type="button" class="btn primary" data-pact="make">Create PDF</button>
+      <button type="button" class="btn" data-pact="cancel">Cancel</button><span class="msg${bad ? " bad" : " good"}" id="pmsg">${esc(msg)}</span></div></div>`;
+}
+function readPrintForm() {
+  printCfg = { university: $("pUniv").value.trim(), office: $("pOffice").value.trim(), ay: $("pAy").value.trim(),
+               preparedBy: $("pPrep").value.trim(), preparedTitle: $("pPrepTitle").value.trim() };
+  try { localStorage.setItem("cs-print", JSON.stringify(printCfg)); } catch (e) {}
+  return $("pscopeAll").checked ? printJob.all : printJob.one;
+}
+
+// Rows for the class list and the sessions for the grid.
+function sectionSheet(section) {
+  const sec = DATA.sections[section];
+  const prog = DATA.programs[sec.program];
+  const classes = sectionClasses(section);
+  const rows = classes.map((c) => {
+    const co = DATA.courses[c.course];
+    const parts = c.meetings.map((m) => ({ m, b: bookings[`${c.id}|${m.part}`] }));
+    const when = parts.map(({ m, b }) => {
+      if (!b) return { days: "TBA", time: "TBA", room: "TBA", label: PART[m.part] };
+      const o = findOpt(m.kind, b.pattern);
+      return { days: o.iv.map((i) => DAY_ABBR[i[0]]).join(""), time: timeRange(o.iv[0][1], o.iv[0][2]), room: b.room || (m.kind === "nstp" ? "Grounds" : "—"), label: PART[m.part] };
+    });
+    const multi = when.length > 1;
+    return [c.course + (c.section !== section ? `\n(${c.section})` : ""), co.title, String(co.credits),
+      co.kind === "field" ? `Placement: ${co.placement.map((d) => DAY_ABBR[d]).join("")}` : when.map((w) => (multi ? `${w.label === "Laboratory" ? "Lab" : "Lec"}: ` : "") + w.days).join("\n"),
+      co.kind === "field" ? "—" : when.map((w) => w.time).join("\n"), co.kind === "field" ? "Off campus" : when.map((w) => w.room).join("\n"),
+      teacherName(teacherOf(c)).replace("No teacher yet", "TBA")];
+  });
+  const units = classes.filter((c) => c.section === section).reduce((a, c) => a + DATA.courses[c.course].credits, 0);
+  return {
+    title: "CLASS SCHEDULE", name: section,
+    info: [["Program", prog.name], ["Year and section", `${section}${sec.track ? ` (${sec.track} major group)` : ""}`],
+           ["College", DATA.colleges[prog.college]], ["Total units", String(units)]].concat(sec.placement.length ? [["Practicum placement days", sec.placement.join(", ")]] : []),
+    head: ["Course code", "Descriptive title", "Units", "Days", "Time", "Room", "Instructor"],
+    widths: [62, 190, 34, 52, 96, 62, null],
+    rows, sessions: sessions.filter((s) => classes.includes(s.cls)),
+    cell: (s) => [s.cls.course + (s.part === "Lab" ? " (Lab)" : ""), s.room || (s.kind === "nstp" ? "Grounds" : ""), s.tkey ? shortName(s.tkey) : "TBA"],
+    off: sec.placement,
+    signs: [["Prepared by", printCfg.preparedBy, printCfg.preparedTitle], ["Approved by", "", `Dean, ${DATA.colleges[prog.college]}`]],
+  };
+}
+function teacherSheet(key) {
+  const t = DATA.teachers[key];
+  const classes = DATA.classes.filter((c) => teacherOf(c)?.key === key);
+  const rows = classes.map((c) => {
+    const co = DATA.courses[c.course];
+    const when = c.meetings.map((m) => {
+      const b = bookings[`${c.id}|${m.part}`];
+      if (!b) return { days: "TBA", time: "TBA", room: "TBA", label: PART[m.part] };
+      const o = findOpt(m.kind, b.pattern);
+      return { days: o.iv.map((i) => DAY_ABBR[i[0]]).join(""), time: timeRange(o.iv[0][1], o.iv[0][2]), room: b.room || (m.kind === "nstp" ? "Grounds" : m.kind === "supervision" ? "Placement" : "—"), label: PART[m.part] };
+    });
+    const multi = when.length > 1;
+    return [c.course, co.title, c.section, String(c.lu), when.map((w) => (multi ? `${w.label === "Laboratory" ? "Lab" : "Lec"}: ` : "") + w.days).join("\n"),
+            when.map((w) => w.time).join("\n"), when.map((w) => w.room).join("\n")];
+  });
+  const lu = classes.reduce((a, c) => a + c.lu, 0);
+  return {
+    title: "FACULTY TEACHING SCHEDULE", name: t.name,
+    info: [["Name", t.name], ["Academic rank", t.rank], ["Department", t.dept], ["College", DATA.colleges[t.college] || t.college],
+           ["Designation", t.role || "Faculty"], ["Office", t.office || "—"], ["Teaching load", `${lu} load units (maximum ${t.max})`]],
+    head: ["Course code", "Descriptive title", "Section", "LU", "Days", "Time", "Room"],
+    widths: [62, 210, 70, 30, 52, 96, null],
+    rows, sessions: sessions.filter((s) => s.tkey === key),
+    cell: (s) => [s.cls.course + (s.part === "Lab" ? " (Lab)" : ""), s.cls.section, s.room || (s.kind === "nstp" ? "Grounds" : "")],
+    off: [],
+    signs: [["Conforme", t.name, t.rank], ["Recommending approval", chairOf(t.dept) === t.name ? "" : chairOf(t.dept), "Department Chair"],
+            ["Approved", "", `Dean, ${DATA.colleges[t.college] || t.college}`]],
+  };
+}
+function roomSheet(room) {
+  const r = DATA.rooms[room];
+  const list = sessions.filter((s) => s.room === room).sort((a, b) => DAYS.indexOf(a.day) - DAYS.indexOf(b.day) || a.start - b.start);
+  const order = (s) => `${s.cls.id}|${s.part}`;
+  const seen = new Map();
+  list.forEach((s) => { const k = order(s); if (!seen.has(k)) seen.set(k, []); seen.get(k).push(s); });
+  const rows = [...seen.values()].map((ss) => {
+    const s = ss[0];
+    return [ss.map((x) => DAY_ABBR[x.day]).join(""), timeRange(s.start, s.end), s.cls.course + (s.part === "Lab" ? " (Lab)" : ""),
+            DATA.courses[s.cls.course].title, s.cls.section, s.tkey ? DATA.teachers[s.tkey].name : teacherName(teacherOf(s.cls)).replace("No teacher yet", "TBA")];
+  });
+  const hours = list.filter((s) => s.day !== "Sat").reduce((a, s) => a + s.end - s.start, 0) / 60;
+  const type = r.pool.startsWith("classrooms") ? "Classroom" : r.pool.startsWith("seminar") ? "Seminar room" : r.pool === "shared" ? "Overflow classroom (any college)" : r.pool === "pe" ? "PE venue" : "Laboratory (" + r.lab.replace(/_/g, " ") + ")";
+  return {
+    title: "ROOM SCHEDULE", name: room,
+    info: [["Room", room], ["Building", DATA.buildings[r.building] || r.building], ["Type", type],
+           ["Assigned to", r.college === "SHARED" ? "Shared facility" : DATA.colleges[r.college]], ["Weekly use", `${hours.toFixed(1)} of ${39 * r.cap} teaching hours`]],
+    head: ["Days", "Time", "Course code", "Descriptive title", "Section", "Instructor"],
+    widths: [52, 96, 72, 230, 70, null],
+    rows, sessions: list,
+    cell: (s) => [s.cls.course + (s.part === "Lab" ? " (Lab)" : ""), s.cls.section, s.tkey ? shortName(s.tkey) : "TBA"],
+    off: [],
+    signs: [["Prepared by", printCfg.preparedBy, printCfg.preparedTitle], ["Noted by", "", r.college === "SHARED" ? "Vice President for Academic Affairs" : `Dean, ${DATA.colleges[r.college]}`]],
+  };
+}
+
+function drawSheet(doc, sheet) {
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 40;
+  let y = M;
+  doc.setTextColor(0); doc.setDrawColor(0);
+  const center = (text, size, style = "normal") => { doc.setFont("times", style); doc.setFontSize(size); doc.text(text, W / 2, y, { align: "center" }); };
+  if (printCfg.university) { center(printCfg.university.toUpperCase(), 14, "bold"); y += 16; }
+  if (printCfg.office) { center(printCfg.office, 11); y += 15; }
+  y += 4;
+  center(sheet.title, 13, "bold"); y += 14;
+  center(`First Semester, Academic Year ${printCfg.ay}`, 10.5, "italic"); y += 9;
+  doc.setLineWidth(0.8); doc.line(M, y, W - M, y); doc.setLineWidth(0.3); doc.line(M, y + 2.5, W - M, y + 2.5);
+  y += 16;
+  // Information block, two columns.
+  doc.setFontSize(10);
+  const colW = (W - 2 * M) / 2;
+  for (let i = 0; i < sheet.info.length; i += 2) {      // label/value pairs, two per line, values wrap
+    let lines = 1;
+    [sheet.info[i], sheet.info[i + 1]].forEach((pair, j) => {
+      if (!pair) return;
+      const x = M + j * colW, wrapped = doc.splitTextToSize(String(pair[1]), colW - 118);
+      doc.setFont("times", "bold"); doc.text(`${pair[0]}:`, x, y);
+      doc.setFont("times", "normal"); doc.text(wrapped, x + 112, y);
+      lines = Math.max(lines, wrapped.length);
+    });
+    y += lines * 12 + 2;
+  }
+  y += 2;
+  // Class list.
+  doc.autoTable({
+    startY: y, head: [sheet.head], body: sheet.rows.length ? sheet.rows : [[{ content: "No classes scheduled.", colSpan: sheet.head.length }]],
+    theme: "grid", margin: { left: M, right: M },
+    styles: { font: "times", fontSize: 8.5, textColor: 0, lineColor: 0, lineWidth: 0.4, cellPadding: 3, valign: "top" },
+    headStyles: { fillColor: [255, 255, 255], textColor: 0, fontStyle: "bold", halign: "center", lineWidth: 0.6 },
+    columnStyles: Object.fromEntries(sheet.widths.map((w, i) => [i, w ? { cellWidth: w } : {}])),
+  });
+  y = doc.lastAutoTable.finalY + 14;
+  // Weekly timetable grid.
+  const rows = (DATA.end - DATA.start) / DATA.slot;
+  const signH = 52;
+  let rowH = Math.min(15, (H - M - signH - y - 22) / rows);
+  if (rowH < 10) { doc.addPage(); y = M; center(`${sheet.title} (continued): ${sheet.name}`, 10.5, "bold"); y += 16; rowH = Math.min(20, (H - M - signH - y - 22) / rows); }
+  doc.setFont("times", "bold"); doc.setFontSize(10); doc.text("Weekly timetable", M, y); y += 6;
+  const timeW = 62, dayW = (W - 2 * M - timeW) / DAYS.length, top = y + 14;
+  doc.setLineWidth(0.6); doc.rect(M, y, W - 2 * M, 14 + rows * rowH);
+  doc.setFontSize(9);
+  doc.text("Time", M + timeW / 2, y + 10, { align: "center" });
+  DAYS.forEach((d, i) => doc.text({ Mon: "Monday", Tue: "Tuesday", Wed: "Wednesday", Thu: "Thursday", Fri: "Friday", Sat: "Saturday" }[d], M + timeW + dayW * (i + 0.5), y + 10, { align: "center" }));
+  doc.line(M, top, W - M, top);
+  doc.setLineWidth(0.2); doc.setDrawColor(150);
+  for (let r = 1; r < rows; r++) doc.line(M + timeW, top + r * rowH, W - M, top + r * rowH);
+  doc.setDrawColor(0); doc.setLineWidth(0.4);
+  for (let i = 0; i <= DAYS.length; i++) doc.line(M + timeW + dayW * i, y, M + timeW + dayW * i, top + rows * rowH);
+  doc.setFont("times", "normal"); doc.setFontSize(7.5);
+  for (let r = 0; r < rows; r++) {
+    const m = DATA.start + r * DATA.slot;
+    if (r % 2 === 0) { doc.text(`${hm(m)}–${hm(m + 60)}`, M + timeW / 2, top + r * rowH + rowH * 0.75, { align: "center" }); doc.setDrawColor(0); doc.setLineWidth(0.3); if (r) doc.line(M, top + r * rowH, M + timeW, top + r * rowH); }
+  }
+  const yOf = (m) => top + ((m - DATA.start) / DATA.slot) * rowH;
+  doc.setFont("times", "italic"); doc.setFontSize(7.5);
+  DAYS.forEach((d, i) => {
+    const x = M + timeW + dayW * i;
+    if (sheet.off.includes(d)) {
+      doc.setFillColor(255, 255, 255); doc.rect(x + 0.4, top + 0.4, dayW - 0.8, rows * rowH - 0.8, "F");
+      doc.text("Practicum placement", x + dayW / 2, top + rows * rowH / 2, { align: "center" }); return;
+    }
+    if (LUNCH[d]) {          // a clear band, no grid lines, labelled
+      const y1 = yOf(LUNCH[d][0]), y2 = yOf(LUNCH[d][1]);
+      doc.setFillColor(255, 255, 255); doc.rect(x + 0.4, y1 + 0.3, dayW - 0.8, y2 - y1 - 0.6, "F");
+      doc.setDrawColor(0); doc.setLineWidth(0.2); doc.setLineDashPattern([1.5, 1.5], 0);
+      doc.line(x, y1, x + dayW, y1); doc.line(x, y2, x + dayW, y2); doc.setLineDashPattern([], 0);
+      doc.text("LUNCH BREAK", x + dayW / 2, (y1 + y2) / 2 + 2.5, { align: "center" });
+    }
+  });
+  DAYS.forEach((d, i) => {
+    const day = sheet.sessions.filter((s) => s.day === d).sort((a, b) => a.start - b.start);
+    const lanes = [];
+    day.forEach((s) => { let k = lanes.findIndex((e) => e <= s.start); if (k < 0) { k = lanes.length; lanes.push(0); } lanes[k] = s.end; s._pl = k; });
+    day.forEach((s) => {
+      const n = Math.max(1, day.filter((o) => o.start < s.end && s.start < o.end).reduce((a, o) => Math.max(a, o._pl + 1), 0));
+      const w = dayW / n, x = M + timeW + dayW * i + s._pl * w, y1 = yOf(s.start), h = yOf(s.end) - y1;
+      doc.setFillColor(255, 255, 255); doc.setDrawColor(0); doc.setLineWidth(0.7);
+      doc.rect(x + 1.2, y1 + 1, w - 2.4, h - 2, "FD");
+      const lines = sheet.cell(s).filter(Boolean);
+      const maxLines = Math.max(1, Math.floor((h - 3) / 8));
+      lines.slice(0, maxLines).forEach((ln, j) => {
+        doc.setFont("times", j === 0 ? "bold" : "normal"); doc.setFontSize(j === 0 ? 7.5 : 7);
+        doc.text(doc.splitTextToSize(ln, w - 5)[0], x + w / 2, y1 + 8.5 + j * 8, { align: "center" });
+      });
+    });
+  });
+  // Signatures.
+  let sy = top + rows * rowH + 30;
+  if (sy + 30 > H - 20) { doc.addPage(); sy = M + 40; }
+  const sw = (W - 2 * M) / sheet.signs.length;
+  sheet.signs.forEach(([label, name, title], i) => {
+    const x = M + i * sw + 10;
+    doc.setFont("times", "normal"); doc.setFontSize(9.5); doc.text(`${label}:`, x, sy - 18);
+    doc.setLineWidth(0.5); doc.line(x, sy, x + sw - 40, sy);
+    if (name) { doc.setFont("times", "bold"); doc.text(name.toUpperCase(), x + (sw - 40) / 2, sy - 3, { align: "center" }); }
+    doc.setFont("times", "italic"); doc.setFontSize(9); doc.text(title || "", x + (sw - 40) / 2, sy + 11, { align: "center" });
+  });
+}
+
+async function makePdf() {
+  const ids = readPrintForm();
+  if (!window.jspdf?.jsPDF || !window.jspdf.jsPDF.API.autoTable) { renderPrintPanel("The PDF tools did not load. Check the connection and reopen the page.", true); return; }
+  const doc = new window.jspdf.jsPDF({ orientation: "landscape", unit: "pt", format: "letter" });
+  const build = { section: sectionSheet, teacher: teacherSheet, room: roomSheet }[printJob.kind];
+  ids.forEach((id, i) => { if (i) doc.addPage(); drawSheet(doc, build(id)); });
+  const pages = doc.getNumberOfPages(), W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+  const stamp = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i); doc.setFont("times", "italic"); doc.setFontSize(8); doc.setTextColor(0);
+    doc.text(`Printed ${stamp}`, 40, H - 18); doc.text(`Page ${i} of ${pages}`, W - 40, H - 18, { align: "right" });
+  }
+  const name = ids.length === 1 ? ids[0] === state.section || ids[0] === state.room ? ids[0] : DATA.teachers[ids[0]]?.name || ids[0] : printJob.allLabel;
+  const filename = `${{ section: "Class schedule", teacher: "Teaching schedule", room: "Room schedule" }[printJob.kind]} - ${name}.pdf`.replace(/[\\/:*?"<>|]/g, "-");
+  const blob = doc.output("blob");
+  const dl = window.claude?.use ? await window.claude.use("downloads").catch(() => null) : null;
+  if (dl) {
+    try { await dl.save({ filename, data: blob }); renderPrintPanel(`Saved ${filename}`); }
+    catch (err) { renderPrintPanel(err?.code === "declined" ? "Not saved." : "The PDF could not be saved here.", err?.code !== "declined"); }
+  } else {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    renderPrintPanel(`Created ${filename}`);
+  }
+}
+document.addEventListener("click", (ev) => {
+  const t = ev.target.closest("[data-pact]");
+  if (!t) { if (ev.target.id === "printPanel") { printJob = null; renderPrintPanel(); } return; }
+  if (t.dataset.pact === "cancel") { printJob = null; renderPrintPanel(); }
+  if (t.dataset.pact === "make") { t.disabled = true; makePdf().finally(() => { const b = document.querySelector('[data-pact="make"]'); if (b) b.disabled = false; }); }
+});
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && printJob) { printJob = null; renderPrintPanel(); } });
 
 // ---------- start ----------
 rebuild(); render();
