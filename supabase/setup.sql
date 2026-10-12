@@ -292,8 +292,10 @@ grant usage on schema public to authenticated;
 grant select on public.faculty, public.classes, public.ge_approvals to authenticated;
 grant select, insert, update, delete on public.staff, public.bookings, public.teacher_changes to authenticated;
 grant select, update on public.settings to authenticated;
-grant execute on function public.decide_ge(text, text, text), public.publish_schedule(), public.my_staff(),
-  public.can_edit_class(text), public.can_assign(text, text), public.needs_approval(text) to authenticated;
+-- Every helper the access rules call must be runnable by signed-in users (some projects do not grant this by default).
+grant execute on function public.my_staff(), public.is_admin(), public.has_role(), public.class_teacher(text),
+  public.class_schedule(text), public.can_edit_class(text), public.can_assign(text, text), public.needs_approval(text),
+  public.decide_ge(text, text, text), public.publish_schedule(), public.stamp_row() to authenticated;
 revoke all on all tables in schema public from anon;
 
 -- ---------- live updates ----------
