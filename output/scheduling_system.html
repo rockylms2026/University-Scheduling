@@ -434,6 +434,7 @@ function approvalOf(cls) {
   if (!BACKEND || !isGE(cls.course)) return null;
   const t = teacherOf(cls)?.key;
   if (!t || DATA.teachers[t].college === "GE") return null;
+  if (cls.holder && DATA.teachers[t].dept === cls.holder) return null;     // the department teaching its own GE course
   if (settings.approvalScope === "cross" && DATA.teachers[t].college === progCollege(cls.section)) return null;
   const sig = scheduleSig(cls);
   // The associate dean is not needed when the teacher's own department holds the course.
@@ -1197,7 +1198,7 @@ function editor(cls, part) {
       }
     } else if (m.kind !== "nstp") checks.push(["warn", "No teacher assigned yet"]);
     const ok = !checks.some(([l]) => l === "bad") && !right;
-    const ap = BACKEND && teacherKey && isGE(cls.course) && DATA.teachers[teacherKey].college !== "GE"
+    const ap = BACKEND && teacherKey && isGE(cls.course) && DATA.teachers[teacherKey].college !== "GE" && DATA.teachers[teacherKey].dept !== cls.holder
       && (settings.approvalScope === "all" || DATA.teachers[teacherKey].college !== progCollege(cls.section));
     if (ap) {
       const f = DATA.teachers[teacherKey], cur = approvalOf(cls);
@@ -1382,7 +1383,7 @@ function renderApprovals(page) {
   const shown = all.filter(filters.find(([k]) => k === state.apprFilter)[2]).sort((x, y) => numSort(x.c.section, y.c.section) || x.c.course.localeCompare(y.c.course));
   const mark = (done, who, at) => done ? `<span class="appr ok" title="${esc(who || "")}">✓ ${esc((who || "").split("@")[0])}${at ? ` · ${new Date(at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</span>` : `<span class="appr wait">Waiting</span>`;
   const mineNow = shown.filter((x) => needsMe(x.a));
-  page.innerHTML = `${head("Approvals", "A GE class taught by a member of a college needs the approval of that teacher's department chair, and also their associate dean unless the teacher's department holds the course. A new time or teacher asks again.")}
+  page.innerHTML = `${head("Approvals", "A GE class taught by a member of a college needs the approval of that teacher's department chair and their associate dean. A department teaching its own GE course needs no approval. A new time or teacher asks again.")}
     <div class="card" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="pills">${filters.map(([k, l, f]) =>
       `<button type="button" class="pill" data-apprfilter="${k}" aria-pressed="${state.apprFilter === k}">${l}<small>${all.filter(f).length}</small></button>`).join("")}</div>
       ${mineNow.length > 1 ? `<button type="button" class="btn primary" data-decideall="approve">Approve all ${mineNow.length} shown</button>` : ""}</div></div>

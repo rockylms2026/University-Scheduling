@@ -9,7 +9,7 @@ The scheduling page in `web/index.html` signs people in with Supabase and limits
 | Department Chair | their department's major classes, with their own department's faculty; never GE | GE classes taught by their department's faculty |
 | GE Coordinator | every GE class (once GE is open) | none |
 
-A GE class taught by a member of a college (not the GE Department) stays *Waiting* until that teacher's chair approves it. If the teacher's department does not hold the course, their college's associate dean must approve too. For example, Psychology holds Understanding the Self, so a Psychology teacher needs only the chair. A new time or a new teacher asks again. In Settings, the Registrar can limit this to teachers serving another college.
+A GE class taught by a member of a college (not the GE Department) stays *Waiting* until that teacher's chair and their college's associate dean approve it. No approval is needed when the teacher's department holds the course: for example, Psychology faculty teaching Understanding the Self. A new time or a new teacher asks again. In Settings, the Registrar can limit this to teachers serving another college.
 
 ## One-time setup
 

@@ -98,11 +98,9 @@ expect("a new time starts approval over", True, f"select decide_ge('{X}','approv
 expect("associate dean rejects", True, f"select decide_ge('{X}','reject','Teaching a thesis class then')", "adean.t2@u.edu")
 expect("rejection recorded", True, f"select rejected_by from ge_approvals where class_id='{X}'", ADMIN, contains="adean.t2@u.edu")
 
-expect("own-department GE needs no associate dean", True, f"select needs_adean('{OWN}')", "ge@u.edu", contains="f")
+expect("own-department GE needs no approval at all", True, f"select needs_approval('{OWN}')", "ge@u.edu", contains="f")
 expect("cross-department GE needs the associate dean", True, f"select needs_adean('{X}')", "ge@u.edu", contains="t")
-expect("associate dean cannot decide an own-department GE", False, f"select decide_ge('{OWN}','approve')", "adean.css@u.edu")
-expect("chair approves own-department GE alone", True, f"select decide_ge('{OWN}','approve'); select chair_by||' '||coalesce(adean_by,'none') from ge_approvals where class_id='{OWN}'",
-       "chair.psy@u.edu", contains="chair.psy@u.edu none")
+expect("nothing to approve for an own-department GE", False, f"select decide_ge('{OWN}','approve')", "chair.psy@u.edu", contains="does not need approval")
 expect("chair cannot publish", False, "select publish_schedule()", "chair.psy@u.edu")
 expect("registrar publishes", True, "select publish_schedule()", ADMIN)
 expect("chair cannot add staff", False, "insert into staff (email, role) values ('x@u.edu','dean')", "chair.psy@u.edu")

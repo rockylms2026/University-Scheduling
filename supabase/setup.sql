@@ -13,8 +13,8 @@
 -- Everyone with a role can read the whole timetable, because conflict checks need it.
 --
 -- A GE class taught by a member of a college (not the GE Department) is "pending"
--- until the chair of the teacher department approves it, and also the associate
--- dean of their college unless the teacher belongs to the department that holds the course
+-- until the chair of the teacher department and the associate dean of their college
+-- approve it. No approval is needed when the teacher belongs to the department that holds the course
 -- (e.g. Psychology holds Understanding the Self). A new time or teacher asks again.
 
 -- ---------- reference data (loaded by seed.sql, read-only to users) ----------
@@ -170,6 +170,7 @@ begin
   if not found or not c.is_ge or t is null then return false; end if;
   select * into f from public.faculty where key = t;
   if f.college = 'GE' then return false; end if;
+  if f.department = c.holder_dept then return false; end if;   -- the department teaching its own GE course
   select approval_scope into scope from public.settings where id = 1;
   return scope = 'all' or f.college <> c.college;
 end $$;
