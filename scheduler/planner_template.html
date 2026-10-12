@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<!--__SUPABASE_JS__-->
 <style>
 /* Layout: registrar's scheduling office. Top bar, side menu, and one working area per menu item.
    The dashboard shows the whole term; the timetable desk is where classes are booked. */
@@ -43,7 +44,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .topbar select, .topbar input { font: inherit; font-size: .86rem; color: #fff; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.28); border-radius: 6px; padding: 5px 8px; }
 .topbar option, .topbar optgroup { color: var(--ink); background: #fff; }
 .topbar input::placeholder { color: rgba(255,255,255,.7); }
-.search { position: relative; flex: 1 1 220px; max-width: 440px; }
+.search { position: relative; flex: 1 1 180px; max-width: 440px; }
 .search input { width: 100%; }
 .results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(15,25,45,.18); max-height: 380px; overflow-y: auto; padding: 4px; z-index: 30; }
 .results button { display: grid; grid-template-columns: 64px 1fr; gap: 8px; width: 100%; text-align: left; font: inherit; font-size: .86rem; border: 0; background: transparent; color: var(--ink); padding: 6px 8px; border-radius: 6px; cursor: pointer; }
@@ -235,6 +236,31 @@ dl.about dd { margin: 0; }
 .who-free span.full { background: var(--warn-soft); color: var(--warn); }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
+/* ----- sign-in, people, approvals ----- */
+.login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: linear-gradient(180deg, var(--navy) 0 38%, var(--bg) 38%); }
+.login .box { width: min(420px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; display: grid; gap: 14px; box-shadow: 0 10px 30px rgba(15,25,45,.12); }
+.login h1 { font-size: 1.2rem; }
+.login .uni { color: #fff; text-align: center; margin-bottom: 14px; font-family: var(--f-display); }
+.login .uni b { display: block; font-size: 1.15rem; }
+.login .uni span { font-size: .82rem; opacity: .8; }
+.form label, label.form { min-width: 0; }
+.form select, label.form select { width: 100%; min-width: 0; }
+.form input, .form select { font: inherit; font-size: .92rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; }
+.userchip { display: flex; align-items: center; gap: 8px; font-size: .78rem; line-height: 1.2; max-width: 240px; }
+.userchip > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.userchip b { display: block; font-size: .84rem; }
+.userchip span { opacity: .8; }
+.userchip button { white-space: nowrap; font: inherit; font-size: .78rem; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.35); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+.readonly { background: var(--lunch); color: var(--ink); border-radius: 6px; padding: 7px 10px; font-size: .84rem; }
+.block.pending { border: 2px dashed #b07800; }
+.block.rejected { border: 2px dashed var(--bad); }
+.legend i.pend { background: #fff; border: 2px dashed #b07800; }
+.appr { display: inline-flex; gap: 4px; align-items: center; font-size: .78rem; white-space: nowrap; }
+.appr.ok { color: var(--good); }
+.appr.wait { color: var(--warn); }
+.switch { display: flex; gap: 10px; align-items: center; font-size: .9rem; }
+.switch input { width: 18px; height: 18px; accent-color: var(--accent); }
+
 /* ----- dialogs ----- */
 .overlay { position: fixed; inset: 0; background: rgba(10, 16, 28, .45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 40; }
 .dialog { background: var(--panel); color: var(--ink); border-radius: 12px; border: 1px solid var(--line); padding: 18px; width: min(560px, 100%); max-height: 90vh; overflow-y: auto; display: grid; gap: 12px; }
@@ -267,16 +293,18 @@ dl.about dd { margin: 0; }
 }
 </style>
 
-<div class="app">
+<div class="login" id="login" hidden></div>
+<div class="app" id="app">
   <header class="topbar">
     <div class="brand"><b>Liberal Arts University of Cagayan Valley</b><span>Office of the University Registrar · Class Scheduling</span></div>
     <div class="tb-field">
-      <select id="semSel" aria-label="Semester"><option value="1" selected>1st Semester</option><option value="2" disabled>2nd Semester (not set up yet)</option></select>
+      <select id="semSel" aria-label="Semester"><option value="1" selected>1st Semester</option><option value="2" disabled title="Not set up yet">2nd Semester</option></select>
       <select id="aySel" aria-label="School year"></select>
     </div>
     <div class="tb-field"><select id="scopeSel" aria-label="College filter"></select></div>
     <div class="search"><input id="search" type="search" placeholder="Search sections, faculty, rooms, courses" aria-label="Search" autocomplete="off"><div class="results" id="results" hidden></div></div>
     <button type="button" class="publish" id="publishBtn">Publish schedule</button>
+    <div class="userchip" id="userchip" hidden></div>
   </header>
   <nav class="side" id="side" aria-label="Main menu"></nav>
   <main class="main" id="page"></main>
@@ -288,6 +316,7 @@ dl.about dd { margin: 0; }
 
 <script>
 const DATA = /*__DATA__*/null;
+const BACKEND = /*__BACKEND__*/null;     // null on claude.ai; { kind: "supabase", url, key } for the hosted version
 const UNIVERSITY = "Liberal Arts University of Cagayan Valley";
 const DAYS = DATA.days;
 const LUNCH = { Mon: [690, 750], Wed: [690, 750], Fri: [690, 750], Tue: [720, 810], Thu: [720, 810] };
@@ -296,7 +325,8 @@ const PART = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Superv
 const COLLEGE_KEYS = ["CSS", "CISC", "CBE", "COE", "CCJPS"];
 const SCOPES = [["ALL", "All colleges"], ["CSS", "CSS"], ["CISC", "CISC"], ["CBE", "CBE"], ["COE", "COE"], ["CCJPS", "CCJPS"], ["GE", "GE Department"]];
 const VIEWS = [["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["rooms", "Rooms"], ["sections", "Sections"],
-               ["courses", "Courses"], ["conflicts", "Conflicts"], ["reports", "Reports"], ["settings", "Settings"]];
+               ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["reports", "Reports"], ["settings", "Settings"]];
+const ROLE_NAME = { registrar: "Registrar", dean: "Dean", associate_dean: "Associate Dean", chair: "Department Chair", ge_coordinator: "GE Coordinator" };
 const TYPE_LABEL = { lec: "Lecture (major)", lab: "Laboratory block (3 h)", ge: "General education", pe: "PE", cwts: "CWTS (Saturday)", prac: "Practicum supervision" };
 const INTRO = new Set(DATA.intro || []);
 const $ = (id) => document.getElementById(id);
@@ -340,7 +370,7 @@ function memoryStore() {
     onSnapshot: (f) => { (subs[n] = subs[n] || []).push(f); setTimeout(() => f(snap(n))); return () => {}; } }) };
 }
 let savedAt = { bookings: null, teachers: null };
-function latest(docs) { return docs.reduce((a, d) => (d.at && (!a || d.at > a) ? d.at : a), null); }
+function latest(docs) { return docs.reduce((a, d) => (d.at && (!a || Date.parse(d.at) > Date.parse(a)) ? d.at : a), null); }
 function listen() {
   store.collection("bookings").onSnapshot((s) => {
     bookings = {};
@@ -363,6 +393,184 @@ function listen() {
   }, () => {});
 }
 function offline() { shared = false; canWrite = false; render(); }
+
+// ---------- people and roles (the hosted version; on claude.ai everyone is the registrar) ----------
+let me = { email: null, name: "", role: "registrar", college: null, department: null };
+let settings = { geOpen: true, approvalScope: "all" };
+let approvals = {};          // `${class}|${teacher}` -> approval row
+let staffList = [];
+const isAdmin = () => me.role === "registrar" || me.role === "dean";
+const progDept = (section) => DATA.programs[DATA.sections[section].program].dept;
+const chairDept = () => (BACKEND && me.role === "chair" ? me.department : null);
+// Why this person may not book a class ("" when they may). Mirrors can_edit_class() in supabase/schema.sql.
+function editRight(cls) {
+  if (!BACKEND || isAdmin()) return "";
+  const col = progCollege(cls.section), dept = progDept(cls.section);
+  if (isGE(cls.course)) {
+    if (me.role === "chair") return "View only: GE classes are scheduled by the GE Coordinator and the associate deans.";
+    if (!settings.geOpen) return "View only: GE scheduling opens after the department chairs have scheduled their faculty. The Dean or the Registrar opens it.";
+    if (me.role === "ge_coordinator") return "";
+    if (me.role === "associate_dean") return col === me.college ? "" : `View only: GE classes in ${col} sections are scheduled by the GE Coordinator or the ${col} associate dean.`;
+  }
+  if (me.role === "associate_dean") return col === me.college ? "" : `View only: this class belongs to the ${DATA.colleges[col]}.`;
+  if (me.role === "chair") return dept === me.department ? "" : `View only: this class belongs to the Department of ${dept}.`;
+  return "View only: the GE Coordinator schedules GE classes only.";
+}
+const teacherAllowed = (key) => !chairDept() || !key || DATA.teachers[key].dept === chairDept();
+function allowedScopes() {
+  if (!BACKEND || isAdmin()) return SCOPES.map(([k]) => k);
+  if (me.role === "chair" || me.role === "associate_dean") return [me.college];
+  return ["GE", "ALL"];
+}
+// GE classes taught by college faculty need their chair's and associate dean's approval.
+function scheduleSig(cls) {
+  return cls.meetings.map((m) => bookings[`${cls.id}|${m.part}`]).filter(Boolean).map((b) => `${b.part}:${b.pattern}`).sort().join(" ");
+}
+function approvalOf(cls) {
+  if (!BACKEND || !isGE(cls.course)) return null;
+  const t = teacherOf(cls)?.key;
+  if (!t || DATA.teachers[t].college === "GE") return null;
+  if (settings.approvalScope === "cross" && DATA.teachers[t].college === progCollege(cls.section)) return null;
+  const sig = scheduleSig(cls);
+  if (!sig) return { state: "unscheduled", teacher: t };
+  const a = approvals[`${cls.id}|${t}`];
+  if (!a || a.schedule !== sig) return { state: "pending", teacher: t, chair: false, adean: false };
+  if (a.rejected_at) return { state: "rejected", teacher: t, chair: false, adean: false, row: a };
+  return { state: a.chair_at && a.adean_at ? "approved" : "pending", teacher: t, chair: !!a.chair_at, adean: !!a.adean_at, row: a };
+}
+function canDecide(teacher) {
+  const f = DATA.teachers[teacher];
+  return { chair: isAdmin() || (me.role === "chair" && me.department === f.dept), adean: isAdmin() || (me.role === "associate_dean" && me.college === f.college) };
+}
+const needsMe = (a) => { if (a.state !== "pending") return false; const d = canDecide(a.teacher); return (d.chair && !a.chair) || (d.adean && !a.adean); };
+
+// ---------- hosted version: Supabase ----------
+let sb = null;
+async function sbAll(q) { const { data, error } = await q; if (error) throw error; return data || []; }
+const sbLoad = {
+  bookings: async () => {
+    const rows = await sbAll(sb.from("bookings").select("*").eq("sem", DATA.semester).range(0, 9999));
+    bookings = {};
+    rows.forEach((r) => { if (CLASS[r.class_id]) bookings[`${r.class_id}|${r.part}`] = { sem: r.sem, class: r.class_id, part: r.part, pattern: r.pattern, room: r.room, by: r.updated_by, at: r.updated_at }; });
+    savedAt.bookings = latest(Object.values(bookings));
+  },
+  teacher_changes: async () => {
+    const rows = await sbAll(sb.from("teacher_changes").select("*").eq("sem", DATA.semester).range(0, 9999));
+    assigned = {};
+    rows.forEach((r) => { if (CLASS[r.class_id]) assigned[r.class_id] = { class: r.class_id, teacher: r.teacher, at: r.updated_at }; });
+    savedAt.teachers = latest(Object.values(assigned));
+  },
+  ge_approvals: async () => {
+    const rows = await sbAll(sb.from("ge_approvals").select("*").range(0, 9999));
+    approvals = {};
+    rows.forEach((r) => (approvals[`${r.class_id}|${r.teacher}`] = r));
+  },
+  settings: async () => {
+    const s = (await sbAll(sb.from("settings").select("*")))[0] || {};
+    settings = { geOpen: !!s.ge_open, approvalScope: s.approval_scope || "all" };
+    pubStatus = s.published_at ? { at: s.published_at, by: s.published_by } : null;
+  },
+  staff: async () => { if (isAdmin()) staffList = await sbAll(sb.from("staff").select("*").order("email")); },
+};
+const refreshTimers = {};
+function sbRefresh(table) {
+  clearTimeout(refreshTimers[table]);
+  refreshTimers[table] = setTimeout(async () => { try { await sbLoad[table](); rebuild(); render(); } catch (e) { console.error(e); } }, 250);
+}
+const sbMessage = (e) => /row-level security|permission denied|not allowed/i.test(e?.message || "") ? "Your role can't change this class." : e?.message || "Could not save. Try again.";
+async function startHosted() {
+  sb = window.supabase.createClient(BACKEND.url, BACKEND.key);
+  const recovering = /type=recovery/.test(location.hash);
+  sb.auth.onAuthStateChange((event) => {
+    if (event === "PASSWORD_RECOVERY") showLogin("reset");
+    else if (event === "SIGNED_OUT") { me = { email: null, name: "", role: null }; showLogin("signin"); }
+  });
+  const { data } = await sb.auth.getSession();
+  if (recovering) return showLogin("reset");
+  if (!data.session) return showLogin("signin");
+  await enter(data.session);
+}
+async function enter(session) {
+  const email = (session.user.email || "").toLowerCase();
+  const { data: rows, error } = await sb.from("staff").select("*").eq("email", email);
+  if (error || !rows?.length) return showLogin("norole", email);
+  const r = rows[0];
+  me = { email, name: r.full_name || email, role: r.role, college: r.college, department: r.department };
+  shared = true; canWrite = true;
+  if (window._lastUser !== email) { state.view = "dashboard"; state.pick = null; state.draft = null; state.staffEdit = null; window._lastUser = email; }
+  if (!allowedScopes().includes(state.scope)) state.scope = allowedScopes()[0];
+  $("login").hidden = true; $("app").hidden = false;
+  try { await Promise.all(Object.values(sbLoad).map((f) => f())); } catch (e) { toast("Could not load the schedule: " + e.message); }
+  rebuild(); render();
+  if (!window._sbChannel) {
+    window._sbChannel = sb.channel("schedule");
+    ["bookings", "teacher_changes", "ge_approvals", "settings", "staff"].forEach((t) =>
+      window._sbChannel.on("postgres_changes", { event: "*", schema: "public", table: t }, () => sbRefresh(t)));
+    window._sbChannel.subscribe();
+  }
+}
+let loginMsg = "";
+function showLogin(mode, email = "") {
+  $("app").hidden = true;
+  const el = $("login");
+  el.hidden = false;
+  const msg = loginMsg ? `<p class="msg ${/sent|saved/i.test(loginMsg) ? "good" : "bad"}" style="margin:0">${esc(loginMsg)}</p>` : "";
+  loginMsg = "";
+  let body;
+  if (mode === "forgot") body = `<h1>Reset your password</h1><p class="small muted" style="margin:0">We'll email you a link to set a new password.</p>
+    <form class="form" id="forgotForm" style="display:grid;gap:12px"><label>Email<input id="lEmail" type="email" autocomplete="username" required value="${esc(email)}"></label>
+    <button class="btn primary" type="submit">Send reset link</button></form>${msg}<button type="button" class="btn link" data-auth="signin">Back to sign in</button>`;
+  else if (mode === "reset") body = `<h1>Set a new password</h1>
+    <form class="form" id="resetForm" style="display:grid;gap:12px"><label>New password<input id="lPass" type="password" autocomplete="new-password" minlength="8" required></label>
+    <label>Type it again<input id="lPass2" type="password" autocomplete="new-password" minlength="8" required></label>
+    <button class="btn primary" type="submit">Save password</button></form>${msg}`;
+  else if (mode === "norole") body = `<h1>Your account isn't set up yet</h1>
+    <p style="margin:0">You're signed in as <b>${esc(email)}</b>, but this email has no role in the scheduling system. Ask the Registrar or the Dean to add it on the Settings page.</p>
+    <button type="button" class="btn" data-auth="signout">Sign out</button>`;
+  else body = `<h1>Sign in</h1>
+    <form class="form" id="signinForm" style="display:grid;gap:12px"><label>Email<input id="lEmail" type="email" autocomplete="username" required value="${esc(email)}"></label>
+    <label>Password<input id="lPass" type="password" autocomplete="current-password" required></label>
+    <button class="btn primary" type="submit">Sign in</button></form>${msg}
+    <button type="button" class="btn link" data-auth="forgot">Forgot your password?</button>
+    <p class="small muted" style="margin:0">Accounts are created by the Office of the University Registrar.</p>`;
+  el.innerHTML = `<div><div class="uni"><b>${esc(UNIVERSITY)}</b><span>Office of the University Registrar · Class Scheduling</span></div><div class="box">${body}</div></div>`;
+  el.querySelector("input")?.focus();
+}
+document.addEventListener("submit", async (ev) => {
+  const id = ev.target.id;
+  if (id === "staffForm") {
+    ev.preventDefault();
+    const role = $("stRole").value, msg = $("stmsg");
+    const row = { email: $("stEmail").value.trim().toLowerCase(), full_name: $("stName").value.trim(), role,
+                  college: ["chair", "associate_dean"].includes(role) ? $("stCollege").value : null, department: role === "chair" ? $("stDept").value : null };
+    const { error } = await sb.from("staff").upsert(row);
+    if (error) { msg.textContent = sbMessage(error); msg.className = "msg bad"; return; }
+    state.staffEdit = null; await sbLoad.staff(); render(); toast(`Saved ${row.email}.`); return;
+  }
+  if (!["signinForm", "forgotForm", "resetForm", "passForm"].includes(id)) return;
+  ev.preventDefault();
+  const btn = ev.target.querySelector("button[type=submit]");
+  if (btn) btn.disabled = true;
+  try {
+    if (id === "signinForm") {
+      const { data, error } = await sb.auth.signInWithPassword({ email: $("lEmail").value.trim(), password: $("lPass").value });
+      if (error) { loginMsg = /invalid/i.test(error.message) ? "Wrong email or password." : error.message; return showLogin("signin", $("lEmail").value); }
+      await enter(data.session);
+    } else if (id === "forgotForm") {
+      const { error } = await sb.auth.resetPasswordForEmail($("lEmail").value.trim(), { redirectTo: location.origin + location.pathname });
+      loginMsg = error ? error.message : "If that email has an account, a reset link has been sent.";
+      showLogin("forgot", $("lEmail").value);
+    } else if (id === "resetForm" || id === "passForm") {
+      const p1 = $(id === "resetForm" ? "lPass" : "nPass").value, p2 = $(id === "resetForm" ? "lPass2" : "nPass2").value;
+      const out = id === "resetForm" ? (m) => { loginMsg = m; showLogin("reset"); } : (m) => { $("pwmsg").textContent = m; };
+      if (p1 !== p2) return out("The two passwords don't match.");
+      const { error } = await sb.auth.updateUser({ password: p1 });
+      if (error) return out(error.message);
+      if (id === "resetForm") { history.replaceState(null, "", location.pathname); const { data } = await sb.auth.getSession(); await enter(data.session); toast("Password saved."); }
+      else { out("Password saved."); ev.target.reset(); }
+    }
+  } finally { if (btn) btn.disabled = false; }
+});
 
 // ---------- derived timetable ----------
 let sessions = [];           // every booked session this semester
@@ -390,22 +598,26 @@ function rebuild() {
   computeLoads();
   clashes = findClashes();
   computeConflicts();
-  lastSaved = [savedAt.bookings, savedAt.teachers].filter(Boolean).sort().pop() || null;
+  lastSaved = latest([savedAt.bookings, savedAt.teachers].filter(Boolean).map((at) => ({ at })));
 }
 const totalMeetings = DATA.classes.reduce((a, c) => a + c.meetings.length, 0);
 
 // ---------- college filter ----------
 function sectionInScope(s) { return state.scope === "ALL" || state.scope === "GE" || progCollege(s) === state.scope; }
-function classInScope(c) { return state.scope === "ALL" || (state.scope === "GE" ? isGE(c.course) : progCollege(c.section) === state.scope); }
-function teacherInScope(k) { return state.scope === "ALL" || DATA.teachers[k].college === state.scope; }
+function classInScope(c) {
+  if (chairDept() && progDept(c.section) !== chairDept()) return false;
+  return state.scope === "ALL" || (state.scope === "GE" ? isGE(c.course) : progCollege(c.section) === state.scope);
+}
+function teacherInScope(k) { return chairDept() ? DATA.teachers[k].dept === chairDept() : state.scope === "ALL" || DATA.teachers[k].college === state.scope; }
 function roomInScope(n) { const r = DATA.rooms[n]; return state.scope === "ALL" || r.college === (state.scope === "GE" ? "SHARED" : state.scope); }
-function programsInScope() { return Object.keys(DATA.programs).filter((p) => state.scope === "ALL" || DATA.programs[p].college === state.scope); }
+const programOk = (p) => !chairDept() || DATA.programs[p].dept === chairDept();
+function programsInScope() { return Object.keys(DATA.programs).filter((p) => programOk(p) && (state.scope === "ALL" || DATA.programs[p].college === state.scope)); }
 function sectionsInScope() {
   const out = [];
-  Object.keys(DATA.programs).forEach((p) => { if (state.scope === "ALL" || state.scope === "GE" || DATA.programs[p].college === state.scope) out.push(...DATA.programs[p].sections); });
+  Object.keys(DATA.programs).forEach((p) => { if (programOk(p) && (state.scope === "ALL" || state.scope === "GE" || DATA.programs[p].college === state.scope)) out.push(...DATA.programs[p].sections); });
   return out;
 }
-const scopeName = () => state.scope === "ALL" ? "all colleges" : state.scope === "GE" ? "the GE Department" : DATA.colleges[state.scope];
+const scopeName = () => chairDept() ? `the Department of ${chairDept()}` : state.scope === "ALL" ? "all colleges" : state.scope === "GE" ? "the GE Department" : DATA.colleges[state.scope];
 
 // ---------- loads ----------
 function computeLoads() {
@@ -566,6 +778,12 @@ function computeConflicts() {
     if (L.cap != null && L.capped > L.cap) out.push({ sev: "bad", type: "Preparations", what: `${t.name} has ${L.capped} preparations (limit ${L.cap}, not counting intro and GE courses)`, items: [...L.courses], when: "", classes: [], teacher: k, go: { teacher: k } });
     else if (L.total > 5) out.push({ sev: "bad", type: "Preparations", what: `${t.name} has ${L.total} different courses (limit 5)`, items: [...L.courses], when: "", classes: [], teacher: k, go: { teacher: k } });
   });
+  DATA.classes.forEach((c) => {
+    const a = approvalOf(c);
+    if (a?.state !== "rejected") return;
+    out.push({ sev: "warn", type: "GE approval rejected", what: `${DATA.teachers[a.teacher].name} for ${c.course} ${c.section}${a.row.note ? `: “${a.row.note}”` : ""}`,
+      items: [`${c.course} · ${c.section}`], when: scheduleSig(c), classes: [c], teacher: a.teacher, go: { cls: c.id, part: c.meetings[0].part } });
+  });
   conflicts = out;
 }
 function conflictsInScope() {
@@ -592,12 +810,13 @@ function grid(list, { offDays = [], dim = () => false, ghost = [], ghostBad = fa
       const n = Math.max(1, day.filter((o) => o.start < s.end && s.start < o.end).reduce((a, o) => Math.max(a, o._lane + 1), 0));
       const w = 100 / n;
       const bad = flagged.has(s);
-      const cls = [`ty-${typeOf(s.kind, s.cls.course)}`, dim(s) ? "other" : "", bad ? "clash" : "",
+      const ap = approvalOf(s.cls)?.state;
+      const cls = [`ty-${typeOf(s.kind, s.cls.course)}`, dim(s) ? "other" : "", bad ? "clash" : "", !bad && (ap === "pending" || ap === "rejected") ? ap : "",
                    state.pick && state.pick.cls === s.cls.id && state.pick.part === s.part ? "sel" : ""].join(" ");
       const who = s.tkey ? surname(s.tkey) : teacherOf(s.cls)?.name || "TBA";
       html += `<button type="button" class="block ${cls}" data-class="${s.cls.id}" data-part="${s.part}"
         style="top:${px(s.start)};height:calc(var(--row) * ${(s.end - s.start) / DATA.slot} - 2px);left:calc(${s._lane * w}% + 2px);width:calc(${w}% - 4px)"
-        title="${esc(`${s.cls.course} ${DATA.courses[s.cls.course].title} · ${s.cls.section} · ${s.tkey ? DATA.teachers[s.tkey].name : "TBA"} · ${s.room || (s.kind === "nstp" ? "Grounds" : "no room")}${bad ? " · CONFLICT" : ""}`)}">
+        title="${esc(`${s.cls.course} ${DATA.courses[s.cls.course].title} · ${s.cls.section} · ${s.tkey ? DATA.teachers[s.tkey].name : "TBA"} · ${s.room || (s.kind === "nstp" ? "Grounds" : "no room")}${bad ? " · CONFLICT" : ""}${ap === "pending" ? " · AWAITING APPROVAL" : ap === "rejected" ? " · APPROVAL REJECTED" : ""}`)}">
         <strong>${bad ? WARN_ICON : ""}<span class="code">${esc(s.cls.course)}${s.part === "Lab" ? " Lab" : ""}</span><span class="sec">· ${esc(s.cls.section)}</span></strong><span class="ttl">${esc(DATA.courses[s.cls.course].title)}</span>
         <span>${esc(who)} · ${esc(s.room || (s.kind === "nstp" ? "Grounds" : "—"))}</span></button>`;
     });
@@ -609,7 +828,7 @@ function grid(list, { offDays = [], dim = () => false, ghost = [], ghostBad = fa
   return html + `</div>`;
 }
 const legend = () => `<div class="legend">${Object.entries(TYPE_LABEL).map(([k, l]) => `<span><i class="ty-${k}"></i>${l}</span>`).join("")}
-  <span><i class="offday"></i>Practicum day</span><span><i class="lunchk"></i>Lunch (locked)</span><span><i class="conf"></i>Conflict</span></div>`;
+  <span><i class="offday"></i>Practicum day</span><span><i class="lunchk"></i>Lunch (locked)</span><span><i class="conf"></i>Conflict</span>${BACKEND ? `<span><i class="pend"></i>GE awaiting approval</span>` : ""}</div>`;
 
 // ---------- shell ----------
 function renderShell() {
@@ -617,16 +836,24 @@ function renderShell() {
   const years = ["2025–2026", "2026–2027", "2027–2028"];
   if (!years.includes(printCfg.ay)) years.push(printCfg.ay);
   ay.innerHTML = years.map((y) => `<option${y === printCfg.ay ? " selected" : ""}>SY ${esc(y)}</option>`).join("");
-  $("scopeSel").innerHTML = SCOPES.map(([k, l]) => `<option value="${k}"${state.scope === k ? " selected" : ""}>${esc(l)}</option>`).join("");
+  const scopes = allowedScopes();
+  $("scopeSel").innerHTML = SCOPES.filter(([k]) => scopes.includes(k)).map(([k, l]) => `<option value="${k}"${state.scope === k ? " selected" : ""}>${esc(chairDept() ? `${l} · ${chairDept()}` : l)}</option>`).join("");
+  $("scopeSel").disabled = scopes.length < 2;
+  $("publishBtn").hidden = !!BACKEND && !isAdmin();
   $("publishBtn").disabled = !canWrite || !shared;
   $("publishBtn").title = !shared ? "Open the page on claude.ai to publish" : !canWrite ? "View-only access" : "";
   const nConf = conflictsInScope().filter((c) => c.sev === "bad").length;
   const unsched = DATA.classes.filter(classInScope).reduce((a, c) => a + c.meetings.filter((m) => !bookings[`${c.id}|${m.part}`]).length, 0);
-  $("side").innerHTML = VIEWS.map(([k, l], i) => {
-    const count = k === "conflicts" ? `<span class="count${nConf ? " bad" : ""}">${nConf}</span>` : k === "timetable" ? `<span class="count">${unsched}</span>` : "";
-    return `${i === 7 ? `<div class="sep"></div>` : ""}<button type="button" data-view="${k}" aria-current="${state.view === k ? "page" : "false"}">${l}${count}</button>`;
+  const nMine = BACKEND ? DATA.classes.filter((c) => { const a = approvalOf(c); return a && needsMe(a); }).length : 0;
+  $("side").innerHTML = VIEWS.filter(([k]) => k !== "approvals" || BACKEND).map(([k, l]) => {
+    const count = k === "conflicts" ? `<span class="count${nConf ? " bad" : ""}">${nConf}</span>` : k === "timetable" ? `<span class="count">${unsched}</span>`
+      : k === "approvals" && nMine ? `<span class="count bad">${nMine}</span>` : "";
+    return `${k === "reports" ? `<div class="sep"></div>` : ""}<button type="button" data-view="${k}" aria-current="${state.view === k ? "page" : "false"}">${l}${count}</button>`;
   }).join("");
   const pub = pubState();
+  const chip = $("userchip");
+  chip.hidden = !BACKEND || !me.email;
+  if (BACKEND && me.email) chip.innerHTML = `<span><b>${esc(me.name)}</b><span>${esc(ROLE_NAME[me.role] || "")}${me.department ? ` · ${esc(me.department)}` : me.college ? ` · ${esc(me.college)}` : ""}</span></span><button type="button" data-auth="signout">Sign out</button>`;
   const when = (iso) => iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
   $("footer").innerHTML = `<span>Last saved: <b>${esc(when(lastSaved))}</b></span>
     <span class="chip ${pub.cls}">${esc(pub.label)}</span>
@@ -639,16 +866,19 @@ function renderShell() {
 function pubState() {
   if (!pubStatus?.at) return { cls: "warn", label: "Draft (not yet published)" };
   const d = new Date(pubStatus.at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  if (lastSaved && lastSaved > pubStatus.at) return { cls: "warn", label: `Draft · changed since publishing on ${d}` };
+  if (lastSaved && Date.parse(lastSaved) > Date.parse(pubStatus.at)) return { cls: "warn", label: `Draft · changed since publishing on ${d}` };
   return { cls: "good", label: `Published ${d}` };
 }
 
 // ---------- pages ----------
 function render() {
+  if (BACKEND && !me.email) return;
+  if (!allowedScopes().includes(state.scope)) state.scope = allowedScopes()[0];
+  if (state.view === "approvals" && !BACKEND) state.view = "dashboard";
   renderShell(); remember();
   const page = $("page");
   const fn = { dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, rooms: renderRooms, sections: renderSections,
-               courses: renderCourses, conflicts: renderConflicts, reports: renderReports, settings: renderSettings }[state.view] || renderDashboard;
+               courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, reports: renderReports, settings: renderSettings }[state.view] || renderDashboard;
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
   fn(page);
   if (banner) page.insertAdjacentHTML("afterbegin", banner);
@@ -731,7 +961,7 @@ function queueItems() {
   const q = state.queueQuery.trim().toLowerCase();
   const out = [];
   DATA.classes.filter(classInScope).forEach((c) => c.meetings.forEach((m) => {
-    if (bookings[`${c.id}|${m.part}`]) return;
+    if (bookings[`${c.id}|${m.part}`] || editRight(c)) return;
     const t = teacherOf(c);
     const who = t?.key ? surname(t.key) : t?.name || "TBA";
     if (q && !`${c.course} ${DATA.courses[c.course].title} ${c.section} ${who}`.toLowerCase().includes(q)) return;
@@ -802,7 +1032,7 @@ function renderDashboard(page) {
         ${legend()}
       </div>
       <div class="card">
-        <div class="cardhead"><h2>Unscheduled</h2><span class="chip none">${queueItems().length}</span></div>
+        <div class="cardhead"><h2>${BACKEND && !isAdmin() ? "Yours to schedule" : "Unscheduled"}</h2><span class="chip none">${queueItems().length}</span></div>
         <input class="inp" id="queueSearch" type="search" placeholder="Filter by course, section, faculty" value="${esc(state.queueQuery)}" aria-label="Filter unscheduled classes">
         <p class="small muted" style="margin:0">Drag a class onto the timetable at the time you want, or click it to open the booking form.</p>
         <div class="queue" id="queue">${queueHtml()}</div>
@@ -820,7 +1050,7 @@ function renderDashboard(page) {
 }
 
 // ===== Timetable (the booking desk) =====
-function programsOf(college) { return Object.entries(DATA.programs).filter(([, p]) => p.college === college).map(([k]) => k); }
+function programsOf(college) { return Object.entries(DATA.programs).filter(([k, p]) => p.college === college && programOk(k)).map(([k]) => k); }
 function progress(p) {
   const secs = DATA.programs[p].sections;
   const cls = DATA.classes.filter((c) => secs.includes(c.section));
@@ -829,7 +1059,7 @@ function progress(p) {
   return `${done}/${all}`;
 }
 function fixDesk() {
-  const colleges = state.scope === "ALL" || state.scope === "GE" ? COLLEGE_KEYS : [state.scope];
+  const colleges = chairDept() ? [me.college] : state.scope === "ALL" || state.scope === "GE" ? COLLEGE_KEYS : [state.scope];
   if (!colleges.includes(state.college)) state.college = colleges[0];
   const progs = programsOf(state.college);
   if (!progs.includes(state.program)) state.program = progs[0] || null;
@@ -911,6 +1141,7 @@ function editor(cls, part) {
   const t = teacherOf(cls);
   const teacherKey = d.teacher ?? (t?.key || "");
   const opts = optionsFor(m.kind);
+  const right = editRight(cls);
   // Status of every allowed time, checked against students, teacher, and rooms.
   const rows = opts.map((o) => {
     const ev = evaluate(cls, m, o, null, teacherKey || null).filter(([l, txt]) => l !== "info" && txt !== "Choose a room");
@@ -935,7 +1166,7 @@ function editor(cls, part) {
     const roomSel = m.pools.some((p) => p) ? `<label for="roomSel">Room
       <select id="roomSel"><option value="">Choose a room</option>${rooms.map((r) => `<option value="${esc(r)}"${r === d.room ? " selected" : ""}>${esc(r)} · ${free.has(r) ? "free" : "booked"}${DATA.rooms[r].lab ? " · " + DATA.rooms[r].lab.replace(/_/g, " ") : ""}${DATA.rooms[r].pool === "shared" ? " · overflow" : ""}</option>`).join("")}</select></label>`
       : `<p class="small muted">${m.kind === "nstp" ? "CWTS meets on the campus grounds; no room is booked." : "Practicum supervision: no room is booked."}</p>`;
-    const ft = freeTeachers(cls, m, opt);
+    const ft = freeTeachers(cls, m, opt).filter((x) => teacherAllowed(x.key));
     const dept = t?.key ? DATA.teachers[t.key].dept : "";
     const usual = (course.usual || "").replace(/^GE Department$/, "General Education");
     const near = ft.filter((x) => { const td = DATA.teachers[x.key].dept; return td === dept || (usual && usual.includes(td)); });
@@ -956,19 +1187,27 @@ function editor(cls, part) {
         else if (L.total + 1 > 5) checks.push(["warn", `Teacher: this would be ${L.total + 1} different courses (limit 5)`]);
       }
     } else if (m.kind !== "nstp") checks.push(["warn", "No teacher assigned yet"]);
-    const ok = !checks.some(([l]) => l === "bad");
+    const ok = !checks.some(([l]) => l === "bad") && !right;
+    const ap = BACKEND && teacherKey && isGE(cls.course) && DATA.teachers[teacherKey].college !== "GE"
+      && (settings.approvalScope === "all" || DATA.teachers[teacherKey].college !== progCollege(cls.section));
+    if (ap) {
+      const f = DATA.teachers[teacherKey], cur = approvalOf(cls);
+      checks.push(["info", `Approval: ${f.name} belongs to the ${f.college} Department of ${f.dept}, so this GE class needs the approval of that department's chair and the ${f.college} associate dean.`
+        + (cur && cur.teacher === teacherKey && cur.state !== "unscheduled" ? ` Now: ${cur.state === "approved" ? "approved" : cur.state === "rejected" ? "rejected" : `waiting for ${[!cur.chair && "the chair", !cur.adean && "the associate dean"].filter(Boolean).join(" and ")}`}.` : " Booking it sends the request.")]);
+    }
     detail = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${teacherSel}</div>
       <div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>
         <div class="who-free" style="margin-top:4px">${(near.length ? near : ft).slice(0, 14).map((x) => `<span class="${x.full ? "full" : ""}">${esc(DATA.teachers[x.key].name)} · ${luFor(x.key)}/${DATA.teachers[x.key].max}</span>`).join("") || `<span class="full">Nobody in this department is free</span>`}
         ${(near.length ? near : ft).length > 14 ? `<span>+${(near.length ? near : ft).length - 14} more in the list</span>` : ""}</div></div>
       <ul class="checks">${checks.length ? checks.map(([l, txt]) => `<li class="${l}">${esc(txt)}</li>`).join("") : `<li class="good">No conflicts. Students, teacher, and room are all free.</li>`}</ul>
       <div class="actions"><button type="button" class="btn primary" data-act="save"${ok && canWrite ? "" : " disabled"}>${b ? "Save changes" : "Book this time"}</button>
-        ${b ? `<button type="button" class="btn danger" data-act="remove"${canWrite ? "" : " disabled"}>Remove booking</button>` : ""}
+        ${b ? `<button type="button" class="btn danger" data-act="remove"${canWrite && !right ? "" : " disabled"}>Remove booking</button>` : ""}
         <button type="button" class="btn" data-act="close">Close</button><span class="msg" id="msg"></span></div>`;
   }
   return `<div class="editor"><div><h3>${esc(cls.course)} ${esc(PART[part])} · ${esc(cls.section)}</h3>
     <div class="facts"><span>${esc(course.title)}</span><span><b>${cls.lu}</b> LU</span>${b ? `<span>Booked: <b>${esc(b.pattern)}</b>${b.room ? ` in <b>${esc(b.room)}</b>` : ""}</span>` : ""}</div></div>
     <div><span class="fieldlabel">Choose a time (allowed by the University Class Time Frame)</span><div class="opts" style="margin-top:4px">${optHtml}</div></div>
+    ${right ? `<div class="readonly">${esc(right)}</div>` : ""}
     ${detail}</div>`;
 }
 // Teacher dropdown in the booking form, filtered by the search box.
@@ -1115,6 +1354,53 @@ function renderConflicts(page) {
       <li>At most ${DATA.facMax} teaching hours in a day for a teacher; the time frame advises ${DATA.facPref}.</li></ul></div>`;
 }
 
+// ===== Approvals (hosted version) =====
+function approvalList() {
+  return DATA.classes.map((c) => ({ c, a: approvalOf(c) })).filter(({ c, a }) => {
+    if (!a || a.state === "unscheduled") return false;
+    if (isAdmin() || me.role === "ge_coordinator") return true;
+    const f = DATA.teachers[a.teacher];
+    if (me.role === "chair") return f.dept === me.department;
+    return f.college === me.college || progCollege(c.section) === me.college;
+  });
+}
+function renderApprovals(page) {
+  const all = approvalList();
+  const filters = [["mine", "Needs my approval", (x) => needsMe(x.a)], ["pending", "Waiting", (x) => x.a.state === "pending"],
+                   ["approved", "Approved", (x) => x.a.state === "approved"], ["rejected", "Rejected", (x) => x.a.state === "rejected"], ["all", "All", () => true]];
+  if (!filters.some(([k]) => k === state.apprFilter)) state.apprFilter = all.some((x) => needsMe(x.a)) ? "mine" : "pending";
+  const shown = all.filter(filters.find(([k]) => k === state.apprFilter)[2]).sort((x, y) => numSort(x.c.section, y.c.section) || x.c.course.localeCompare(y.c.course));
+  const mark = (done, who, at) => done ? `<span class="appr ok" title="${esc(who || "")}">✓ ${esc((who || "").split("@")[0])}${at ? ` · ${new Date(at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</span>` : `<span class="appr wait">Waiting</span>`;
+  const mineNow = shown.filter((x) => needsMe(x.a));
+  page.innerHTML = `${head("Approvals", "A GE class taught by a member of a college needs the approval of that teacher's department chair and their college's associate dean. A new time or teacher asks again.")}
+    <div class="card" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="pills">${filters.map(([k, l, f]) =>
+      `<button type="button" class="pill" data-apprfilter="${k}" aria-pressed="${state.apprFilter === k}">${l}<small>${all.filter(f).length}</small></button>`).join("")}</div>
+      ${mineNow.length > 1 ? `<button type="button" class="btn primary" data-decideall="approve">Approve all ${mineNow.length} shown</button>` : ""}</div></div>
+    <div class="card">${shown.length ? `<div class="scroll"><table><thead><tr><th>Class</th><th>Schedule</th><th>Teacher</th><th>Chair</th><th>Associate dean</th><th>Status</th><th></th></tr></thead><tbody>
+      ${shown.map(({ c, a }) => {
+        const f = DATA.teachers[a.teacher], d = canDecide(a.teacher), r = a.row || {};
+        const acts = [];
+        if (needsMe(a)) acts.push(`<button type="button" class="btn primary" data-decide="approve" data-cid="${c.id}">Approve</button>`);
+        if (a.state === "pending" && (d.chair || d.adean)) acts.push(`<button type="button" class="btn danger" data-decide="reject" data-cid="${c.id}">Reject</button>`);
+        if (a.state === "rejected" && (!editRight(c) || d.chair || d.adean)) acts.push(`<button type="button" class="btn" data-decide="reopen" data-cid="${c.id}">Ask again</button>`);
+        acts.push(`<button type="button" class="btn" data-pick="${c.id}" data-part="${c.meetings[0].part}">Open</button>`);
+        return `<tr><td><b>${esc(c.course)}</b> · ${esc(c.section)}<div class="small muted">${esc(DATA.courses[c.course].title)} · ${esc(progCollege(c.section))} section</div></td>
+          <td class="small">${esc(scheduleSig(c).replace(/(Lec|Lab|PE|NSTP):/g, "").trim())}</td>
+          <td>${esc(f.name)}<div class="small muted">${esc(f.dept)} · ${esc(f.college)}</div></td>
+          <td>${a.state === "rejected" ? "—" : mark(a.chair, r.chair_by, r.chair_at)}</td><td>${a.state === "rejected" ? "—" : mark(a.adean, r.adean_by, r.adean_at)}</td>
+          <td><span class="chip ${a.state === "approved" ? "good" : a.state === "rejected" ? "bad" : "warn"}">${a.state === "approved" ? "Approved" : a.state === "rejected" ? "Rejected" : "Waiting"}</span>
+            ${a.state === "rejected" ? `<div class="small muted">${esc(r.rejected_by || "")}${r.note ? `: “${esc(r.note)}”` : ""}</div>` : ""}</td>
+          <td><div class="actions">${acts.join("")}</div></td></tr>`;
+      }).join("")}</tbody></table></div>` : `<p class="empty">Nothing here.</p>`}</div>`;
+}
+async function decide(cid, decision) {
+  let note = null;
+  if (decision === "reject") { note = window.prompt("Reason for rejecting (shown to the scheduler):", ""); if (note === null) return; }
+  const { error } = await sb.rpc("decide_ge", { cid, decision, note });
+  if (error) { toast(sbMessage(error)); return false; }
+  return true;
+}
+
 // ===== Reports =====
 function renderReports(page) {
   const secs = sectionsInScope(), tks = Object.keys(DATA.teachers).filter(teacherInScope).sort((a, b) => DATA.teachers[a].name.localeCompare(DATA.teachers[b].name));
@@ -1134,6 +1420,39 @@ function renderReports(page) {
 
 // ===== Settings =====
 function renderSettings(page) {
+  renderSettingsBase(page);
+  if (!BACKEND) return;
+  const colleges = COLLEGE_KEYS;
+  const deptsOf = (col) => [...new Set(Object.values(DATA.teachers).filter((t) => t.college === col).map((t) => t.dept))].sort();
+  const ed = state.staffEdit || { email: "", full_name: "", role: "chair", college: "CSS", department: deptsOf("CSS")[0] };
+  const people = isAdmin() ? `<div class="card" style="grid-column:1/-1"><div class="cardhead"><h2>People and roles</h2><span class="small muted">${staffList.length} accounts</span></div>
+      <p class="small muted" style="margin:0">Create each person's login in Supabase (Authentication → Users → Add user), then give their email a role here. An email with no role can sign in but sees nothing.</p>
+      <div class="scroll"><table><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>College</th><th>Department</th><th></th></tr></thead><tbody>
+        ${staffList.map((x) => `<tr><td>${esc(x.email)}</td><td>${esc(x.full_name)}</td><td>${esc(ROLE_NAME[x.role])}</td><td>${esc(x.college || "—")}</td><td>${esc(x.department || "—")}</td>
+          <td><div class="actions"><button type="button" class="btn" data-staffedit="${esc(x.email)}">Edit</button>${x.email !== me.email ? `<button type="button" class="btn danger" data-staffdel="${esc(x.email)}">Remove</button>` : ""}</div></td></tr>`).join("")}
+      </tbody></table></div>
+      <form class="form" id="staffForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end">
+        <label>Email<input id="stEmail" type="email" required value="${esc(ed.email)}"></label>
+        <label>Name<input id="stName" value="${esc(ed.full_name)}"></label>
+        <label>Role<select id="stRole">${Object.entries(ROLE_NAME).map(([k, l]) => `<option value="${k}"${ed.role === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+        <label>College<select id="stCollege">${colleges.map((c) => `<option${ed.college === c ? " selected" : ""}>${c}</option>`).join("")}</select></label>
+        <label>Department<select id="stDept">${deptsOf(ed.college || "CSS").map((d) => `<option${ed.department === d ? " selected" : ""}>${esc(d)}</option>`).join("")}</select></label>
+        <div class="actions"><button type="submit" class="btn primary">Save person</button>${state.staffEdit ? `<button type="button" class="btn" data-staffedit="">Clear</button>` : ""}<span class="msg" id="stmsg"></span></div>
+      </form><p class="small muted" style="margin:0">College applies to associate deans and chairs; department applies to chairs only.</p></div>` : "";
+  const phase = isAdmin() ? `<div class="card"><h2>Scheduling phase</h2>
+      <label class="switch"><input type="checkbox" id="geOpen"${settings.geOpen ? " checked" : ""}> GE scheduling is open</label>
+      <p class="small muted" style="margin:0">While closed, department chairs schedule their own faculty first; the GE Coordinator and associate deans can only view GE classes.</p>
+      <label class="form" style="display:grid">GE classes that need approval<select id="apprScope">
+        <option value="all"${settings.approvalScope === "all" ? " selected" : ""}>Every GE class taught by college faculty</option>
+        <option value="cross"${settings.approvalScope === "cross" ? " selected" : ""}>Only when the teacher serves another college</option></select></label></div>` : "";
+  const account = `<div class="card form"><h2>Your account</h2><dl class="about"><dt>Name</dt><dd>${esc(me.name)}</dd><dt>Email</dt><dd>${esc(me.email)}</dd>
+      <dt>Role</dt><dd>${esc(ROLE_NAME[me.role])}${me.department ? ` · ${esc(me.department)}` : ""}${me.college ? ` · ${esc(me.college)}` : ""}</dd></dl>
+      <form id="passForm" style="display:grid;gap:10px"><label>New password<input id="nPass" type="password" minlength="8" autocomplete="new-password" required></label>
+      <label>Type it again<input id="nPass2" type="password" minlength="8" autocomplete="new-password" required></label>
+      <div class="actions"><button type="submit" class="btn primary">Change password</button><span class="msg good" id="pwmsg"></span></div></form></div>`;
+  page.querySelector(".grid3").insertAdjacentHTML("afterbegin", account + phase + people);
+}
+function renderSettingsBase(page) {
   const lec = optionsFor("lecture").filter((o) => !o.ex), lab = optionsFor("lab").filter((o) => !o.ex);
   const blocks = {};
   lab.forEach((o) => { if (!blocks[o.block]) blocks[o.block] = { days: [], iv: o.iv[0] }; blocks[o.block].days.push(o.iv[0][0]); });
@@ -1201,8 +1520,24 @@ let toastTimer = null;
 function toast(text) { const t = $("toast"); t.textContent = text; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 4200); }
 async function save() {
   const cls = CLASS[state.pick.cls], part = state.pick.part, d = state.draft;
-  const me = user ? await user.id() : null;
   const msg = $("msg");
+  if (sb) {
+    try {
+      if ((d.teacher || "") !== (teacherOf(cls)?.key || "")) {
+        const r = (d.teacher || "") === (cls.teacher || "")
+          ? await sb.from("teacher_changes").delete().eq("class_id", cls.id)
+          : await sb.from("teacher_changes").upsert({ class_id: cls.id, sem: DATA.semester, teacher: d.teacher || null });
+        if (r.error) throw r.error;
+      }
+      const r = await sb.from("bookings").upsert({ class_id: cls.id, part, sem: DATA.semester, pattern: d.pattern, room: d.room || null });
+      if (r.error) throw r.error;
+      await Promise.all([sbLoad.bookings(), sbLoad.teacher_changes()]);
+      rebuild(); render();
+      const m2 = $("msg"); if (m2) { m2.textContent = "Saved."; m2.className = "msg good"; }
+    } catch (err) { const m2 = $("msg") || msg; if (m2) { m2.textContent = sbMessage(err); m2.className = "msg bad"; } const b = document.querySelector('[data-act="save"]'); if (b) b.disabled = false; }
+    return;
+  }
+  const me = user ? await user.id() : null;
   try {
     const plan = cls.teacher || "";
     if ((d.teacher || "") !== (teacherOf(cls)?.key || "")) {
@@ -1219,6 +1554,11 @@ async function save() {
 }
 async function removeBooking() {
   const cls = CLASS[state.pick.cls];
+  if (sb) {
+    const { data, error } = await sb.from("bookings").delete().eq("class_id", cls.id).eq("part", state.pick.part).select();
+    if (error || !data?.length) { const msg = $("msg"); if (msg) { msg.textContent = error ? sbMessage(error) : "Your role can't change this class."; msg.className = "msg bad"; } return; }
+    await sbLoad.bookings(); state.draft.pattern = null; rebuild(); render(); return;
+  }
   try { await store.collection("bookings").doc(docId(DATA.semester, cls.id, state.pick.part)).delete(); state.draft.pattern = null; render(); }
   catch (err) { const msg = $("msg"); if (msg) { msg.textContent = "Could not remove. Try again."; msg.className = "msg bad"; } }
 }
@@ -1235,11 +1575,17 @@ function openPublish() {
     <ul class="checks">
       <li class="${done === totalMeetings ? "good" : "warn"}">${done} of ${totalMeetings} class meetings are booked${done === totalMeetings ? "" : ` · ${totalMeetings - done} still unscheduled`}</li>
       <li class="${bad ? "bad" : "good"}">${bad ? `${bad} open conflicts across all colleges` : "No open conflicts"}</li>
-      <li class="${Object.values(loads).some((L) => L.status === "over") ? "warn" : "good"}">${Object.values(loads).filter((L) => L.status === "over").length} faculty over their limit</li></ul>
+      <li class="${Object.values(loads).some((L) => L.status === "over") ? "warn" : "good"}">${Object.values(loads).filter((L) => L.status === "over").length} faculty over their limit</li>
+      ${BACKEND ? (() => { const n = DATA.classes.filter((c) => approvalOf(c)?.state === "pending").length; return `<li class="${n ? "warn" : "good"}">${n ? `${n} GE classes still waiting for approval` : "Every GE class taught by college faculty is approved"}</li>`; })() : ""}</ul>
     <div class="actions"><button type="button" class="btn primary" data-pub="go">${bad ? `Publish with ${bad} conflicts` : "Publish"}</button>
       <button type="button" class="btn" data-pub="cancel">Cancel</button><span class="msg" id="pubmsg"></span></div></div>`;
 }
 async function publish() {
+  if (sb) {
+    const { error } = await sb.rpc("publish_schedule");
+    if (error) { const m = $("pubmsg"); if (m) { m.textContent = sbMessage(error); m.className = "msg bad"; } return; }
+    await sbLoad.settings(); $("publishPanel").hidden = true; toast("Schedule published."); render(); return;
+  }
   const me = user ? await user.id() : null;
   try {
     await store.collection("status").doc(`sem${DATA.semester}`).set({ sem: DATA.semester, published: true, at: new Date().toISOString(), by: me,
@@ -1268,7 +1614,7 @@ function runSearch(q) {
   box.innerHTML = searchHits.length ? searchHits.map((x, i) => `<button type="button" data-hit="${i}" class="${i === 0 ? "on" : ""}"><small>${x.kind}</small><span>${esc(x.label)}<em>${esc(x.sub)}</em></span></button>`).join("")
     : `<p class="empty" style="padding:8px">No matches.</p>`;
 }
-function goHit(i) { const h = searchHits[i]; if (!h) return; h.go(); state.pick = null; $("results").hidden = true; $("search").value = ""; render(); window.scrollTo(0, 0); }
+function goHit(i) { const h = searchHits[i]; if (!h) return; h.go(); if (!allowedScopes().includes(state.scope)) state.scope = allowedScopes()[0]; state.pick = null; $("results").hidden = true; $("search").value = ""; render(); window.scrollTo(0, 0); }
 
 // ---------- events ----------
 document.addEventListener("click", async (ev) => {
@@ -1278,6 +1624,21 @@ document.addEventListener("click", async (ev) => {
   if (!t) return;
   const ds = t.dataset;
   if (ds.hit) { goHit(+ds.hit); return; }
+  if (ds.auth) { if (ds.auth === "signout") { await sb.auth.signOut(); return; } showLogin(ds.auth); return; }
+  if (ds.decide) { t.disabled = true; if (await decide(ds.cid, ds.decide)) { await sbLoad.ge_approvals(); rebuild(); render(); } else t.disabled = false; return; }
+  if (ds.decideall) {
+    const list = approvalList().filter((x) => needsMe(x.a));
+    t.disabled = true;
+    for (const [i, x] of list.entries()) { t.textContent = `Approving ${i + 1} of ${list.length}…`; if (!(await decide(x.c.id, "approve"))) break; }
+    await sbLoad.ge_approvals(); rebuild(); render(); return;
+  }
+  if (ds.apprfilter) { state.apprFilter = ds.apprfilter; render(); return; }
+  if (ds.staffedit !== undefined) { state.staffEdit = staffList.find((x) => x.email === ds.staffedit) || null; render(); return; }
+  if (ds.staffdel) {
+    if (!window.confirm(`Remove ${ds.staffdel}? They will no longer see the schedule.`)) return;
+    const { error } = await sb.from("staff").delete().eq("email", ds.staffdel);
+    if (error) toast(sbMessage(error)); await sbLoad.staff(); render(); return;
+  }
   if (ds.pub) { if (ds.pub === "go") { t.disabled = true; await publish(); } else $("publishPanel").hidden = true; return; }
   if (t.id === "publishBtn") { openPublish(); return; }
   if (ds.export) { $("exportMenu")?.removeAttribute("open"); if (ds.export === "xlsx") exportExcel(); else { state.view = "reports"; render(); } return; }
@@ -1327,11 +1688,20 @@ document.addEventListener("keydown", (ev) => {
   }
   if (ev.key === "Escape") { if (printJob) { printJob = null; renderPrintPanel(); } $("publishPanel").hidden = true; }
 });
-document.addEventListener("change", (ev) => {
+document.addEventListener("change", async (ev) => {
   const id = ev.target.id;
   if (id === "scopeSel") { state.scope = ev.target.value; state.pick = null; state.draft = null; render(); return; }
   if (id === "aySel") { printCfg.ay = ev.target.value.replace(/^SY /, ""); try { localStorage.setItem("cs-print", JSON.stringify(printCfg)); } catch (e) {} render(); return; }
   if (id === "gridKey") { state.gridKey[state.gridMode] = ev.target.value; render(); return; }
+  if (id === "geOpen" || id === "apprScope") {
+    const { error } = await sb.from("settings").update({ ge_open: $("geOpen").checked, approval_scope: $("apprScope").value }).eq("id", 1);
+    if (error) toast(sbMessage(error)); await sbLoad.settings(); rebuild(); render(); return;
+  }
+  if (id === "stCollege") {
+    const col = ev.target.value;
+    $("stDept").innerHTML = [...new Set(Object.values(DATA.teachers).filter((t) => t.college === col).map((t) => t.dept))].sort().map((d) => `<option>${esc(d)}</option>`).join("");
+    return;
+  }
   if (!state.draft) return;
   if (id === "roomSel") { state.draft.room = ev.target.value; render(); }
   if (id === "teacherSel") { state.draft.teacher = ev.target.value; render(); }
@@ -1686,8 +2056,9 @@ document.addEventListener("click", (ev) => {
 });
 
 // ---------- start ----------
-rebuild(); render();
-(async () => {
+if (BACKEND) { $("app").hidden = true; startHosted().catch((e) => { loginMsg = "Could not reach the server: " + e.message; showLogin("signin"); }); }
+else rebuild(), render();
+if (!BACKEND) (async () => {
   let db = null;
   if (window.claude?.use) {
     try { [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]); } catch (e) { db = null; }

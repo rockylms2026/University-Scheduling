@@ -1,0 +1,417 @@
+{
+ "note": "Bookings made in the claude.ai version, exported for the move to Supabase.",
+ "bookings": [
+  {
+   "sem": 1,
+   "class": "S1-0630",
+   "part": "Lec",
+   "pattern": "M3 MWF",
+   "room": "DIW 201",
+   "at": "2026-10-12T01:48:55.972Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0631",
+   "part": "Lec",
+   "pattern": "M2 MWF",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:14:59.085Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0632",
+   "part": "Lec",
+   "pattern": "M2 MWF",
+   "room": "DIW 201",
+   "at": "2026-10-12T01:57:24.182Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0633",
+   "part": "Lec",
+   "pattern": "M3 MWF",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:15:24.317Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0634",
+   "part": "Lec",
+   "pattern": "T4 TTh",
+   "room": "DIW 201",
+   "at": "2026-10-12T02:02:35.389Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0635",
+   "part": "Lec",
+   "pattern": "T2 TTh",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:15:46.282Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0636",
+   "part": "Lec",
+   "pattern": "M4 MWF",
+   "room": "DIW 201",
+   "at": "2026-10-12T02:03:24.516Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0637",
+   "part": "Lec",
+   "pattern": "M5 MWF",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:26:33.241Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0638",
+   "part": "PE",
+   "pattern": "M7-M8 Fri",
+   "room": "Covered Court",
+   "at": "2026-10-12T02:04:09.628Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0639",
+   "part": "PE",
+   "pattern": "M7-M8 Wed",
+   "room": "Covered Court",
+   "at": "2026-10-12T02:27:12.305Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0640",
+   "part": "NSTP",
+   "pattern": "Sat CWTS",
+   "room": null,
+   "at": "2026-10-12T02:13:51.285Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0641",
+   "part": "NSTP",
+   "pattern": "Sat CWTS",
+   "room": null,
+   "at": "2026-10-12T02:27:19.777Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0642",
+   "part": "Lec",
+   "pattern": "M5 Mon",
+   "room": "DIW 201",
+   "at": "2026-10-12T02:14:19.046Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0643",
+   "part": "Lec",
+   "pattern": "M1 Mon",
+   "room": "DIW 201",
+   "at": "2026-10-12T02:27:42.007Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0644",
+   "part": "Lec",
+   "pattern": "M2 MWF",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:29:04.465Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0645",
+   "part": "Lec",
+   "pattern": "M4 MWF",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:36:01.848Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0646",
+   "part": "Lab",
+   "pattern": "LC Wed",
+   "room": "DIW 204",
+   "at": "2026-10-12T02:30:29.910Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0646",
+   "part": "Lec",
+   "pattern": "M3 MW",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:29:27.064Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0647",
+   "part": "Lab",
+   "pattern": "LE Tue",
+   "room": "DIW 204",
+   "at": "2026-10-12T02:37:03.391Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0647",
+   "part": "Lec",
+   "pattern": "M6 MF",
+   "room": "DIW 201",
+   "at": "2026-10-12T02:36:46.592Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0648",
+   "part": "Lec",
+   "pattern": "T2 TTh",
+   "room": "DIW 201",
+   "at": "2026-10-12T02:30:56.232Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0649",
+   "part": "Lec",
+   "pattern": "T5 TTh",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:37:28.461Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0650",
+   "part": "Lec",
+   "pattern": "T3 TTh",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:33:34.546Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0651",
+   "part": "Lec",
+   "pattern": "T4 TTh",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:37:41.173Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0652",
+   "part": "Lec",
+   "pattern": "M4 MWF",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:35:22.540Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0653",
+   "part": "Lec",
+   "pattern": "M3 MWF",
+   "room": "DIW 301",
+   "at": "2026-10-12T02:38:05.883Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0654",
+   "part": "PE",
+   "pattern": "M7-M8 Fri",
+   "room": "Dance Studio",
+   "at": "2026-10-12T02:35:44.656Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0655",
+   "part": "PE",
+   "pattern": "M7-M8 Wed",
+   "room": "Dance Studio",
+   "at": "2026-10-12T02:38:27.620Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0656",
+   "part": "Lec",
+   "pattern": "M1 MWF",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:38:46.849Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0657",
+   "part": "Lec",
+   "pattern": "M4 MWF",
+   "room": "DIW 301",
+   "at": "2026-10-12T02:42:10.162Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0658",
+   "part": "Lec",
+   "pattern": "T5 TTh",
+   "room": "DIW 201",
+   "at": "2026-10-12T02:38:56.631Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0659",
+   "part": "Lec",
+   "pattern": "M3 MWF",
+   "room": "DIW 302",
+   "at": "2026-10-12T02:42:17.644Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0660",
+   "part": "Lec",
+   "pattern": "T4 TTh",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:39:08.167Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0661",
+   "part": "Lec",
+   "pattern": "T3 TTh",
+   "room": "DIW 302",
+   "at": "2026-10-12T02:42:33.841Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0662",
+   "part": "Lec",
+   "pattern": "T3 TTh",
+   "room": "DIW 201",
+   "at": "2026-10-12T02:39:19.090Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0663",
+   "part": "Lec",
+   "pattern": "T4 TTh",
+   "room": "DIW 301",
+   "at": "2026-10-12T02:42:45.683Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0664",
+   "part": "Lec",
+   "pattern": "T1 TTh",
+   "room": "DIW 201",
+   "at": "2026-10-12T02:39:32.344Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0665",
+   "part": "Lec",
+   "pattern": "M5 MWF",
+   "room": "DIW 301",
+   "at": "2026-10-12T02:42:56.278Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0666",
+   "part": "Lec",
+   "pattern": "M5 MWF",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:41:37.833Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0667",
+   "part": "Lec",
+   "pattern": "T2 TTh",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:43:49.298Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0668",
+   "part": "Lec",
+   "pattern": "M2 MWF",
+   "room": "DIW 301",
+   "at": "2026-10-12T02:41:55.927Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0669",
+   "part": "Lec",
+   "pattern": "M6 MWF",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:44:03.441Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0670",
+   "part": "Lec",
+   "pattern": "M6 MWF",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:45:03.210Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0671",
+   "part": "Lec",
+   "pattern": "T1 TTh",
+   "room": "DIW 202",
+   "at": "2026-10-12T02:46:12.022Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0672",
+   "part": "Lec",
+   "pattern": "T3 TTh",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:45:20.686Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0673",
+   "part": "Lec",
+   "pattern": "M1 MWF",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:45:34.363Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0674",
+   "part": "Lec",
+   "pattern": "M1 MWF",
+   "room": "DIW 301",
+   "at": "2026-10-12T02:46:20.406Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0675",
+   "part": "Lec",
+   "pattern": "T5 TTh",
+   "room": "DIW 203",
+   "at": "2026-10-12T02:46:31.250Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0676",
+   "part": "Lec",
+   "pattern": "M1 MWF",
+   "room": "MAL 201",
+   "at": "2026-10-12T02:51:26.099Z"
+  }
+ ],
+ "teachers": [
+  {
+   "sem": 1,
+   "class": "S1-0637",
+   "teacher": "CISC-T2",
+   "at": "2026-10-12T02:26:32.818Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0666",
+   "teacher": "CCJPS-D2",
+   "at": "2026-10-12T02:41:37.414Z"
+  },
+  {
+   "sem": 1,
+   "class": "S1-0667",
+   "teacher": "CCJPS-D2",
+   "at": "2026-10-12T02:43:48.878Z"
+  }
+ ]
+}

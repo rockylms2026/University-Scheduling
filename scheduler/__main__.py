@@ -5,6 +5,7 @@
   diagnose --semester N    explain why a semester cannot be scheduled
   export                   write the Excel workbook and the HTML viewer
   planner [--semester N]   write the manual scheduling page (output/scheduling_system.html)
+  web [--semester N]       write the hosted version with logins (web/index.html, supabase/setup.sql)
   apply-changes FILE       add changes saved in the online schedule (JSON) to data/overrides.yaml
 """
 
@@ -30,6 +31,8 @@ def main(argv=None) -> int:
     p.add_argument("--semester", type=int, choices=[1, 2], required=True)
     sub.add_parser("export")
     p = sub.add_parser("planner")
+    p.add_argument("--semester", type=int, choices=[1, 2], default=1)
+    p = sub.add_parser("web")
     p.add_argument("--semester", type=int, choices=[1, 2], default=1)
     p = sub.add_parser("apply-changes")
     p.add_argument("file")
@@ -88,6 +91,12 @@ def main(argv=None) -> int:
     if args.command == "planner":
         from .export_planner import write_planner
         print("Scheduling page:", write_planner(uni, args.semester))
+        return 0
+
+    if args.command == "web":
+        from .export_web import write_web
+        for path in write_web(uni, args.semester):
+            print("Wrote", path)
         return 0
 
     if args.command == "apply-changes":
