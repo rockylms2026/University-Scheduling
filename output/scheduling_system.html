@@ -418,6 +418,7 @@ let settings = { geOpen: true };
 let approvals = {};          // class id -> decision on a borrowed GE class
 let requests = {};           // class id -> { department, college }: the department a section asked
 let submissions = null;      // department -> its submitted schedule (null until first loaded)
+let instrRequests = {};      // class id -> request for an instructor, made without booking
 let geLists = {};            // GE course -> departments that may teach it (hosted: from the database)
 let geRows = [];             // the ge_teachers rows, for the Settings page
 Object.entries(DATA.geTeachers || {}).forEach(([code, depts]) => (geLists[code] = depts.slice()));
@@ -497,7 +498,10 @@ function approvalOf(cls) {
   if (!BACKEND || classKind(cls) !== "borrowed") return null;
   const t = teacherOf(cls)?.key || null, sig = scheduleSig(cls), r = requestOf(cls);
   const base = { teacher: t, approver: approverOf(cls), dept: r?.department || null };
-  if (!sig) return { state: "unscheduled", ...base };
+  if (!sig) {
+    const last = approvals[cls.id];
+    return last?.rejected_at ? { state: "rejected", ...base, dept: last.department, approver: last.department, row: last } : { state: "unscheduled", ...base };
+  }
   if (!r) return { state: "unasked", ...base };
   const a = approvals[cls.id];
   if (!a || a.department !== r.department || a.schedule !== sig || (a.teacher || null) !== t) return { state: "pending", ...base };
@@ -555,6 +559,10 @@ const sbLoad = {
     pubStatus = s.published_at ? { at: s.published_at, by: s.published_by } : null;
   },
   staff: async () => { if (isAdmin()) staffList = await sbAll(sb.from("staff").select("*").order("email")); },
+  instructor_requests: async () => {
+    instrRequests = {};
+    (await sbAll(sb.from("instructor_requests").select("*"))).forEach((r) => (instrRequests[r.class_id] = r));
+  },
   submissions: async () => {
     const before = submissions;
     submissions = {};
@@ -598,7 +606,7 @@ async function enter(session) {
   rebuild(); render();
   if (!window._sbChannel) {
     window._sbChannel = sb.channel("schedule");
-    ["bookings", "teacher_changes", "ge_requests", "ge_decisions", "ge_teachers", "settings", "staff", "submissions"].forEach((t) =>
+    ["bookings", "teacher_changes", "ge_requests", "ge_decisions", "ge_teachers", "settings", "staff", "submissions", "instructor_requests"].forEach((t) =>
       window._sbChannel.on("postgres_changes", { event: "*", schema: "public", table: t }, () => sbRefresh(t)));
     window._sbChannel.subscribe();
   }
@@ -1119,19 +1127,19 @@ function conflictList(list, limit) {
     ${limit && list.length > limit ? `<button type="button" class="btn link" data-view="conflicts">See all ${list.length}</button>` : ""}</div>`;
 }
 // ===== Submitting a department schedule (hosted version) =====
-// The part a department does itself, still incomplete: no time, no room, or (except borrowed GE
-// classes, whose instructors come from other departments later) no teacher. Mirrors dept_missing().
-// GE Department courses are left out.
+// The part a department does itself, still incomplete: its major classes and the GE classes it
+// teaches, with no time, no room, or no teacher. Mirrors dept_missing(). Borrowed GE classes are
+// booked after the lending departments submit, and GE Department courses are left out.
 function missingFor(dept) {
   const out = [];
-  DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) !== "gedept" && c.meetings.length).forEach((c) => {
+  DATA.classes.filter((c) => progDept(c.section) === dept && ["major", "own"].includes(classKind(c)) && c.meetings.length).forEach((c) => {
     const issues = [];
     c.meetings.forEach((m) => {
       const b = bookings[`${c.id}|${m.part}`];
       if (!b) issues.push(`${PART[m.part].toLowerCase()} has no time`);
       else if (m.pools.some((p) => p) && !b.room) issues.push(`${PART[m.part].toLowerCase()} has no room`);
     });
-    if (classKind(c) !== "borrowed" && !teacherOf(c)) issues.push("no teacher");
+    if (!teacherOf(c)) issues.push("no teacher");
     if (issues.length) out.push({ cls: c, issues });
   });
   return out;
@@ -1139,13 +1147,13 @@ function missingFor(dept) {
 // Borrowed GE classes of a department still without an approved instructor from another department.
 function waitingFor(dept) {
   return DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) === "borrowed")
-    .map((c) => ({ cls: c, a: approvalOf(c) })).filter((x) => x.a && x.a.state !== "approved");
+    .map((c) => ({ cls: c, a: approvalOf(c) || { state: "unscheduled" } })).filter((x) => x.a.state !== "approved");
 }
 // A short description: "2 SOCS 195 classes waiting for Economics, 1 HIST 201 class not asked yet".
 function waitingText(list) {
   const groups = {};
   list.forEach(({ cls, a }) => {
-    const what = a.state === "unasked" || a.state === "unscheduled" ? "not asked yet" : a.state === "rejected" ? `not approved by ${a.dept}` : `waiting for ${a.dept}`;
+    const what = a.state === "unscheduled" ? "not booked yet" : a.state === "unasked" ? "booked without an instructor" : a.state === "rejected" ? `not approved by ${a.dept}` : `waiting for ${a.dept}`;
     const k = `${cls.course}|${what}`;
     groups[k] = (groups[k] || 0) + 1;
   });
@@ -1182,7 +1190,7 @@ function openSubmit(dept) {
   const el = $("submitPanel");
   const bySection = {};
   miss.forEach((x) => (bySection[x.cls.section] = bySection[x.cls.section] || []).push(x));
-  const total = DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) !== "gedept" && c.meetings.length).length;
+  const total = DATA.classes.filter((c) => progDept(c.section) === dept && ["major", "own"].includes(classKind(c)) && c.meetings.length).length;
   el.hidden = false;
   el.innerHTML = `<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="subTitle" style="width:min(640px,100%)">
     <h2 id="subTitle">Submit the schedule of the Department of ${esc(dept)}</h2>
@@ -1190,8 +1198,8 @@ function openSubmit(dept) {
       <div class="misslist">${Object.entries(bySection).sort((a, b) => numSort(a[0], b[0])).map(([sec, list]) => `<div><h3>${esc(sec)}</h3><ul style="margin:0;padding-left:18px">${list.map((x) =>
         `<li><b>${esc(x.cls.course)}</b> ${esc(DATA.courses[x.cls.course].title)}: ${esc(x.issues.join(", "))}</li>`).join("")}</ul></div>`).join("")}</div>
       <p class="small" style="margin:0">Finish these, then submit. Other departments rely on a submitted schedule to see which of your instructors are free.</p>`
-    : `<ul class="checks"><li class="good">Every class has a time and a room where needed, and every class your department teaches has a teacher.</li></ul>
-       ${waitingFor(dept).length ? `<p class="small" style="margin:0"><b>After you submit:</b> ${esc(waitingText(waitingFor(dept)))}. Ask the instructors on the Timetable once those departments have submitted. The Submissions page shows them as waiting until they are approved.</p>` : ""}`}
+    : `<ul class="checks"><li class="good">Every major class and every GE class your department teaches has a time, a room where needed, and a teacher.</li></ul>
+       ${waitingFor(dept).length ? `<p class="small" style="margin:0"><b>After you submit:</b> ${esc(waitingText(waitingFor(dept)))}. Book them on the Timetable with free instructors of the departments that teach them, once those departments have submitted (see GE Availability). The Submissions page shows them until they are approved.</p>` : ""}`}
     <p class="small muted" style="margin:0">Submitting tells the other departments and the Registrar that your own part is done, so they can see which of your instructors are free for GE classes. You can still make changes; they will show as changed since submitting until you submit again. GE Department courses are not counted.</p>
     <div class="actions">${miss.length ? "" : `<button type="button" class="btn primary" data-subgo="${esc(dept)}">Submit</button>`}
       <button type="button" class="btn${miss.length ? " primary" : ""}" data-subcancel="1">${miss.length ? "Go back and finish" : "Cancel"}</button><span class="msg bad" id="submsg"></span></div></div>`;
@@ -1212,7 +1220,7 @@ function renderSubmissions(page) {
   const depts = [...new Set(Object.values(DATA.programs).map((p) => p.dept))].sort();
   const rows = depts.map((dept) => {
     const sub = submissions?.[dept], miss = missingFor(dept).length, wait = waitingFor(dept);
-    const total = DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) !== "gedept" && c.meetings.length).length;
+    const total = DATA.classes.filter((c) => progDept(c.section) === dept && ["major", "own"].includes(classKind(c)) && c.meetings.length).length;
     const when = sub ? new Date(sub.submitted_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
     const status = !sub ? `<span class="chip none">Not submitted</span>`
       : `<span class="chip ${wait.length ? "info" : "good"}">${wait.length ? "Submitted" : "Fully complete"}</span>${changedSince(dept) ? ` <span class="chip warn">Changed since</span>` : ""}${
@@ -1224,7 +1232,7 @@ function renderSubmissions(page) {
   }).join("");
   const n = depts.filter((d) => submissions?.[d]).length;
   const full = depts.filter((d) => submissions?.[d] && !waitingFor(d).length).length;
-  page.innerHTML = `${head("Submissions", `${n} of ${depts.length} departments have submitted, ${full} fully complete. A department submits when its own part is done: every class has a time, and every class it teaches has a teacher. It is fully complete once its borrowed GE classes have approved instructors from other departments.`, submitButton())}
+  page.innerHTML = `${head("Submissions", `${n} of ${depts.length} departments have submitted, ${full} fully complete. A department submits when its own part is done: every major class and every GE class it teaches has a time and a teacher. It is fully complete once its borrowed GE classes are booked with instructors of other departments and approved.`, submitButton())}
     <div class="card"><div class="scroll"><table><thead><tr><th>Department</th><th>Status</th><th>Submitted</th><th class="num">Own part done</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
@@ -1397,14 +1405,13 @@ function editor(cls, part) {
   const rows = opts.map((o) => {
     const ev = evaluate(cls, m, o, null, checkTeacher).filter(([l, txt]) => l !== "info" && txt !== "Choose a room");
     const rooms = m.pools.some((p) => p) ? freeRooms(cls, m, o).length : -1;
-    const ask = borrowed ? askable(cls, o).filter((x) => x.submitted && x.free.length) : null;
+    const ask = borrowed ? askable(cls, o).filter((x) => x.submitted && x.free.some((k) => luFor(k) + cls.lu <= DATA.teachers[k].max)) : null;
     const hf = borrowed ? ask.length : -1;
     const bad = ev.filter(([l]) => l === "bad");
     let chip, why;
     if (bad.length) { chip = `<span class="chip bad">Conflict</span>`; why = bad[0][1]; }
     else if (rooms === 0) { chip = `<span class="chip bad">No room</span>`; why = "Every suitable room is booked"; }
-    else if (hf === 0 && !askable(cls, null).some((x) => x.submitted)) { chip = `<span class="chip good">Free</span>`; why = [rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed", "ask an instructor later"].join(" · "); }
-    else if (hf === 0) { chip = `<span class="chip warn">No instructor</span>`; why = `No instructor of a submitted department is free then; you can still book it and request one`; }
+    else if (hf === 0) { chip = `<span class="chip bad">No instructor</span>`; why = askable(cls, null).some((x) => x.submitted) ? "No instructor of a submitted department is free then" : `No department that teaches ${cls.course} has submitted yet`; }
     else if (ev.length) { chip = `<span class="chip warn">Check</span>`; why = ev[0][1]; }
     else { chip = `<span class="chip good">Free</span>`; why = [rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed", hf > 0 && ask.map((x) => `${x.dept} ${x.free.length}`).join(", ") + " free"].filter(Boolean).join(" · "); }
     const when = `${o.iv.map((i) => i[0]).join("/")} ${hm(o.iv[0][1])}–${hm(o.iv[0][2])}`;
@@ -1437,28 +1444,33 @@ function editor(cls, part) {
     const checks = evaluate(cls, m, opt, d.room || null, checkTeacher);
     let askSel = "";
     if (borrowed && tRight) {
-      // Instructors of departments that have submitted, free at this time and under their load limit.
-      // When nobody is available, a department can be asked to provide an instructor (value dept|*).
+      // Book together with an instructor of a department that has submitted, free at this time and
+      // under their load limit. If nobody is available at any time, a department can be asked for one.
       const list = askable(cls, opt);
       const full = (k) => luFor(k) + cls.lu > DATA.teachers[k].max;
       const avail = list.filter((x) => x.submitted).flatMap((x) => x.free.filter((k) => !full(k)));
+      const anyTime = optionsFor(m.kind).filter((o) => !o.ex).some((o) => askable(cls, o).some((x) => x.submitted && x.free.some((k) => !full(k))));
       const val = d.askDept && d.askTeacher ? `${d.askDept}|${d.askTeacher}` : "";
-      const openReq = list.filter((x) => x.submitted).map((x) =>
-        `<option value="${esc(x.dept)}|*"${`${x.dept}|*` === val ? " selected" : ""}>Request an instructor from ${esc(x.dept)} (${esc(x.college)})</option>`).join("");
-      askSel = `<label for="askSel" style="grid-column:span 2">Ask an instructor to teach it
+      const openReq = !anyTime ? list.map((x) =>
+        `<option value="${esc(x.dept)}|*"${`${x.dept}|*` === val ? " selected" : ""}>Request an instructor from ${esc(x.dept)} (${esc(x.college)})</option>`).join("") : "";
+      askSel = `<label for="askSel" style="grid-column:span 2">Instructor (from a department that teaches ${esc(cls.course)})
         <select id="askSel"${right ? " disabled" : ""}><option value="">Choose an instructor</option>${list.map((x) => !x.submitted
           ? `<optgroup label="${esc(x.dept)} (${esc(x.college)}): not submitted yet"></optgroup>`
           : `<optgroup label="${esc(x.dept)} (${esc(x.college)})${x.free.length ? "" : ": nobody free then"}">${x.free.map((k) =>
               `<option value="${esc(x.dept)}|${k}"${`${x.dept}|${k}` === val ? " selected" : ""}${full(k) ? " disabled" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${full(k) ? " · full load" : ""}${k === cls.planTeacher ? " · loading plan" : ""}</option>`).join("")}</optgroup>`).join("")}
-          ${!avail.length && openReq ? `<optgroup label="No instructor available: request one">${openReq}</optgroup>` : ""}</select></label>`;
+          ${openReq ? `<optgroup label="Nobody is available at any time">${openReq}</optgroup>` : ""}</select></label>`;
       const pick = list.find((x) => x.dept === d.askDept);
-      if (!list.some((x) => x.submitted)) checks.push(["info", `Book the time now. No department that teaches ${cls.course} has submitted yet; once one does, open this class again and ask one of its instructors (see the GE Availability page).`]);
-      else if (!d.askTeacher) checks.push(["info", avail.length ? `You can book the time now and ask an instructor later, or choose one above to send the request now.`
-        : `No instructor is free and under load at ${opt.label}. Book the time now, or choose “Request an instructor” to ask a department to find one.`]);
+      if (!list.some((x) => x.submitted)) checks.push(["bad", `No department that teaches ${cls.course} has submitted yet, so it cannot be booked. Submit your own part; the bell tells you when one submits.`]);
+      else if (!d.askTeacher) checks.push(["bad", avail.length ? `Choose the instructor: a borrowed GE class is booked together with its instructor`
+        : anyTime ? `No instructor is free and under load at ${opt.label}. Choose another time (the times marked Free have one).`
+        : `No instructor is free at any time. Choose “Request an instructor” to ask a department to find one.`]);
+      else if (d.askTeacher === "*") checks.push(["info", `This sends a request to ${d.askDept} and the Registrar for an instructor. Nothing is booked yet; book the class once they tell you someone is free.`]);
       else if (!pick?.submitted) checks.push(["bad", `${d.askDept} has not submitted its schedule yet`]);
-      else if (d.askTeacher === "*") checks.push(["info", `Requests an instructor from ${d.askDept}: it will find one when it approves`]);
       else if (!pick.free.includes(d.askTeacher)) checks.push(["bad", `${DATA.teachers[d.askTeacher].name} is not free at ${opt.label}`]);
-      else checks.push(["good", `${DATA.teachers[d.askTeacher].name} (${d.askDept}) is free at ${opt.label}`]);
+      else checks.push(["good", `${DATA.teachers[d.askTeacher].name} (${d.askDept}) is free at ${opt.label}. Booking holds this time for them until ${d.askDept} approves.`]);
+      const last = approvals[cls.id], ir = instrRequests[cls.id];
+      if (last?.rejected_at && !b) checks.push(["warn", `Last booking was not approved by ${last.department}${last.note ? `: “${last.note}”` : ""}. Choose another instructor or time.`]);
+      if (ir) checks.push(["info", `You asked ${ir.department} for an instructor on ${new Date(ir.requested_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}${ir.note ? ` (“${ir.note}”)` : ""}.`]);
     }
     if (teacherKey) {
       const lu = luFor(teacherKey) + (t?.key === teacherKey ? 0 : cls.lu);
@@ -1478,14 +1490,15 @@ function editor(cls, part) {
       const same = r && r.department === d.askDept && (teacherOf(cls)?.key || "*") === (d.askTeacher || "");
       checks.push(["info", `Request: the Department of ${progDept(cls.section)} does not teach ${cls.course}, so it asks an instructor of a department that does. ${who[0].toUpperCase() + who.slice(1)} approves, and may give it to another of its instructors.`
         + (same ? (cur.state === "approved" ? " Now: approved." : cur.state === "rejected" ? ` Now: not approved${cur.row.note ? ` (“${cur.row.note}”)` : ""}. Ask another instructor or change the time.` : cur.state === "pending" ? " Now: waiting for an answer." : "")
-           : !d.askTeacher ? " Saving books the time only; no request is sent yet." : r ? " Saving sends a new request." : " Saving sends the request.")]);
+           : d.askTeacher === "*" ? "" : r ? " Saving books it again and asks for approval again." : " Saving books it and asks for approval.")]);
     }
     detail = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${askSel}${teacherSel}</div>
       ${borrowed && tRight ? "" : `<div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>
         <div class="who-free" style="margin-top:4px">${(near.length ? near : ft).slice(0, 14).map((x) => `<span class="${x.full ? "full" : ""}">${esc(DATA.teachers[x.key].name)} · ${luFor(x.key)}/${DATA.teachers[x.key].max}</span>`).join("") || `<span class="full">Nobody in this department is free</span>`}
         ${(near.length ? near : ft).length > 14 ? `<span>+${(near.length ? near : ft).length - 14} more in the list</span>` : ""}</div></div>`}
       <ul class="checks">${checks.length ? checks.map(([l, txt]) => `<li class="${l}">${esc(txt)}</li>`).join("") : `<li class="good">No conflicts. Students, teacher, and room are all free.</li>`}</ul>
-      <div class="actions"><button type="button" class="btn primary" data-act="save"${ok && canWrite ? "" : " disabled"}>${b ? "Save changes" : "Book this time"}</button>
+      <div class="actions">${borrowed && tRight && d.askTeacher === "*" ? `<button type="button" class="btn primary" data-act="askinstr">Send instructor request</button>`
+        : `<button type="button" class="btn primary" data-act="save"${ok && canWrite ? "" : " disabled"}>${b ? "Save changes" : "Book this time"}</button>`}
         ${b ? `<button type="button" class="btn danger" data-act="remove"${canWrite && !right ? "" : " disabled"}>Remove booking</button>` : ""}
         <button type="button" class="btn" data-act="close">Close</button><span class="msg" id="msg"></span></div>`;
   }
@@ -1669,26 +1682,46 @@ function renderApprovals(page) {
     <div class="card" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="pills">${filters.map(([k, l, f]) =>
       `<button type="button" class="pill" data-apprfilter="${k}" aria-pressed="${state.apprFilter === k}">${l}<small>${all.filter(f).length}</small></button>`).join("")}</div>
       ${mineNow.length > 1 ? `<button type="button" class="btn primary" data-decideall="approve">Approve all ${mineNow.length} shown</button>` : ""}</div></div>
+    ${instrRequestCard()}
     <div class="card">${shown.length ? `<div class="scroll"><table><thead><tr><th>Class</th><th>Schedule</th><th>Asked</th><th>Teacher</th><th>Answers</th><th>Status</th><th></th></tr></thead><tbody>
       ${shown.map(({ c, a }) => {
         const mine = canDecide(c), r = a.row || {};
         const acts = [];
-        if (mine && a.state !== "approved") acts.push(`<button type="button" class="btn primary" data-decide="approve" data-cid="${c.id}">Approve</button>`);
+        if (mine && a.state === "pending") acts.push(`<button type="button" class="btn primary" data-decide="approve" data-cid="${c.id}">Approve</button>`);
         if (mine && a.state === "pending") acts.push(`<button type="button" class="btn danger" data-decide="reject" data-cid="${c.id}">Reject</button>`);
-        if (a.state === "rejected" && !mine && !editRight(c)) acts.push(`<button type="button" class="btn" data-decide="reopen" data-cid="${c.id}">Ask again</button>`);
+
         const canAsk = !editRight(c) && (a.state === "unasked" || a.state === "rejected");
-        acts.push(`<button type="button" class="btn${canAsk ? " primary" : ""}" data-pick="${c.id}" data-part="${c.meetings[0].part}">${canAsk ? (a.state === "unasked" ? "Ask a department" : "Ask another") : "Open"}</button>`);
+        acts.push(`<button type="button" class="btn${canAsk ? " primary" : ""}" data-pick="${c.id}" data-part="${c.meetings[0].part}">${canAsk ? (a.state === "unasked" ? "Choose an instructor" : "Book again") : "Open"}</button>`);
         const status = a.state === "approved" ? `<span class="chip good">Approved</span><div class="small muted">${esc((r.approved_by || "").split("@")[0])}</div>`
           : a.state === "rejected" ? `<span class="chip bad">Not approved</span><div class="small muted">${esc((r.rejected_by || "").split("@")[0])}${r.note ? `: “${esc(r.note)}”` : ""}</div>`
           : a.state === "unasked" ? `<span class="chip none">Not asked yet</span>` : `<span class="chip warn">Waiting</span>`;
         return `<tr><td><b>${esc(c.course)}</b> · ${esc(c.section)}<div class="small muted">${esc(DATA.courses[c.course].title)} · ${esc(progDept(c.section))}</div></td>
           <td class="small">${esc(scheduleSig(c).replace(/(Lec|Lab|PE|NSTP):/g, "").trim())}</td>
           <td>${a.dept ? `${esc(a.dept)}<div class="small muted">${esc(DATA.deptCollege[a.dept])}${ownGeLeft(a.dept) ? ` · booking its own GE first (${ownGeLeft(a.dept)} left)` : ""}</div>` : "—"}</td>
-          <td>${mine && a.state !== "approved" ? approverTeacherSelect(c, a) : esc(a.teacher ? DATA.teachers[a.teacher].name : a.state === "unasked" ? "—" : "Not yet chosen")}</td>
+          <td>${mine && a.state === "pending" ? approverTeacherSelect(c, a) : esc(a.teacher ? DATA.teachers[a.teacher].name : a.state === "unasked" ? "—" : "Not yet chosen")}</td>
           <td class="small">${esc(a.approver.replace(/^the /, ""))}</td>
           <td>${status}</td>
           <td><div class="actions">${acts.join("")}</div></td></tr>`;
       }).join("")}</tbody></table></div>` : `<p class="empty">Nothing here.</p>`}</div>`;
+}
+// Requests for an instructor made without booking (nobody was available). Shown to the asked
+// department, the asking department, and the Registrar or Dean.
+function instrRequestCard() {
+  const list = Object.values(instrRequests).filter((r) => CLASS[r.class_id]).filter((r) => {
+    const c = CLASS[r.class_id];
+    if (isAdmin()) return true;
+    if (me.role === "chair") return r.department === me.department || progDept(c.section) === me.department;
+    if (me.role === "associate_dean") return r.college === me.college || progCollege(c.section) === me.college;
+    return false;
+  });
+  if (!list.length) return "";
+  return `<div class="card"><div class="cardhead"><h2>Instructor requests</h2><span class="chip warn">${list.length}</span></div>
+    <p class="small muted" style="margin:0">Sections that found no free instructor at any time ask the department for one. Once someone is free (or a new instructor is added), tell the section; it then books the class.</p>
+    <div class="scroll"><table><thead><tr><th>Class</th><th>Asked</th><th>Note</th><th>When</th><th></th></tr></thead><tbody>${list.map((r) => {
+      const c = CLASS[r.class_id];
+      return `<tr><td><b>${esc(c.course)}</b> · ${esc(c.section)}<div class="small muted">${esc(progDept(c.section))}</div></td><td>${esc(r.department)}<div class="small muted">${esc(r.college)}</div></td>
+        <td class="small">${esc(r.note || "")}</td><td class="small">${new Date(r.requested_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}<div class="muted">${esc((r.requested_by || "").split("@")[0])}</div></td>
+        <td><button type="button" class="btn" data-closeinstr="${esc(r.class_id)}">Close</button></td></tr>`; }).join("")}</tbody></table></div></div>`;
 }
 async function decide(cid, decision) {
   let note = null, teacher = null;
@@ -1847,13 +1880,14 @@ async function save() {
           : await sb.from("teacher_changes").upsert({ class_id: cls.id, sem: DATA.semester, teacher: d.teacher || null });
         if (r.error) throw r.error;
       }
-      const r = await sb.from("bookings").upsert({ class_id: cls.id, part, sem: DATA.semester, pattern: d.pattern, room: d.room || null });
-      if (r.error) throw r.error;
-      if (classKind(cls) === "borrowed" && d.askTeacher && (requestOf(cls)?.department !== d.askDept || (teacherOf(cls)?.key || "*") !== d.askTeacher)) {
-        const q = await sb.rpc("request_ge", { cid: cls.id, d: d.askDept, t: d.askTeacher === "*" ? null : d.askTeacher });
+      if (classKind(cls) === "borrowed" && !isAdmin() || classKind(cls) === "borrowed" && d.askTeacher && d.askTeacher !== "*") {
+        const q = await sb.rpc("book_borrowed", { cid: cls.id, meeting: part, slot: d.pattern, place: d.room || null, d: d.askDept, t: d.askTeacher });
         if (q.error) throw q.error;
+      } else {
+        const r = await sb.from("bookings").upsert({ class_id: cls.id, part, sem: DATA.semester, pattern: d.pattern, room: d.room || null });
+        if (r.error) throw r.error;
       }
-      await Promise.all([sbLoad.bookings(), sbLoad.teacher_changes(), sbLoad.ge_requests(), sbLoad.ge_decisions()]);
+      await Promise.all([sbLoad.bookings(), sbLoad.teacher_changes(), sbLoad.ge_requests(), sbLoad.ge_decisions(), sbLoad.instructor_requests()]);
       rebuild(); render();
       const m2 = $("msg"); if (m2) { m2.textContent = "Saved."; m2.className = "msg good"; }
     } catch (err) { const m2 = $("msg") || msg; if (m2) { m2.textContent = sbMessage(err); m2.className = "msg bad"; } const b = document.querySelector('[data-act="save"]'); if (b) b.disabled = false; }
@@ -1876,6 +1910,12 @@ async function save() {
 }
 async function removeBooking() {
   const cls = CLASS[state.pick.cls];
+  if (sb && classKind(cls) === "borrowed") {
+    const { error } = await sb.rpc("unbook_borrowed", { cid: cls.id });
+    if (error) { const msg = $("msg"); if (msg) { msg.textContent = sbMessage(error); msg.className = "msg bad"; } return; }
+    await Promise.all([sbLoad.bookings(), sbLoad.teacher_changes(), sbLoad.ge_requests(), sbLoad.ge_decisions()]);
+    state.draft.pattern = null; rebuild(); render(); return;
+  }
   if (sb) {
     const { data, error } = await sb.from("bookings").delete().eq("class_id", cls.id).eq("part", state.pick.part).select();
     if (error || !data?.length) { const msg = $("msg"); if (msg) { msg.textContent = error ? sbMessage(error) : "Your role can't change this class."; msg.className = "msg bad"; } return; }
@@ -1960,6 +2000,10 @@ document.addEventListener("click", async (ev) => {
   }
   if (ds.apprfilter) { state.apprFilter = ds.apprfilter; render(); return; }
   if (ds.submit) { openSubmit(ds.submit); return; }
+  if (ds.closeinstr) {
+    const { error } = await sb.rpc("close_instructor_request", { cid: ds.closeinstr });
+    if (error) toast(sbMessage(error)); await sbLoad.instructor_requests(); render(); return;
+  }
   if (ds.subgo) { t.disabled = true; await doSubmit(ds.subgo); t.disabled = false; return; }
   if (ds.subcancel) { $("submitPanel").hidden = true; return; }
   if (ds.geremove) {
@@ -1997,6 +2041,13 @@ document.addEventListener("click", async (ev) => {
   else if (ds.act === "close") { state.pick = null; state.draft = null; }
   else if (ds.act === "save") { t.disabled = true; await save(); return; }
   else if (ds.act === "remove") { await removeBooking(); return; }
+  else if (ds.act === "askinstr") {
+    const note = window.prompt(`Note for ${state.draft.askDept} and the Registrar (optional):`, "We need an instructor for this class");
+    if (note === null) return;
+    const { error } = await sb.rpc("ask_instructor", { cid: state.pick.cls, d: state.draft.askDept, note });
+    if (error) { toast(sbMessage(error)); return; }
+    await sbLoad.instructor_requests(); render(); toast(`Request sent to ${state.draft.askDept} and the Registrar.`); return;
+  }
   else if (ds.act === "savesettings") {
     printCfg = { university: $("sUniv").value.trim(), office: $("sOffice").value.trim(), ay: $("sAy").value.trim() || PRINT_DEFAULTS.ay,
                  preparedBy: $("sPrep").value.trim(), preparedTitle: $("sPrepTitle").value.trim() };

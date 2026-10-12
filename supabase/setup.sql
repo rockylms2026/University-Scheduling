@@ -5,8 +5,9 @@
 --   registrar, dean    everything, manage staff and GE teaching lists, publish, open GE Department scheduling
 --   chair              major classes of their own department, with their own faculty.
 --                      GE classes of their own sections that their department may teach, with their own faculty.
---                      Other GE classes of their own sections: they book the time and ask an instructor of a
---                      department that may teach the course and has submitted, once their own GE classes are booked.
+--                      Other GE classes of their own sections: they book the time together with a free instructor
+--                      of a department that may teach the course and has submitted (book_borrowed), and the
+--                      lending department approves, swaps the instructor, or rejects (which removes the booking).
 --   associate_dean     the classes of the sections of their own college (as a chair would),
 --                      and approves requests to departments of their college from other colleges
 --   ge_coordinator     courses of the GE Department, once the Registrar or Dean opens them, with no approval
@@ -223,9 +224,23 @@ begin
     select ge_open into ge_is_open from public.settings where id = 1;
     return me.role = 'ge_coordinator' and coalesce(ge_is_open, false);
   end if;
-  mine := (me.role = 'associate_dean' and c.college = me.college) or (me.role = 'chair' and c.department = me.department);
-  if kind = 'borrowed' then return mine and public.own_ge_left(c.department) = 0; end if;
-  return mine;
+  if kind = 'borrowed' then return false; end if;      -- booked only with an instructor, through book_borrowed()
+  return (me.role = 'associate_dean' and c.college = me.college) or (me.role = 'chair' and c.department = me.department);
+end $$;
+
+-- May the signed-in person book (or release) this borrowed GE class for its section? The section
+-- department must have booked every GE class it teaches for its own sections first.
+create or replace function public.can_request(cid text) returns boolean
+language plpgsql stable security definer set search_path = public as $$
+declare
+  me public.staff := public.my_staff();
+  c  public.classes;
+begin
+  if me.email is null or public.class_kind(cid) is distinct from 'borrowed' then return false; end if;
+  if me.role in ('registrar', 'dean') then return true; end if;
+  select * into c from public.classes where id = cid;
+  return ((me.role = 'associate_dean' and c.college = me.college) or (me.role = 'chair' and c.department = me.department))
+     and public.own_ge_left(c.department) = 0;
 end $$;
 
 -- May the signed-in person answer the request for this class (approve, reject, pick the teacher)?
@@ -273,18 +288,19 @@ language sql stable security definer set search_path = public as $$
   select coalesce(public.class_kind(cid) = 'borrowed', false)
 $$;
 
--- Ask department d to teach a borrowed GE class, naming instructor t of d. Only a department that has
--- submitted its schedule can be asked, so its free times are final. Any earlier answer is cleared.
+-- Book a borrowed GE class: its time and room together with instructor t of department d, which may
+-- teach the course and has submitted its schedule. The booking holds the instructor at once and
+-- waits for the lending department to approve. Any earlier answer is cleared.
 drop function if exists public.request_ge(text, text);
-create or replace function public.request_ge(cid text, d text, t text default null) returns text
+drop function if exists public.request_ge(text, text, text);
+create or replace function public.book_borrowed(cid text, meeting text, slot text, place text, d text, t text) returns text
 language plpgsql volatile security definer set search_path = public as $$
 declare
   c  public.classes;
   dc text;
 begin
   if (public.my_staff()).email is null then raise exception 'Your account has no role yet'; end if;
-  if public.class_kind(cid) is distinct from 'borrowed' then raise exception 'This class is not asked of another department'; end if;
-  if not public.can_edit_class(cid) then
+  if not public.can_request(cid) then
     raise exception 'Book every GE class your department teaches for its own sections first, or this class is not yours';
   end if;
   select * into c from public.classes where id = cid;
@@ -292,17 +308,74 @@ begin
   if not exists (select 1 from public.submissions s where s.department = d) then
     raise exception 'The % department has not submitted its schedule yet', d;
   end if;
-  if t is not null and not exists (select 1 from public.faculty f where f.key = t and f.department = d) then
+  if t is null or not exists (select 1 from public.faculty f where f.key = t and f.department = d) then
     raise exception 'Choose an instructor of the % department', d;
   end if;
   select college into dc from public.ge_teachers where course = c.course and department = d;
+  insert into public.bookings (class_id, part, sem, pattern, room) values (cid, meeting, c.sem, slot, place)
+    on conflict (class_id, part) do update set pattern = excluded.pattern, room = excluded.room;
   insert into public.ge_requests (class_id, department, college, requested_by) values (cid, d, dc, (public.my_staff()).email)
     on conflict (class_id) do update set department = excluded.department, college = excluded.college,
       requested_by = excluded.requested_by, requested_at = now();
   delete from public.ge_decisions where class_id = cid;
   insert into public.teacher_changes (class_id, sem, teacher) values (cid, c.sem, t)
     on conflict (class_id) do update set teacher = excluded.teacher;
+  delete from public.instructor_requests where class_id = cid;
+  return 'booked';
+end $$;
+
+-- Release a borrowed GE class: its booking, request, answer, and instructor.
+create or replace function public.unbook_borrowed(cid text) returns text
+language plpgsql volatile security definer set search_path = public as $$
+begin
+  if not public.can_request(cid) then raise exception 'This class is not yours to release'; end if;
+  delete from public.bookings where class_id = cid;
+  delete from public.ge_requests where class_id = cid;
+  delete from public.ge_decisions where class_id = cid;
+  delete from public.teacher_changes where class_id = cid;
+  return 'released';
+end $$;
+
+-- When no instructor is available: ask department d (and the Registrar) for one, without booking.
+create table if not exists public.instructor_requests (
+  class_id     text primary key references public.classes(id) on delete cascade,
+  department   text not null,
+  college      text not null,
+  note         text,
+  requested_by text,
+  requested_at timestamptz not null default now()
+);
+create or replace function public.ask_instructor(cid text, d text, note text default null) returns text
+language plpgsql volatile security definer set search_path = public as $$
+declare
+  c  public.classes;
+  dc text;
+begin
+  if not public.can_request(cid) then raise exception 'This class is not yours to ask for'; end if;
+  select * into c from public.classes where id = cid;
+  if not public.may_teach(c.course, d) then raise exception 'The % department does not teach %', d, c.course; end if;
+  select college into dc from public.ge_teachers where course = c.course and department = d;
+  insert into public.instructor_requests (class_id, department, college, note, requested_by)
+    values (cid, d, dc, ask_instructor.note, (public.my_staff()).email)
+    on conflict (class_id) do update set department = excluded.department, college = excluded.college,
+      note = excluded.note, requested_by = excluded.requested_by, requested_at = now();
   return 'asked';
+end $$;
+-- Close an instructor request: the asking section, the asked department, or the Registrar.
+create or replace function public.close_instructor_request(cid text) returns text
+language plpgsql volatile security definer set search_path = public as $$
+declare
+  me public.staff := public.my_staff();
+  r  public.instructor_requests;
+begin
+  select * into r from public.instructor_requests where class_id = cid;
+  if not found then return 'none'; end if;
+  if not (public.is_admin() or public.can_request(cid) or (me.role = 'chair' and me.department = r.department)
+          or (me.role = 'associate_dean' and me.college = r.college)) then
+    raise exception 'Not allowed';
+  end if;
+  delete from public.instructor_requests where class_id = cid;
+  return 'closed';
 end $$;
 
 -- Answer a request: approve (naming the teacher), reject (with a reason), or reopen (ask again).
@@ -321,7 +394,7 @@ begin
   if d is null then raise exception 'No department has been asked yet'; end if;
   select * into c from public.classes where id = cid;
   if decision = 'reopen' then
-    if not (public.can_edit_class(cid) or public.can_decide(cid)) then raise exception 'Not allowed'; end if;
+    if not (public.can_request(cid) or public.can_decide(cid)) then raise exception 'Not allowed'; end if;
     delete from public.ge_decisions where class_id = cid;
     return 'reopened';
   end if;
@@ -357,20 +430,23 @@ begin
       on conflict (class_id) do update set department = excluded.department, schedule = excluded.schedule, teacher = excluded.teacher,
         rejected_by = excluded.rejected_by, rejected_at = excluded.rejected_at,
         approved_by = null, approved_at = null, note = excluded.note;
+    -- A rejection releases the booking and the held instructor. The answer stays, so the section sees why.
+    delete from public.bookings where class_id = cid;
+    delete from public.ge_requests where class_id = cid;
+    delete from public.teacher_changes where class_id = cid;
     return 'rejected';
   end if;
   raise exception 'Unknown decision %', decision;
 end $$;
 
--- The part of department d that it does itself, still incomplete: classes with no time, and classes
--- other than borrowed GE classes with no teacher. Borrowed GE classes need only a time, since their
--- instructors come from other departments after everyone submits. GE Department courses do not count.
+-- The part of department d that it does itself, still incomplete: its major classes and the GE classes
+-- it teaches, with no time or no teacher. Borrowed GE classes are booked after the lending departments
+-- submit, so they do not count, and neither do GE Department courses.
 create or replace function public.dept_missing(d text) returns int
 language sql stable security definer set search_path = public as $$
   select count(*)::int from public.classes c
-  where c.department = d and public.class_kind(c.id) <> 'gedept'
-    and (not exists (select 1 from public.bookings b where b.class_id = c.id)
-         or (public.class_kind(c.id) <> 'borrowed' and public.class_teacher(c.id) is null))
+  where c.department = d and public.class_kind(c.id) in ('major', 'own')
+    and (not exists (select 1 from public.bookings b where b.class_id = c.id) or public.class_teacher(c.id) is null)
 $$;
 
 -- Submit the schedule of department d. Every class must be complete first.
@@ -435,6 +511,7 @@ alter table public.ge_requests     enable row level security;
 alter table public.ge_decisions    enable row level security;
 alter table public.settings        enable row level security;
 alter table public.submissions     enable row level security;
+alter table public.instructor_requests enable row level security;
 
 drop policy if exists read_faculty on public.faculty;
 create policy read_faculty on public.faculty for select to authenticated using (public.has_role());
@@ -478,6 +555,10 @@ create policy read_ge_requests on public.ge_requests for select to authenticated
 drop policy if exists read_ge_decisions on public.ge_decisions;
 create policy read_ge_decisions on public.ge_decisions for select to authenticated using (public.has_role());
 
+-- Instructor requests are written only through ask_instructor() and close_instructor_request().
+drop policy if exists read_instructor_requests on public.instructor_requests;
+create policy read_instructor_requests on public.instructor_requests for select to authenticated using (public.has_role());
+
 -- Submissions are written only through submit_schedule().
 drop policy if exists read_submissions on public.submissions;
 create policy read_submissions on public.submissions for select to authenticated using (public.has_role());
@@ -488,14 +569,16 @@ drop policy if exists admin_settings on public.settings;
 create policy admin_settings on public.settings for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 grant usage on schema public to authenticated;
-grant select on public.faculty, public.classes, public.ge_requests, public.ge_decisions, public.submissions to authenticated;
+grant select on public.faculty, public.classes, public.ge_requests, public.ge_decisions, public.submissions, public.instructor_requests to authenticated;
 grant select, insert, update, delete on public.staff, public.bookings, public.teacher_changes, public.ge_teachers to authenticated;
 grant select, update on public.settings to authenticated;
 -- Every helper the access rules call must be runnable by signed-in users (some projects do not grant this by default).
 grant execute on function public.my_staff(), public.is_admin(), public.has_role(), public.class_teacher(text),
   public.class_schedule(text), public.may_teach(text, text), public.class_kind(text), public.own_ge_left(text),
   public.request_dept(text), public.request_college(text), public.can_edit_class(text), public.can_decide(text),
-  public.can_assign(text, text), public.needs_approval(text), public.request_ge(text, text, text),
+  public.can_assign(text, text), public.needs_approval(text), public.can_request(text),
+  public.book_borrowed(text, text, text, text, text, text), public.unbook_borrowed(text),
+  public.ask_instructor(text, text, text), public.close_instructor_request(text),
   public.decide_ge(text, text, text, text), public.dept_missing(text), public.submit_schedule(text, text, jsonb),
   public.publish_schedule(), public.stamp_row() to authenticated;
 revoke all on all tables in schema public from anon;
@@ -507,6 +590,7 @@ alter table public.ge_requests replica identity full;
 alter table public.ge_decisions replica identity full;
 alter table public.ge_teachers replica identity full;
 alter table public.submissions replica identity full;
+alter table public.instructor_requests replica identity full;
 do $$ begin
   begin alter publication supabase_realtime add table public.bookings; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.teacher_changes; exception when duplicate_object then null; end;
@@ -515,6 +599,7 @@ do $$ begin
   begin alter publication supabase_realtime add table public.ge_teachers; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.settings; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.submissions; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.instructor_requests; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.staff; exception when duplicate_object then null; end;
 end $$;
 

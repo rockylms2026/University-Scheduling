@@ -110,37 +110,48 @@ expect("Social Work books PSYC 160 for its own sections", True, bk(sw_own, "M1 M
 expect("own GE needs no approval", True, f"select needs_approval('{sw_own}')", ADMIN, contains="f")
 expect("Psychology chair cannot book Social Work sections", False, bk(sw_own, "M2 MWF"), "chair.psy@u.edu")
 
-# Asking: Criminology cannot teach PSYC 160, so it asks
-expect("Criminology must book its own GE classes first", False, bk(crim_psyc, "T1 TTh"), "chair.crim@u.edu")
+# Borrowing: Criminology cannot teach PSYC 160, so it books it with an instructor of a submitted department
+def bb(cid, d, t, pat="T1 TTh"):
+    return f"select book_borrowed('{cid}', 'Lec', '{pat}', 'KAT 301', '{d}', {('null' if t is None else repr(t))})"
+
+
+expect("a borrowed class cannot be booked without an instructor", False, bk(crim_psyc, "T1 TTh"), "chair.crim@u.edu")
+expect("Criminology must book its own GE classes first", False, bb(crim_psyc, "Social Work", sw_teacher), "chair.crim@u.edu")
 expect("Criminology books its own GE classes", True, book_own_ge("Criminology") + "; select own_ge_left('Criminology')", "chair.crim@u.edu", contains="0")
-expect("then books the PSYC 160 time", True, bk(crim_psyc, "T1 TTh"), "chair.crim@u.edu")
-expect("cannot ask a department that does not teach it", False, f"select request_ge('{crim_psyc}','Accountancy')", "chair.crim@u.edu")
-expect("cannot ask Social Work before it submits", False, f"select request_ge('{crim_psyc}','Social Work','{sw_teacher}')", "chair.crim@u.edu", contains="not submitted")
+expect("cannot book from a department that does not teach it", False, bb(crim_psyc, "Accountancy", sw_teacher), "chair.crim@u.edu")
+expect("cannot book from Social Work before it submits", False, bb(crim_psyc, "Social Work", sw_teacher), "chair.crim@u.edu", contains="not submitted")
 expect("Social Work books its own GE classes", True, book_own_ge("Social Work") + "; select own_ge_left('Social Work')", "chair.sw@u.edu", contains="0")
 psql("insert into submissions (department, college, complete) values ('Social Work','CCJPS',true), ('Psychology','CSS',true) on conflict do nothing")
-expect("cannot name an instructor of another department", False, f"select request_ge('{crim_psyc}','Social Work','{psy_teacher}')", "chair.crim@u.edu")
-expect("Criminology asks a Social Work instructor", True,
-       f"select request_ge('{crim_psyc}','Social Work','{sw_teacher}'); select class_teacher('{crim_psyc}')", "chair.crim@u.edu", contains=sw_teacher)
-expect("asked class needs approval", True, f"select needs_approval('{crim_psyc}')", ADMIN, contains="t")
-expect("Criminology cannot pick its teacher", False, tc(crim_psyc, sw_teacher), "chair.crim@u.edu")
+expect("cannot book without naming an instructor", False, bb(crim_psyc, "Social Work", None), "chair.crim@u.edu")
+expect("cannot name an instructor of another department", False, bb(crim_psyc, "Social Work", psy_teacher), "chair.crim@u.edu")
+expect("Criminology books PSYC 160 with a Social Work instructor", True,
+       bb(crim_psyc, "Social Work", sw_teacher) + f"; select class_teacher('{crim_psyc}')||' '||class_schedule('{crim_psyc}')", "chair.crim@u.edu", contains=f"{sw_teacher} Lec:T1 TTh")
+expect("the instructor is held while it waits", True, f"select needs_approval('{crim_psyc}') and class_teacher('{crim_psyc}') is not null", ADMIN, contains="t")
+expect("Criminology cannot change its teacher directly", False, tc(crim_psyc, sw_teacher), "chair.crim@u.edu")
 expect("Psychology chair cannot answer for Social Work", False, f"select decide_ge('{crim_psyc}','approve')", "chair.psy@u.edu")
 expect("CCJPS associate dean is not the one to answer (same college)", False, f"select decide_ge('{crim_psyc}','approve')", "adean.ccjps@u.edu")
-expect("Social Work cannot give it to a Psychology teacher", False, f"select decide_ge('{crim_psyc}','approve',null,'{psy_teacher}')", "chair.sw@u.edu")
-expect("Social Work chair approves with its teacher", True,
-       f"select decide_ge('{crim_psyc}','approve',null,'{sw_teacher}'); select class_teacher('{crim_psyc}')||' '||approved_by from ge_decisions where class_id='{crim_psyc}'",
+expect("Social Work cannot swap in a Psychology teacher", False, f"select decide_ge('{crim_psyc}','approve',null,'{psy_teacher}')", "chair.sw@u.edu")
+expect("Social Work chair approves", True,
+       f"select decide_ge('{crim_psyc}','approve'); select class_teacher('{crim_psyc}')||' '||approved_by from ge_decisions where class_id='{crim_psyc}'",
        "chair.sw@u.edu", contains=f"{sw_teacher} chair.sw@u.edu")
-expect("Criminology changes the time", True, bk(crim_psyc, "T2 TTh"), "chair.crim@u.edu")
-expect("Social Work rejects the new time", True, f"select decide_ge('{crim_psyc}','reject','No instructor free then')", "chair.sw@u.edu", contains="rejected")
-expect("Psychology has its own GE classes left", True, "select own_ge_left('Psychology') > 0", ADMIN, contains="t")
+expect("Criminology books a new time", True, bb(crim_psyc, "Social Work", sw_teacher, "T2 TTh"), "chair.crim@u.edu")
+expect("Social Work rejects it with a reason", True, f"select decide_ge('{crim_psyc}','reject','Thesis defense then')", "chair.sw@u.edu", contains="rejected")
+expect("the rejection released the booking and the instructor", True,
+       f"select (select count(*) from bookings where class_id='{crim_psyc}')||' '||coalesce(class_teacher('{crim_psyc}'),'none')||' '||(select note from ge_decisions where class_id='{crim_psyc}')",
+       ADMIN, contains="0 none Thesis defense then")
 psql(book_own_ge("Psychology"))
-expect("Criminology asks Psychology instead", True,
-       f"select request_ge('{crim_psyc}','Psychology','{psy_teacher}'); select count(*) from ge_decisions where class_id='{crim_psyc}'", "chair.crim@u.edu", contains="0")
+expect("Criminology books a Psychology instructor instead", True, bb(crim_psyc, "Psychology", psy_teacher), "chair.crim@u.edu", contains="booked")
 expect("the CSS associate dean answers (another college)", True, f"select can_decide('{crim_psyc}')", "adean.css@u.edu", contains="t")
 expect("the Psychology chair does not (another college)", True, f"select can_decide('{crim_psyc}')", "chair.psy@u.edu", contains="f")
+expect("Criminology releases it", True, f"select unbook_borrowed('{crim_psyc}'); select count(*) from bookings where class_id='{crim_psyc}'", "chair.crim@u.edu", contains="0")
+expect("Criminology asks for an instructor without booking", True,
+       f"select ask_instructor('{crim_psyc}','Psychology','Nobody free at our times'); select department from instructor_requests where class_id='{crim_psyc}'", "chair.crim@u.edu", contains="Psychology")
+expect("the Psychology chair closes it", True, f"select close_instructor_request('{crim_psyc}')", "chair.psy@u.edu", contains="closed")
+expect("another chair cannot close requests", False, f"select ask_instructor('{crim_psyc}','Psychology'); select close_instructor_request('{crim_psyc}')", "chair.eco@u.edu")
 
-# Another college: Entrepreneurship (CBE) asks Social Work (CCJPS) for GAD 171
+# Another college: Entrepreneurship (CBE) books a Social Work (CCJPS) instructor for GAD 171
 psql(book_own_ge("Entrepreneurship"))
-expect("Entrepreneurship asks Social Work", True, bk(entrep_gad, "T3 TTh") + f"; select request_ge('{entrep_gad}','Social Work','{sw_teacher}')", "chair.entrep@u.edu", contains="asked")
+expect("Entrepreneurship books a Social Work instructor", True, bb(entrep_gad, "Social Work", sw_teacher, "T3 TTh"), "chair.entrep@u.edu", contains="booked")
 expect("the CCJPS associate dean answers", True, f"select can_decide('{entrep_gad}')", "adean.ccjps@u.edu", contains="t")
 expect("the Social Work chair does not", True, f"select can_decide('{entrep_gad}')", "chair.sw@u.edu", contains="f")
 expect("requests cannot be written directly", False, f"insert into ge_requests (class_id, department, college) values ('{entrep_gad}','Psychology','CSS')", "chair.entrep@u.edu")
