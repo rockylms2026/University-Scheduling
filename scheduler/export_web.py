@@ -45,11 +45,11 @@ def seed_sql(uni: University, semester: int) -> str:
     for c in data["classes"]:
         prog = data["programs"][data["sections"][c["section"]]["program"]]
         rows.append(f"({q(c['id'])}, {semester}, {q(c['course'])}, {q(c['section'])}, {q(data['sections'][c['section']]['program'])}, "
-                    f"{q(prog['college'])}, {q(prog['dept'])}, {q(data['courses'][c['course']]['college'] == 'CORE')}, {q(c['teacher'])}, {q(c['holder'])}, {q(c['holderCollege'])})")
-    out.append("insert into public.classes (id, sem, course, section, program, college, department, is_ge, plan_teacher, holder_dept, holder_college) values\n  "
+                    f"{q(prog['college'])}, {q(prog['dept'])}, {q(data['courses'][c['course']]['college'] == 'CORE')}, {q(c['teacher'])}, {q(c['holder'])}, {q(c['holderCollege'])}, {q(c['house'])}, {q(c['houseCollege'])})")
+    out.append("insert into public.classes (id, sem, course, section, program, college, department, is_ge, plan_teacher, holder_dept, holder_college, house_dept, house_college) values\n  "
                + ",\n  ".join(rows) + "\non conflict (id) do update set course = excluded.course, section = excluded.section,"
                " program = excluded.program, college = excluded.college, department = excluded.department,"
-               " is_ge = excluded.is_ge, plan_teacher = excluded.plan_teacher, holder_dept = excluded.holder_dept, holder_college = excluded.holder_college;")
+               " is_ge = excluded.is_ge, plan_teacher = excluded.plan_teacher, holder_dept = excluded.holder_dept, holder_college = excluded.holder_college, house_dept = excluded.house_dept, house_college = excluded.house_college;")
     out.append("commit;")
     return "\n".join(out) + "\n"
 

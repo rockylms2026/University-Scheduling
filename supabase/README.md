@@ -9,7 +9,7 @@ The scheduling page in `web/index.html` signs people in with Supabase and limits
 | Associate Dean | the classes of their college's sections | borrowed GE classes from their college, when the borrowing department is in another college (and they pick the teacher) |
 | GE Coordinator | GE Department courses (PE, CWTS, PHIL 190, PHIL 220, ARTS 101, ENGL 302), last, once opened | none |
 
-Which department holds each GE course comes from `housed_by` in `data/institutional_core.yaml` (UNI 103 is held by each program's own department). A GE class a department books from another department stays *Waiting* until the holding department approves it and picks the teacher. A new time asks again.
+The department holding a GE class is the one the loading plan gives it to: Social Work, say, for the PSYC 160 and GAD 171 classes its faculty teach. A class with no teacher in the plan goes to the house department in `housed_by` (`data/institutional_core.yaml`; UNI 103 is held by each program's own department). A department teaching a GE course for its own sections needs no approval. A GE class a department books from another department stays *Waiting* until the holding department approves it and picks the teacher from its own faculty. A holding department without an available instructor can hand the class to the house department (and take it back). A new time asks again.
 
 ## One-time setup
 

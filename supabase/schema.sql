@@ -11,6 +11,11 @@
 --   ge_coordinator     courses of the GE Department, once the Registrar or Dean opens them, with no approval
 -- Everyone with a role can read the whole timetable, because conflict checks need it.
 --
+-- The holding department of a GE class is the department whose teacher the loading plan gives it
+-- (Social Work teaching PSYC 160, for example), or the house department of the course (housed_by)
+-- when the plan names no teacher. A holding department that lacks an instructor may hand the class
+-- to the house department, which then holds it.
+--
 -- Approval of a borrowed GE class (a GE course held by another department):
 --   holding department in the same college    the chair of the holding department approves
 --   holding department in another college     the associate dean of that college approves
@@ -37,11 +42,15 @@ create table if not exists public.classes (
   department   text not null,        -- department of the section program
   is_ge        boolean not null,
   plan_teacher text references public.faculty(key),
-  holder_dept  text,                 -- GE only: the department that holds the course
-  holder_college text                -- and its college (GE for the GE Department)
+  holder_dept  text,                 -- GE only: the department holding the class (see above)
+  holder_college text,               -- and its college (GE for the GE Department)
+  house_dept   text,                 -- GE only: the department in housed_by
+  house_college text
 );
 alter table public.classes add column if not exists holder_dept text;
 alter table public.classes add column if not exists holder_college text;
+alter table public.classes add column if not exists house_dept text;
+alter table public.classes add column if not exists house_college text;
 
 -- ---------- people ----------
 create table if not exists public.staff (
@@ -89,6 +98,15 @@ create table if not exists public.ge_decisions (
   note        text
 );
 
+-- A GE class handed to its house department because the holding department lacks an instructor.
+create table if not exists public.ge_holders (
+  class_id       text primary key references public.classes(id) on delete cascade,
+  holder_dept    text not null,
+  holder_college text not null,
+  handed_by      text,
+  handed_at      timestamptz not null default now()
+);
+
 create table if not exists public.settings (
   id             int primary key default 1 check (id = 1),
   ge_open        boolean not null default false,   -- chairs schedule first, then GE opens
@@ -127,13 +145,23 @@ language sql stable security definer set search_path = public as $$
   select coalesce(string_agg(part || ':' || pattern, ' ' order by part), '') from public.bookings where class_id = cid
 $$;
 
+-- The department holding a class now, after any hand-over, and its college.
+create or replace function public.holder_dept_of(cid text) returns text
+language sql stable security definer set search_path = public as $$
+  select coalesce(h.holder_dept, c.holder_dept) from public.classes c left join public.ge_holders h on h.class_id = c.id where c.id = cid
+$$;
+create or replace function public.holder_college_of(cid text) returns text
+language sql stable security definer set search_path = public as $$
+  select coalesce(h.holder_college, c.holder_college) from public.classes c left join public.ge_holders h on h.class_id = c.id where c.id = cid
+$$;
+
 -- What kind of class is this? major, gedept (a GE Department course), own (a GE course the
 -- department of the section holds), or borrowed (a GE course another department holds).
 create or replace function public.class_kind(cid text) returns text
 language sql stable security definer set search_path = public as $$
   select case when not c.is_ge then 'major'
-              when c.holder_dept is null or c.holder_dept = 'General Education' then 'gedept'
-              when c.holder_dept = c.department then 'own'
+              when public.holder_dept_of(cid) is null or public.holder_dept_of(cid) = 'General Education' then 'gedept'
+              when public.holder_dept_of(cid) = c.department then 'own'
               else 'borrowed' end
   from public.classes c where c.id = cid
 $$;
@@ -174,9 +202,9 @@ begin
   select * into c from public.classes where id = cid;
   select * into f from public.faculty where key = t;
   if kind = 'borrowed' then
-    if t is not null and f.department <> c.holder_dept then return false; end if;
-    return (me.role = 'chair' and me.department = c.holder_dept)
-        or (me.role = 'associate_dean' and me.college = c.holder_college);
+    if t is not null and f.department <> public.holder_dept_of(cid) then return false; end if;
+    return (me.role = 'chair' and me.department = public.holder_dept_of(cid))
+        or (me.role = 'associate_dean' and me.college = public.holder_college_of(cid));
   end if;
   if not public.can_edit_class(cid) then return false; end if;
   if t is null or me.role <> 'chair' then return true; end if;
@@ -199,10 +227,10 @@ begin
   if me.email is null or not public.needs_approval(cid) then return false; end if;
   if me.role in ('registrar', 'dean') then return true; end if;
   select * into c from public.classes where id = cid;
-  if c.holder_college = c.college then
-    return me.role = 'chair' and me.department = c.holder_dept;
+  if public.holder_college_of(cid) = c.college then
+    return me.role = 'chair' and me.department = public.holder_dept_of(cid);
   end if;
-  return me.role = 'associate_dean' and me.college = c.holder_college;
+  return me.role = 'associate_dean' and me.college = public.holder_college_of(cid);
 end $$;
 
 -- Approve, reject, or reopen a borrowed GE class. On approval the approver may name the teacher.
@@ -226,14 +254,14 @@ begin
     return 'reopened';
   end if;
   if not public.can_decide(cid) then
-    if c.holder_college = c.college then raise exception 'Only the % chair can decide this', c.holder_dept; end if;
-    raise exception 'Only the % associate dean can decide this', c.holder_college;
+    if public.holder_college_of(cid) = c.college then raise exception 'Only the % chair can decide this', public.holder_dept_of(cid); end if;
+    raise exception 'Only the % associate dean can decide this', public.holder_college_of(cid);
   end if;
   if sched = '' then raise exception 'The class has no booked time yet'; end if;
   if decision = 'approve' then
     if decide_ge.teacher is not null then
-      if not exists (select 1 from public.faculty f where f.key = decide_ge.teacher and f.department = c.holder_dept) and not public.is_admin() then
-        raise exception 'Choose a teacher from the % department', c.holder_dept;
+      if not exists (select 1 from public.faculty f where f.key = decide_ge.teacher and f.department = public.holder_dept_of(cid)) and not public.is_admin() then
+        raise exception 'Choose a teacher from the % department', public.holder_dept_of(cid);
       end if;
       if decide_ge.teacher is distinct from c.plan_teacher then
         insert into public.teacher_changes (class_id, sem, teacher) values (cid, c.sem, decide_ge.teacher)
@@ -259,6 +287,40 @@ begin
     return 'rejected';
   end if;
   raise exception 'Unknown decision %', decision;
+end $$;
+
+-- Hand a GE class to its house department (or take it back, with undo). For the department
+-- the loading plan gives the class to, when it lacks an instructor. The class starts over:
+-- no teacher, no decision.
+create or replace function public.hand_to_house(cid text, undo boolean default false) returns text
+language plpgsql volatile security definer set search_path = public as $$
+declare
+  me public.staff := public.my_staff();
+  c  public.classes;
+  allowed boolean;
+begin
+  if me.email is null then raise exception 'Your account has no role yet'; end if;
+  select * into c from public.classes where id = cid;
+  if not found or not c.is_ge or c.house_dept is null or c.house_dept = c.holder_dept then
+    raise exception 'This class is already with its house department';
+  end if;
+  allowed := public.is_admin()
+          or (me.role = 'chair' and me.department = c.holder_dept)
+          or (me.role = 'associate_dean' and me.college = c.holder_college);
+  if not allowed then raise exception 'Only the % department can hand this class over', c.holder_dept; end if;
+  if undo then
+    delete from public.ge_holders where class_id = cid;
+    delete from public.teacher_changes where class_id = cid;
+  else
+    insert into public.ge_holders (class_id, holder_dept, holder_college, handed_by)
+      values (cid, c.house_dept, c.house_college, me.email)
+      on conflict (class_id) do update set holder_dept = excluded.holder_dept, holder_college = excluded.holder_college,
+        handed_by = excluded.handed_by, handed_at = now();
+    insert into public.teacher_changes (class_id, sem, teacher) values (cid, c.sem, null)
+      on conflict (class_id) do update set teacher = null;
+  end if;
+  delete from public.ge_decisions where class_id = cid;
+  return case when undo then 'taken back' else 'handed over' end;
 end $$;
 
 -- Publish the schedule (registrar and dean only).
@@ -291,6 +353,7 @@ alter table public.staff           enable row level security;
 alter table public.bookings        enable row level security;
 alter table public.teacher_changes enable row level security;
 alter table public.ge_decisions    enable row level security;
+alter table public.ge_holders      enable row level security;
 alter table public.settings        enable row level security;
 
 drop policy if exists read_faculty on public.faculty;
@@ -324,7 +387,9 @@ create policy change_teacher_changes on public.teacher_changes for update to aut
 drop policy if exists remove_teacher_changes on public.teacher_changes;
 create policy remove_teacher_changes on public.teacher_changes for delete to authenticated using (public.can_assign(class_id, null));
 
--- Decisions are written only through decide_ge().
+-- Hand-overs and decisions are written only through hand_to_house() and decide_ge().
+drop policy if exists read_ge_holders on public.ge_holders;
+create policy read_ge_holders on public.ge_holders for select to authenticated using (public.has_role());
 drop policy if exists read_ge_decisions on public.ge_decisions;
 create policy read_ge_decisions on public.ge_decisions for select to authenticated using (public.has_role());
 
@@ -334,13 +399,14 @@ drop policy if exists admin_settings on public.settings;
 create policy admin_settings on public.settings for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 grant usage on schema public to authenticated;
-grant select on public.faculty, public.classes, public.ge_decisions to authenticated;
+grant select on public.faculty, public.classes, public.ge_decisions, public.ge_holders to authenticated;
 grant select, insert, update, delete on public.staff, public.bookings, public.teacher_changes to authenticated;
 grant select, update on public.settings to authenticated;
 -- Every helper the access rules call must be runnable by signed-in users (some projects do not grant this by default).
 grant execute on function public.my_staff(), public.is_admin(), public.has_role(), public.class_teacher(text),
   public.class_schedule(text), public.class_kind(text), public.can_edit_class(text), public.can_assign(text, text),
   public.needs_approval(text), public.can_decide(text), public.decide_ge(text, text, text, text),
+  public.holder_dept_of(text), public.holder_college_of(text), public.hand_to_house(text, boolean),
   public.publish_schedule(), public.stamp_row() to authenticated;
 revoke all on all tables in schema public from anon;
 
@@ -348,10 +414,12 @@ revoke all on all tables in schema public from anon;
 alter table public.bookings replica identity full;
 alter table public.teacher_changes replica identity full;
 alter table public.ge_decisions replica identity full;
+alter table public.ge_holders replica identity full;
 do $$ begin
   begin alter publication supabase_realtime add table public.bookings; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.teacher_changes; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.ge_decisions; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.ge_holders; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.settings; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.staff; exception when duplicate_object then null; end;
 end $$;

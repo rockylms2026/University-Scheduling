@@ -47,6 +47,11 @@ same_college = cls(f"{BSP} and course = 'SOCS 195'")                 # Economics
 other_college = cls(f"{BSP} and course = 'STS 180'")                 # Information Technology (CISC) holds it
 gedept = cls(f"{BSP} and course = 'PE 101'")                         # GE Department
 ge_elsewhere = cls("department = 'Communication' and course = 'PSYC 160'")
+# Social Work teaches PSYC 160 and GAD 171 (housed by Psychology) in the loading plan.
+sw_own = cls("department = 'Social Work' and course = 'PSYC 160'")
+sw_lends_same = cls("department = 'Criminology' and course = 'PSYC 160' and holder_dept = 'Social Work'")
+sw_lends_other = cls("department = 'Entrepreneurship' and course = 'GAD 171' and holder_dept = 'Social Work'")
+sw_teacher = one("select key from faculty where department = 'Social Work' order by key limit 1")
 psy_teacher = one("select key from faculty where department = 'Psychology' order by key limit 1")
 eco_teacher = one("select key from faculty where department = 'Economics' order by key limit 1")
 it_teacher = one("select key from faculty where department = 'Information Technology' order by key limit 1")
@@ -56,6 +61,10 @@ psql("""insert into staff (email, full_name, role, college, department) values
   ('chair.psy@u.edu','Chair Psychology','chair','CSS','Psychology'),
   ('chair.eco@u.edu','Chair Economics','chair','CSS','Economics'),
   ('chair.it@u.edu','Chair IT','chair','CISC','Information Technology'),
+  ('chair.sw@u.edu','Chair Social Work','chair','CCJPS','Social Work'),
+  ('chair.crim@u.edu','Chair Criminology','chair','CCJPS','Criminology'),
+  ('chair.entrep@u.edu','Chair Entrepreneurship','chair','CBE','Entrepreneurship'),
+  ('adean.ccjps@u.edu','Assoc Dean CCJPS','associate_dean','CCJPS',null),
   ('adean.css@u.edu','Assoc Dean CSS','associate_dean','CSS',null),
   ('adean.cisc@u.edu','Assoc Dean CISC','associate_dean','CISC',null),
   ('ge@u.edu','GE Coordinator','ge_coordinator',null,null),
@@ -122,6 +131,33 @@ expect("associate dean rejects with a reason", True,
        f"select decide_ge('{other_college}','reject','Teacher has a thesis class then'); select rejected_by from ge_decisions where class_id='{other_college}'",
        "adean.cisc@u.edu", contains="adean.cisc@u.edu")
 expect("requesting chair can ask again", True, f"select decide_ge('{other_college}','reopen')", "chair.psy@u.edu", contains="reopened")
+
+# A department teaching a GE course it does not house (Social Work, PSYC 160 and GAD 171)
+expect("Social Work's own PSYC 160 is its own GE", True, f"select class_kind('{sw_own}')", ADMIN, contains="own")
+expect("Social Work chair books it with own faculty", True, bk(sw_own, "M1 MWF") + "; " + tc(sw_own, sw_teacher), "chair.sw@u.edu")
+expect("Psychology chair cannot book it", False, bk(sw_own, "M2 MWF"), "chair.psy@u.edu")
+expect("Criminology PSYC 160 is held by Social Work", True,
+       f"select class_kind('{sw_lends_same}')||' '||holder_dept_of('{sw_lends_same}')", ADMIN, contains="borrowed Social Work")
+expect("Criminology chair books its time", True, bk(sw_lends_same, "T1 TTh"), "chair.crim@u.edu")
+expect("Psychology chair does not decide a Social Work class", False, f"select decide_ge('{sw_lends_same}','approve')", "chair.psy@u.edu")
+expect("CSS associate dean does not decide it", False, f"select decide_ge('{sw_lends_same}','approve')", "adean.css@u.edu")
+expect("Social Work chair cannot give it to a Psychology teacher", False,
+       f"select decide_ge('{sw_lends_same}','approve',null,'{psy_teacher}')", "chair.sw@u.edu")
+expect("Social Work chair approves it (same college)", True, f"select decide_ge('{sw_lends_same}','approve',null,'{sw_teacher}')", "chair.sw@u.edu", contains="approved")
+expect("Entrepreneurship GAD 171 goes to the CCJPS associate dean", True, bk(sw_lends_other, "T2 TTh") + f"; select can_decide('{sw_lends_other}')",
+       "chair.entrep@u.edu", contains="f")
+expect("CCJPS associate dean decides it", True, f"select can_decide('{sw_lends_other}')", "adean.ccjps@u.edu", contains="t")
+
+# Lacking an instructor: Social Work hands the Criminology class to the house (Psychology)
+expect("Psychology chair cannot hand it over", False, f"select hand_to_house('{sw_lends_same}')", "chair.psy@u.edu")
+expect("Social Work chair hands it to Psychology", True, f"select hand_to_house('{sw_lends_same}')", "chair.sw@u.edu", contains="handed over")
+expect("now held by Psychology, no teacher, no decision", True,
+       f"select holder_dept_of('{sw_lends_same}')||' '||coalesce(class_teacher('{sw_lends_same}'),'none')||' '||(select count(*) from ge_decisions where class_id='{sw_lends_same}')",
+       ADMIN, contains="Psychology none 0")
+expect("CSS associate dean now decides (another college)", True, f"select can_decide('{sw_lends_same}')", "adean.css@u.edu", contains="t")
+expect("Psychology chair picks a Psychology teacher", True, tc(sw_lends_same, psy_teacher), "chair.psy@u.edu")
+expect("Social Work takes it back", True, f"select hand_to_house('{sw_lends_same}', true); select holder_dept_of('{sw_lends_same}')", "chair.sw@u.edu", contains="Social Work")
+expect("hand-overs cannot be written directly", False, f"insert into ge_holders (class_id, holder_dept, holder_college) values ('{sw_lends_same}','Psychology','CSS')", "chair.sw@u.edu")
 
 # Associate deans book their own college
 expect("associate dean books own college major", True, bk(eco_major), "adean.css@u.edu")

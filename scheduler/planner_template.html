@@ -402,6 +402,13 @@ function offline() { shared = false; canWrite = false; render(); }
 let me = { email: null, name: "", role: "registrar", college: null, department: null };
 let settings = { geOpen: true };
 let approvals = {};          // class id -> decision on a borrowed GE class
+let handovers = {};          // class id -> hand-over to the house department
+// The department holding a GE class now: the one the loading plan gives it to, or its house
+// department after a hand-over. Mirrors holder_dept_of() in supabase/schema.sql.
+const holderOf = (cls) => { const h = handovers[cls.id]; return h ? { dept: h.holder_dept, college: h.holder_college, handed: h } : { dept: cls.holder, college: cls.holderCollege }; };
+// May this person hand the class to its house department (or take it back)? Mirrors hand_to_house().
+const canHand = (cls) => !!BACKEND && isGE(cls.course) && !!cls.house && cls.house !== cls.holder
+  && (isAdmin() || (me.role === "chair" && me.department === cls.holder) || (me.role === "associate_dean" && me.college === cls.holderCollege));
 let staffList = [];
 const isAdmin = () => me.role === "registrar" || me.role === "dean";
 const progDept = (section) => DATA.programs[DATA.sections[section].program].dept;
@@ -410,8 +417,8 @@ const chairDept = () => (BACKEND && me.role === "chair" ? me.department : null);
 // section holds), or borrowed (a GE course another department holds). Mirrors class_kind() in supabase/schema.sql.
 function classKind(cls) {
   if (!isGE(cls.course)) return "major";
-  if (!cls.holder || cls.holder === "General Education") return "gedept";
-  return cls.holder === progDept(cls.section) ? "own" : "borrowed";
+  if (!holderOf(cls).dept || holderOf(cls).dept === "General Education") return "gedept";
+  return holderOf(cls).dept === progDept(cls.section) ? "own" : "borrowed";
 }
 // Why this person may not book a class ("" when they may). Mirrors can_edit_class().
 function editRight(cls) {
@@ -429,14 +436,14 @@ function editRight(cls) {
 function teacherRight(cls) {
   if (!BACKEND || isAdmin()) return "";
   if (classKind(cls) === "borrowed") {
-    const ok = (me.role === "chair" && me.department === cls.holder) || (me.role === "associate_dean" && me.college === cls.holderCollege);
-    return ok ? "" : `The ${cls.holder} department picks the teacher when the class is approved.`;
+    const ok = (me.role === "chair" && me.department === holderOf(cls).dept) || (me.role === "associate_dean" && me.college === holderOf(cls).college);
+    return ok ? "" : `The ${holderOf(cls).dept} department picks the teacher when the class is approved.`;
   }
   return editRight(cls);
 }
 function teacherAllowed(cls, key) {
   if (!key || !BACKEND || isAdmin()) return true;
-  if (classKind(cls) === "borrowed") return DATA.teachers[key].dept === cls.holder;
+  if (classKind(cls) === "borrowed") return DATA.teachers[key].dept === holderOf(cls).dept;
   return !chairDept() || DATA.teachers[key].dept === chairDept();
 }
 function allowedScopes() {
@@ -450,7 +457,7 @@ function scheduleSig(cls) {
   return cls.meetings.map((m) => bookings[`${cls.id}|${m.part}`]).filter(Boolean).map((b) => `${b.part}:${b.pattern}`).sort().join(" ");
 }
 function approverOf(cls) {
-  return cls.holderCollege === progCollege(cls.section) ? `the ${cls.holder} chair` : `the ${cls.holderCollege} associate dean`;
+  return holderOf(cls).college === progCollege(cls.section) ? `the ${holderOf(cls).dept} chair` : `the ${holderOf(cls).college} associate dean`;
 }
 function approvalOf(cls) {
   if (!BACKEND || classKind(cls) !== "borrowed") return null;
@@ -465,13 +472,13 @@ function approvalOf(cls) {
 function canDecide(cls) {
   if (!BACKEND || classKind(cls) !== "borrowed") return false;
   if (isAdmin()) return true;
-  if (cls.holderCollege === progCollege(cls.section)) return me.role === "chair" && me.department === cls.holder;
-  return me.role === "associate_dean" && me.college === cls.holderCollege;
+  if (holderOf(cls).college === progCollege(cls.section)) return me.role === "chair" && me.department === holderOf(cls).dept;
+  return me.role === "associate_dean" && me.college === holderOf(cls).college;
 }
 const needsMe = (c, a) => a.state === "pending" && canDecide(c);
 // Teachers of the holding department free at every meeting of a time option.
 function holderFree(cls, opt) {
-  return Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === cls.holder
+  return Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === holderOf(cls).dept
     && opt.iv.every(([day, start, end]) => !teacherBusy(k, { day, start, end }, cls.id).length));
 }
 
@@ -490,6 +497,11 @@ const sbLoad = {
     assigned = {};
     rows.forEach((r) => { if (CLASS[r.class_id]) assigned[r.class_id] = { class: r.class_id, teacher: r.teacher, at: r.updated_at }; });
     savedAt.teachers = latest(Object.values(assigned));
+  },
+  ge_holders: async () => {
+    const rows = await sbAll(sb.from("ge_holders").select("*").range(0, 9999));
+    handovers = {};
+    rows.forEach((r) => (handovers[r.class_id] = r));
   },
   ge_decisions: async () => {
     const rows = await sbAll(sb.from("ge_decisions").select("*").range(0, 9999));
@@ -536,7 +548,7 @@ async function enter(session) {
   rebuild(); render();
   if (!window._sbChannel) {
     window._sbChannel = sb.channel("schedule");
-    ["bookings", "teacher_changes", "ge_decisions", "settings", "staff"].forEach((t) =>
+    ["bookings", "teacher_changes", "ge_decisions", "ge_holders", "settings", "staff"].forEach((t) =>
       window._sbChannel.on("postgres_changes", { event: "*", schema: "public", table: t }, () => sbRefresh(t)));
     window._sbChannel.subscribe();
   }
@@ -1190,9 +1202,9 @@ function editor(cls, part) {
     let chip, why;
     if (bad.length) { chip = `<span class="chip bad">Conflict</span>`; why = bad[0][1]; }
     else if (rooms === 0) { chip = `<span class="chip bad">No room</span>`; why = "Every suitable room is booked"; }
-    else if (hf === 0) { chip = `<span class="chip bad">No teacher</span>`; why = `No ${cls.holder} teacher is free`; }
+    else if (hf === 0) { chip = `<span class="chip bad">No teacher</span>`; why = `No ${holderOf(cls).dept} teacher is free`; }
     else if (ev.length) { chip = `<span class="chip warn">Check</span>`; why = ev[0][1]; }
-    else { chip = `<span class="chip good">Free</span>`; why = [rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed", hf > 0 && `${hf} ${cls.holder} teacher${hf > 1 ? "s" : ""} free`].filter(Boolean).join(" · "); }
+    else { chip = `<span class="chip good">Free</span>`; why = [rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed", hf > 0 && `${hf} ${holderOf(cls).dept} teacher${hf > 1 ? "s" : ""} free`].filter(Boolean).join(" · "); }
     const when = `${o.iv.map((i) => i[0]).join("/")} ${hm(o.iv[0][1])}–${hm(o.iv[0][2])}`;
     return { o, html: `<button type="button" class="opt${d.pattern === o.label ? " on" : ""}" data-opt="${esc(o.label)}"><b>${esc(o.label)}</b><span><span class="small">${when}</span><span class="why">${esc(why)}</span></span>${chip}</button>`, group: o.ex ? "Outside the time frame (needs approval)" : o.label.includes("TTh") || ["Tue", "Thu"].includes(o.iv[0][0]) ? "Tuesday / Thursday" : o.iv[0][0] === "Sat" ? "Saturday" : "Monday / Wednesday / Friday" };
   });
@@ -1222,11 +1234,11 @@ function editor(cls, part) {
     const checks = evaluate(cls, m, opt, d.room || null, checkTeacher);
     if (borrowed) {
       const hf = holderFree(cls, opt);
-      checks.push(hf.length ? ["good", `${hf.length} ${cls.holder} teacher${hf.length > 1 ? "s are" : " is"} free at ${opt.label}: ${hf.slice(0, 6).map(surname).join(", ")}${hf.length > 6 ? ", …" : ""}`]
-                            : ["bad", `No ${cls.holder} teacher is free at ${opt.label}`]);
-      const left = DATA.classes.filter((x) => progDept(x.section) === cls.holder && classKind(x) !== "borrowed")
+      checks.push(hf.length ? ["good", `${hf.length} ${holderOf(cls).dept} teacher${hf.length > 1 ? "s are" : " is"} free at ${opt.label}: ${hf.slice(0, 6).map(surname).join(", ")}${hf.length > 6 ? ", …" : ""}`]
+                            : ["bad", `No ${holderOf(cls).dept} teacher is free at ${opt.label}`]);
+      const left = DATA.classes.filter((x) => progDept(x.section) === holderOf(cls).dept && classKind(x) !== "borrowed")
         .reduce((n, x) => n + x.meetings.filter((mm) => !bookings[`${x.id}|${mm.part}`]).length, 0);
-      if (left) checks.push(["warn", `${cls.holder} still has ${left} of its own class meetings to book, so its teachers' free times may change.`]);
+      if (left) checks.push(["warn", `${holderOf(cls).dept} still has ${left} of its own class meetings to book, so its teachers' free times may change.`]);
     }
     if (teacherKey) {
       const lu = luFor(teacherKey) + (t?.key === teacherKey ? 0 : cls.lu);
@@ -1239,9 +1251,12 @@ function editor(cls, part) {
       }
     } else if (m.kind !== "nstp" && !tRight) checks.push(["warn", "No teacher assigned yet"]);
     const ok = !checks.some(([l]) => l === "bad") && !right;
+    if (canHand(cls)) checks.push(["info", holderOf(cls).handed
+      ? `Handed over: ${cls.holder} gave this class to ${cls.house}, its house department. Use “Take back” on the Approvals page to return it.`
+      : `Hand-over: if ${cls.holder} has no instructor for this class, hand it to ${cls.house}, the house department, which will pick a teacher.`]);
     if (BACKEND && borrowed) {
       const cur = approvalOf(cls);
-      checks.push(["info", `Approval: ${cls.course} is held by the ${cls.holder} department${cls.holderCollege !== progCollege(cls.section) ? ` (${cls.holderCollege})` : ""}, so this booking waits for ${cur.approver}, who also picks the teacher.`
+      checks.push(["info", `Approval: ${cls.course} is held by the ${holderOf(cls).dept} department${holderOf(cls).college !== progCollege(cls.section) ? ` (${holderOf(cls).college})` : ""}, so this booking waits for ${cur.approver}, who also picks the teacher.`
         + (cur.state === "approved" ? " Now: approved." : cur.state === "rejected" ? ` Now: not approved${cur.row.note ? ` (“${cur.row.note}”)` : ""}.` : cur.state === "pending" ? " Now: waiting." : " Booking it sends the request.")]);
     }
     detail = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${teacherSel}</div>
@@ -1251,6 +1266,7 @@ function editor(cls, part) {
       <ul class="checks">${checks.length ? checks.map(([l, txt]) => `<li class="${l}">${esc(txt)}</li>`).join("") : `<li class="good">No conflicts. Students, teacher, and room are all free.</li>`}</ul>
       <div class="actions"><button type="button" class="btn primary" data-act="save"${ok && canWrite ? "" : " disabled"}>${b ? "Save changes" : "Book this time"}</button>
         ${b ? `<button type="button" class="btn danger" data-act="remove"${canWrite && !right ? "" : " disabled"}>Remove booking</button>` : ""}
+        ${canHand(cls) ? `<button type="button" class="btn" data-hand="${holderOf(cls).handed ? "back" : "house"}" data-cid="${cls.id}">${holderOf(cls).handed ? `Take back for ${esc(cls.holder)}` : `Hand to ${esc(cls.house)}`}</button>` : ""}
         <button type="button" class="btn" data-act="close">Close</button><span class="msg" id="msg"></span></div>`;
   }
   return `<div class="editor"><div><h3>${esc(cls.course)} ${esc(PART[part])} · ${esc(cls.section)}</h3>
@@ -1408,15 +1424,15 @@ function approvalList() {
   return DATA.classes.map((c) => ({ c, a: approvalOf(c) })).filter(({ c, a }) => {
     if (!a || a.state === "unscheduled") return false;
     if (isAdmin() || me.role === "ge_coordinator") return true;
-    if (me.role === "chair") return progDept(c.section) === me.department || c.holder === me.department;
-    return progCollege(c.section) === me.college || c.holderCollege === me.college;
+    if (me.role === "chair") return progDept(c.section) === me.department || holderOf(c).dept === me.department || c.holder === me.department;
+    return progCollege(c.section) === me.college || holderOf(c).college === me.college || c.holderCollege === me.college;
   });
 }
 // The teacher picker an approver uses: teachers of the holding department, free ones first.
 function approverTeacherSelect(c, a) {
   const sessionsOf = sessions.filter((x) => x.cls === c);
   const free = (k) => sessionsOf.every((x) => !teacherBusy(k, x, c.id).length);
-  const list = Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === c.holder)
+  const list = Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === holderOf(c).dept)
     .sort((x, y) => free(y) - free(x) || DATA.teachers[x].name.localeCompare(DATA.teachers[y].name));
   return `<select class="inp" id="apT-${c.id}" aria-label="Teacher for ${esc(c.course)} ${esc(c.section)}">
     <option value="">Choose a teacher</option>${list.map((k) => `<option value="${k}"${k === a.teacher ? " selected" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${free(k) ? "" : " · busy then"}</option>`).join("")}</select>`;
@@ -1428,7 +1444,7 @@ function renderApprovals(page) {
   if (!filters.some(([k]) => k === state.apprFilter)) state.apprFilter = all.some((x) => needsMe(x.c, x.a)) ? "mine" : "pending";
   const shown = all.filter(filters.find(([k]) => k === state.apprFilter)[2]).sort((x, y) => numSort(x.c.section, y.c.section) || x.c.course.localeCompare(y.c.course));
   const mineNow = shown.filter((x) => needsMe(x.c, x.a));
-  page.innerHTML = `${head("Approvals", "A department may book a GE course that another department holds for its own sections. The booking waits for the holding department: its chair when both are in the same college, or the associate dean of its college otherwise. The approver also picks the teacher. A new time asks again.")}
+  page.innerHTML = `${head("Approvals", "A department may book a GE course that another department holds for its own sections. The holding department is the one the loading plan gives the class to (or the house department in housed_by when the plan names no teacher). The booking waits for its chair when both are in the same college, or the associate dean of its college otherwise, who also picks the teacher. A holding department without an available instructor can hand the class to the house department.")}
     <div class="card" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="pills">${filters.map(([k, l, f]) =>
       `<button type="button" class="pill" data-apprfilter="${k}" aria-pressed="${state.apprFilter === k}">${l}<small>${all.filter(f).length}</small></button>`).join("")}</div>
       ${mineNow.length > 1 ? `<button type="button" class="btn primary" data-decideall="approve">Approve all ${mineNow.length} shown</button>` : ""}</div></div>
@@ -1439,13 +1455,15 @@ function renderApprovals(page) {
         if (mine && a.state !== "approved") acts.push(`<button type="button" class="btn primary" data-decide="approve" data-cid="${c.id}">Approve</button>`);
         if (mine && a.state === "pending") acts.push(`<button type="button" class="btn danger" data-decide="reject" data-cid="${c.id}">Reject</button>`);
         if (a.state === "rejected" && !mine && !editRight(c)) acts.push(`<button type="button" class="btn" data-decide="reopen" data-cid="${c.id}">Ask again</button>`);
+        if (canHand(c)) acts.push(holderOf(c).handed ? `<button type="button" class="btn" data-hand="back" data-cid="${c.id}" title="Return the class to ${esc(c.holder)}">Take back</button>`
+          : `<button type="button" class="btn" data-hand="house" data-cid="${c.id}" title="No ${esc(c.holder)} instructor is available">Hand to ${esc(c.house)}</button>`);
         acts.push(`<button type="button" class="btn" data-pick="${c.id}" data-part="${c.meetings[0].part}">Open</button>`);
         const status = a.state === "approved" ? `<span class="chip good">Approved</span><div class="small muted">${esc((r.approved_by || "").split("@")[0])}</div>`
           : a.state === "rejected" ? `<span class="chip bad">Not approved</span><div class="small muted">${esc((r.rejected_by || "").split("@")[0])}${r.note ? `: “${esc(r.note)}”` : ""}</div>`
           : `<span class="chip warn">Waiting</span>`;
         return `<tr><td><b>${esc(c.course)}</b> · ${esc(c.section)}<div class="small muted">${esc(DATA.courses[c.course].title)} · ${esc(progDept(c.section))}</div></td>
           <td class="small">${esc(scheduleSig(c).replace(/(Lec|Lab|PE|NSTP):/g, "").trim())}</td>
-          <td>${esc(c.holder)}<div class="small muted">${esc(c.holderCollege)}</div></td>
+          <td>${esc(holderOf(c).dept)}<div class="small muted">${esc(holderOf(c).college)}${holderOf(c).handed ? ` · handed over by ${esc(c.holder)}` : ""}</div></td>
           <td>${mine && a.state !== "approved" ? approverTeacherSelect(c, a) : esc(a.teacher ? DATA.teachers[a.teacher].name : "Not yet chosen")}</td>
           <td class="small">${esc(a.approver.replace(/^the /, ""))}</td>
           <td>${status}</td>
@@ -1690,6 +1708,17 @@ document.addEventListener("click", async (ev) => {
     t.disabled = true;
     if (await decide(ds.cid, ds.decide)) { await Promise.all([sbLoad.ge_decisions(), sbLoad.teacher_changes()]); rebuild(); render(); } else t.disabled = false;
     return;
+  }
+  if (ds.hand) {
+    const c = CLASS[ds.cid];
+    const q = ds.hand === "back" ? `Take ${c.course} ${c.section} back for ${c.holder}? Its teacher returns to the loading plan.`
+      : `Hand ${c.course} ${c.section} to ${c.house}? ${c.house} will hold it and pick the teacher.`;
+    if (!window.confirm(q)) return;
+    const { error } = await sb.rpc("hand_to_house", { cid: ds.cid, undo: ds.hand === "back" });
+    if (error) { toast(sbMessage(error)); return; }
+    await Promise.all([sbLoad.ge_holders(), sbLoad.ge_decisions(), sbLoad.teacher_changes()]);
+    if (state.draft && state.pick?.cls === ds.cid) state.draft.teacher = teacherOf(c)?.key || "";
+    rebuild(); render(); toast(ds.hand === "back" ? `Returned to ${c.holder}.` : `Handed to ${c.house}.`); return;
   }
   if (ds.decideall) {
     const list = approvalList().filter((x) => needsMe(x.c, x.a));

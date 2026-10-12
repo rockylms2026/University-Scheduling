@@ -38,6 +38,21 @@ def holder_department(housed_by: str | None, program_dept: str) -> str | None:
     return m.group(1) if m else None
 
 
+def ge_holder(k, uni: University, dept_college: dict) -> dict:
+    """Which department handles a GE class.
+
+    The house is the department in housed_by. The holder is the department whose teacher the
+    loading plan gives the class (Social Work teaching PSYC 160, say), or the house when the plan
+    names no teacher. Non-GE classes have neither.
+    """
+    if not k.course.is_core:
+        return {"house": None, "houseCollege": None, "holder": None, "holderCollege": None}
+    house = holder_department(k.course.housed_by, uni.programs[k.section.program].department)
+    holder = k.faculty.department if k.faculty and house != "General Education" else house
+    return {"house": house, "houseCollege": dept_college.get(house),
+            "holder": holder, "holderCollege": dept_college.get(holder)}
+
+
 def planner_data(uni: University, semester: int) -> dict:
     campus_raw = yaml.safe_load((DATA_DIR / "campus.yaml").read_text())
     offices = campus_raw.get("faculty_offices") or {}
@@ -70,8 +85,7 @@ def planner_data(uni: University, semester: int) -> dict:
                            "labRooms": list(c.lab_rooms), "placement": list(c.placement)}
         classes.append({"id": k.id, "course": c.code, "section": k.section.name,
                         "teacher": k.faculty.key if k.faculty else None,
-                        "holder": holder_department(c.housed_by, uni.programs[k.section.program].department) if c.is_core else None,
-                        "holderCollege": dept_college.get(holder_department(c.housed_by, uni.programs[k.section.program].department)) if c.is_core else None,
+                        **ge_holder(k, uni, dept_college),
                         "lu": c.load_units, "meetings": by_class.get(k.id, [])})
 
     load = faculty_load_summary(uni, semester)
