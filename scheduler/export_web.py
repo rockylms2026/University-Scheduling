@@ -58,20 +58,11 @@ def seed_sql(uni: University, semester: int) -> str:
     return "\n".join(out) + "\n"
 
 
-# GE classes already booked that their section must ask for: ask the department the loading plan
-# gives them to, or else the house department.
-DEFAULT_REQUESTS = """-- Booked GE classes that must be asked of another department: ask the department of the plan teacher, or the house.
-insert into public.ge_requests (class_id, department, college, requested_by)
-select c.id, d.department, d.college, 'setup'
-from public.classes c
-left join public.faculty f on f.key = c.plan_teacher
-join lateral (
-  select g.department, g.college from public.ge_teachers g
-  where g.course = c.course and g.allowed
-  order by (g.department = f.department) desc nulls last, (g.department = c.house_dept) desc, g.department
-  limit 1) d on true
-where public.class_kind(c.id) = 'borrowed' and exists (select 1 from public.bookings b where b.class_id = c.id)
-on conflict (class_id) do nothing;
+# Requests are made by the chairs, to departments that have submitted. Earlier versions of this setup
+# sent requests by themselves; take those back.
+DEFAULT_REQUESTS = """-- Remove requests that an earlier setup sent by itself (chairs now ask instructors of submitted departments).
+delete from public.ge_decisions where class_id in (select class_id from public.ge_requests where requested_by = 'setup');
+delete from public.ge_requests where requested_by = 'setup';
 """
 
 

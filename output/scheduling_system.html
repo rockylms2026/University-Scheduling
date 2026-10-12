@@ -1403,7 +1403,8 @@ function editor(cls, part) {
     let chip, why;
     if (bad.length) { chip = `<span class="chip bad">Conflict</span>`; why = bad[0][1]; }
     else if (rooms === 0) { chip = `<span class="chip bad">No room</span>`; why = "Every suitable room is booked"; }
-    else if (hf === 0) { chip = `<span class="chip bad">No teacher</span>`; why = askable(cls, null).some((x) => x.submitted) ? `No instructor of a submitted department is free` : `No department that teaches ${cls.course} has submitted yet`; }
+    else if (hf === 0 && !askable(cls, null).some((x) => x.submitted)) { chip = `<span class="chip good">Free</span>`; why = [rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed", "ask an instructor later"].join(" · "); }
+    else if (hf === 0) { chip = `<span class="chip warn">No instructor</span>`; why = `No instructor of a submitted department is free then; you can still book it and request one`; }
     else if (ev.length) { chip = `<span class="chip warn">Check</span>`; why = ev[0][1]; }
     else { chip = `<span class="chip good">Free</span>`; why = [rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed", hf > 0 && ask.map((x) => `${x.dept} ${x.free.length}`).join(", ") + " free"].filter(Boolean).join(" · "); }
     const when = `${o.iv.map((i) => i[0]).join("/")} ${hm(o.iv[0][1])}–${hm(o.iv[0][2])}`;
@@ -1451,8 +1452,9 @@ function editor(cls, part) {
               `<option value="${esc(x.dept)}|${k}"${`${x.dept}|${k}` === val ? " selected" : ""}${full(k) ? " disabled" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${full(k) ? " · full load" : ""}${k === cls.planTeacher ? " · loading plan" : ""}</option>`).join("")}</optgroup>`).join("")}
           ${!avail.length && openReq ? `<optgroup label="No instructor available: request one">${openReq}</optgroup>` : ""}</select></label>`;
       const pick = list.find((x) => x.dept === d.askDept);
-      if (!list.some((x) => x.submitted)) checks.push(["bad", `No department that teaches ${cls.course} has submitted its schedule yet. Check the GE Availability page later.`]);
-      else if (!d.askTeacher) checks.push(["bad", avail.length ? `Choose the instructor to ask for ${cls.course}` : `No instructor is free and under load at ${opt.label}. Choose “Request an instructor” to ask a department to find one.`]);
+      if (!list.some((x) => x.submitted)) checks.push(["info", `Book the time now. No department that teaches ${cls.course} has submitted yet; once one does, open this class again and ask one of its instructors (see the GE Availability page).`]);
+      else if (!d.askTeacher) checks.push(["info", avail.length ? `You can book the time now and ask an instructor later, or choose one above to send the request now.`
+        : `No instructor is free and under load at ${opt.label}. Book the time now, or choose “Request an instructor” to ask a department to find one.`]);
       else if (!pick?.submitted) checks.push(["bad", `${d.askDept} has not submitted its schedule yet`]);
       else if (d.askTeacher === "*") checks.push(["info", `Requests an instructor from ${d.askDept}: it will find one when it approves`]);
       else if (!pick.free.includes(d.askTeacher)) checks.push(["bad", `${DATA.teachers[d.askTeacher].name} is not free at ${opt.label}`]);
@@ -1476,7 +1478,7 @@ function editor(cls, part) {
       const same = r && r.department === d.askDept && (teacherOf(cls)?.key || "*") === (d.askTeacher || "");
       checks.push(["info", `Request: the Department of ${progDept(cls.section)} does not teach ${cls.course}, so it asks an instructor of a department that does. ${who[0].toUpperCase() + who.slice(1)} approves, and may give it to another of its instructors.`
         + (same ? (cur.state === "approved" ? " Now: approved." : cur.state === "rejected" ? ` Now: not approved${cur.row.note ? ` (“${cur.row.note}”)` : ""}. Ask another instructor or change the time.` : cur.state === "pending" ? " Now: waiting for an answer." : "")
-           : r ? " Saving sends a new request." : " Saving sends the request.")]);
+           : !d.askTeacher ? " Saving books the time only; no request is sent yet." : r ? " Saving sends a new request." : " Saving sends the request.")]);
     }
     detail = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${askSel}${teacherSel}</div>
       ${borrowed && tRight ? "" : `<div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>

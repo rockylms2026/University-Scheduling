@@ -1560,15 +1560,6 @@ insert into public.teacher_changes (class_id, sem, teacher, updated_by, updated_
 alter table public.bookings enable trigger stamp_bookings;
 alter table public.teacher_changes enable trigger stamp_teacher_changes;
 
--- Booked GE classes that must be asked of another department: ask the department of the plan teacher, or the house.
-insert into public.ge_requests (class_id, department, college, requested_by)
-select c.id, d.department, d.college, 'setup'
-from public.classes c
-left join public.faculty f on f.key = c.plan_teacher
-join lateral (
-  select g.department, g.college from public.ge_teachers g
-  where g.course = c.course and g.allowed
-  order by (g.department = f.department) desc nulls last, (g.department = c.house_dept) desc, g.department
-  limit 1) d on true
-where public.class_kind(c.id) = 'borrowed' and exists (select 1 from public.bookings b where b.class_id = c.id)
-on conflict (class_id) do nothing;
+-- Remove requests that an earlier setup sent by itself (chairs now ask instructors of submitted departments).
+delete from public.ge_decisions where class_id in (select class_id from public.ge_requests where requested_by = 'setup');
+delete from public.ge_requests where requested_by = 'setup';
