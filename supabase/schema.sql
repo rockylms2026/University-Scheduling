@@ -361,18 +361,15 @@ begin
   raise exception 'Unknown decision %', decision;
 end $$;
 
--- Classes of the sections of department d still incomplete: no time, no teacher, or a borrowed GE
--- class not approved for its current time and teacher. GE Department courses do not count.
+-- The part of department d that it does itself, still incomplete: classes with no time, and classes
+-- other than borrowed GE classes with no teacher. Borrowed GE classes need only a time, since their
+-- instructors come from other departments after everyone submits. GE Department courses do not count.
 create or replace function public.dept_missing(d text) returns int
 language sql stable security definer set search_path = public as $$
   select count(*)::int from public.classes c
   where c.department = d and public.class_kind(c.id) <> 'gedept'
     and (not exists (select 1 from public.bookings b where b.class_id = c.id)
-         or public.class_teacher(c.id) is null
-         or (public.class_kind(c.id) = 'borrowed' and not exists (
-               select 1 from public.ge_decisions g join public.ge_requests r on r.class_id = g.class_id
-               where g.class_id = c.id and g.department = r.department and g.approved_at is not null
-                 and g.schedule = public.class_schedule(c.id) and g.teacher is not distinct from public.class_teacher(c.id))))
+         or (public.class_kind(c.id) <> 'borrowed' and public.class_teacher(c.id) is null))
 $$;
 
 -- Submit the schedule of department d. Every class must be complete first.

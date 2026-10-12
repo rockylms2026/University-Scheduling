@@ -1119,8 +1119,9 @@ function conflictList(list, limit) {
     ${limit && list.length > limit ? `<button type="button" class="btn link" data-view="conflicts">See all ${list.length}</button>` : ""}</div>`;
 }
 // ===== Submitting a department schedule (hosted version) =====
-// What is still incomplete for the sections of a department: no time, no room, no teacher, or a
-// borrowed GE class not yet approved. GE Department courses are left out. Mirrors dept_missing().
+// The part a department does itself, still incomplete: no time, no room, or (except borrowed GE
+// classes, whose instructors come from other departments later) no teacher. Mirrors dept_missing().
+// GE Department courses are left out.
 function missingFor(dept) {
   const out = [];
   DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) !== "gedept" && c.meetings.length).forEach((c) => {
@@ -1130,13 +1131,25 @@ function missingFor(dept) {
       if (!b) issues.push(`${PART[m.part].toLowerCase()} has no time`);
       else if (m.pools.some((p) => p) && !b.room) issues.push(`${PART[m.part].toLowerCase()} has no room`);
     });
-    const a = approvalOf(c);
-    if (a && a.state !== "approved" && a.state !== "unscheduled")
-      issues.push(a.state === "unasked" ? "no department asked to teach it" : a.state === "rejected" ? `not approved by ${a.approver}` : `waiting for ${a.approver}`);
-    else if (!teacherOf(c)) issues.push("no teacher");
+    if (classKind(c) !== "borrowed" && !teacherOf(c)) issues.push("no teacher");
     if (issues.length) out.push({ cls: c, issues });
   });
   return out;
+}
+// Borrowed GE classes of a department still without an approved instructor from another department.
+function waitingFor(dept) {
+  return DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) === "borrowed")
+    .map((c) => ({ cls: c, a: approvalOf(c) })).filter((x) => x.a && x.a.state !== "approved");
+}
+// A short description: "2 SOCS 195 classes waiting for Economics, 1 HIST 201 class not asked yet".
+function waitingText(list) {
+  const groups = {};
+  list.forEach(({ cls, a }) => {
+    const what = a.state === "unasked" || a.state === "unscheduled" ? "not asked yet" : a.state === "rejected" ? `not approved by ${a.dept}` : `waiting for ${a.dept}`;
+    const k = `${cls.course}|${what}`;
+    groups[k] = (groups[k] || 0) + 1;
+  });
+  return Object.entries(groups).map(([k, n]) => { const [course, what] = k.split("|"); return `${n} ${course} class${n > 1 ? "es" : ""} ${what}`; }).join(", ");
 }
 const myDept = () => (BACKEND && me.role === "chair" ? me.department : null);
 const canSubmit = (dept) => BACKEND && (isAdmin() || (me.role === "chair" && me.department === dept)
@@ -1177,8 +1190,9 @@ function openSubmit(dept) {
       <div class="misslist">${Object.entries(bySection).sort((a, b) => numSort(a[0], b[0])).map(([sec, list]) => `<div><h3>${esc(sec)}</h3><ul style="margin:0;padding-left:18px">${list.map((x) =>
         `<li><b>${esc(x.cls.course)}</b> ${esc(DATA.courses[x.cls.course].title)}: ${esc(x.issues.join(", "))}</li>`).join("")}</ul></div>`).join("")}</div>
       <p class="small" style="margin:0">Finish these, then submit. Other departments rely on a submitted schedule to see which of your instructors are free.</p>`
-    : `<ul class="checks"><li class="good">All ${total} classes have a time, a room where needed, and a teacher, and every borrowed GE class is approved.</li></ul>`}
-    <p class="small muted" style="margin:0">Submitting tells the other departments and the Registrar that this schedule is done. You can still make changes; they will show as changed since submitting until you submit again. GE Department courses are not counted.</p>
+    : `<ul class="checks"><li class="good">Every class has a time and a room where needed, and every class your department teaches has a teacher.</li></ul>
+       ${waitingFor(dept).length ? `<p class="small" style="margin:0"><b>After you submit:</b> ${esc(waitingText(waitingFor(dept)))}. Ask the instructors on the Timetable once those departments have submitted. The Submissions page shows them as waiting until they are approved.</p>` : ""}`}
+    <p class="small muted" style="margin:0">Submitting tells the other departments and the Registrar that your own part is done, so they can see which of your instructors are free for GE classes. You can still make changes; they will show as changed since submitting until you submit again. GE Department courses are not counted.</p>
     <div class="actions">${miss.length ? "" : `<button type="button" class="btn primary" data-subgo="${esc(dept)}">Submit</button>`}
       <button type="button" class="btn${miss.length ? " primary" : ""}" data-subcancel="1">${miss.length ? "Go back and finish" : "Cancel"}</button><span class="msg bad" id="submsg"></span></div></div>`;
 }
@@ -1197,19 +1211,21 @@ function renderSubmissions(page) {
   try { localStorage.setItem(seenKey(), new Date().toISOString()); } catch (e) {}
   const depts = [...new Set(Object.values(DATA.programs).map((p) => p.dept))].sort();
   const rows = depts.map((dept) => {
-    const sub = submissions?.[dept], miss = missingFor(dept).length;
+    const sub = submissions?.[dept], miss = missingFor(dept).length, wait = waitingFor(dept);
     const total = DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) !== "gedept" && c.meetings.length).length;
     const when = sub ? new Date(sub.submitted_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
     const status = !sub ? `<span class="chip none">Not submitted</span>`
-      : `<span class="chip ${sub.complete ? "good" : "warn"}">${sub.complete ? "Submitted, complete" : `Submitted with ${sub.missing} incomplete`}</span>${changedSince(dept) ? ` <span class="chip warn">Changed since</span>` : ""}`;
-    return `<tr><td><b>${esc(dept)}</b><div class="small muted">${esc(DATA.deptCollege[dept])}</div></td><td>${status}${sub?.reason ? `<div class="small muted">“${esc(sub.reason)}”</div>` : ""}</td>
+      : `<span class="chip ${wait.length ? "info" : "good"}">${wait.length ? "Submitted" : "Fully complete"}</span>${changedSince(dept) ? ` <span class="chip warn">Changed since</span>` : ""}${
+          wait.length ? `<div class="small muted">${esc(waitingText(wait))}</div>` : ""}`;
+    return `<tr><td><b>${esc(dept)}</b><div class="small muted">${esc(DATA.deptCollege[dept])}</div></td><td>${status}</td>
       <td class="small">${esc(when)}${sub ? `<div class="muted">${esc((sub.submitted_by || "").split("@")[0])}</div>` : ""}</td>
       <td class="num">${total - miss}/${total}<div class="bar"><i style="width:${total ? (100 * (total - miss)) / total : 0}%"></i></div></td>
       <td>${canSubmit(dept) ? `<button type="button" class="btn${dept === myDept() ? " primary" : ""}" data-submit="${esc(dept)}">${sub ? "Submit again" : "Submit"}</button>` : ""}</td></tr>`;
   }).join("");
   const n = depts.filter((d) => submissions?.[d]).length;
-  page.innerHTML = `${head("Submissions", `${n} of ${depts.length} departments have submitted their schedules. A department submits when it has finished scheduling its sections; others are told here and by the bell at the top.`, submitButton())}
-    <div class="card"><div class="scroll"><table><thead><tr><th>Department</th><th>Status</th><th>Submitted</th><th class="num">Classes complete</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  const full = depts.filter((d) => submissions?.[d] && !waitingFor(d).length).length;
+  page.innerHTML = `${head("Submissions", `${n} of ${depts.length} departments have submitted, ${full} fully complete. A department submits when its own part is done: every class has a time, and every class it teaches has a teacher. It is fully complete once its borrowed GE classes have approved instructors from other departments.`, submitButton())}
+    <div class="card"><div class="scroll"><table><thead><tr><th>Department</th><th>Status</th><th>Submitted</th><th class="num">Own part done</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
 // ===== GE Availability: instructors of submitted departments, and when they are free =====
