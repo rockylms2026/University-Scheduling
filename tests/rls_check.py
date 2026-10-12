@@ -149,6 +149,12 @@ expect("registrar removes a department from a list", True,
        "update ge_teachers set allowed = false where course = 'GAD 171' and department = 'Social Work'; select may_teach('GAD 171','Social Work')", ADMIN, contains="f")
 psql("update ge_teachers set allowed = true")
 
+# Submitting a department schedule
+expect("Psychology still has incomplete classes", True, "select dept_missing('Psychology') > 0", ADMIN, contains="t")
+expect("an incomplete schedule cannot be submitted", False, "select submit_schedule('Psychology')", "chair.psy@u.edu", contains="unscheduled")
+expect("another chair cannot submit Psychology", False, "select submit_schedule('Psychology')", "chair.eco@u.edu")
+expect("submissions cannot be written directly", False, "insert into submissions (department, college, complete) values ('Psychology','CSS',true)", "chair.psy@u.edu")
+
 # Associate deans book their own college
 expect("associate dean books own college major", True, bk(eco_major), "adean.css@u.edu")
 expect("associate dean cannot book other college", False, bk(cisc_major), "adean.css@u.edu")

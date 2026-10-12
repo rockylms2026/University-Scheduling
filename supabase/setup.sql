@@ -121,6 +121,18 @@ create table if not exists public.ge_decisions (
 );
 alter table public.ge_decisions add column if not exists department text;
 
+-- A department telling everyone that it has finished scheduling its sections.
+create table if not exists public.submissions (
+  department   text primary key,
+  college      text not null,
+  submitted_by text,
+  submitted_at timestamptz not null default now(),
+  complete     boolean not null,
+  missing      int not null default 0,      -- classes still incomplete when submitted
+  missing_list jsonb not null default '[]',  -- what the page listed, for others to see
+  reason       text                          -- why it was submitted incomplete
+);
+
 create table if not exists public.settings (
   id             int primary key default 1 check (id = 1),
   ge_open        boolean not null default false,   -- departments schedule first, then the GE Department
@@ -350,6 +362,48 @@ begin
   raise exception 'Unknown decision %', decision;
 end $$;
 
+-- Classes of the sections of department d still incomplete: no time, no teacher, or a borrowed GE
+-- class not approved for its current time and teacher. GE Department courses do not count.
+create or replace function public.dept_missing(d text) returns int
+language sql stable security definer set search_path = public as $$
+  select count(*)::int from public.classes c
+  where c.department = d and public.class_kind(c.id) <> 'gedept'
+    and (not exists (select 1 from public.bookings b where b.class_id = c.id)
+         or public.class_teacher(c.id) is null
+         or (public.class_kind(c.id) = 'borrowed' and not exists (
+               select 1 from public.ge_decisions g join public.ge_requests r on r.class_id = g.class_id
+               where g.class_id = c.id and g.department = r.department and g.approved_at is not null
+                 and g.schedule = public.class_schedule(c.id) and g.teacher is not distinct from public.class_teacher(c.id))))
+$$;
+
+-- Submit the schedule of department d. Every class must be complete first.
+create or replace function public.submit_schedule(d text, reason text default null, missing_list jsonb default '[]')
+returns text
+language plpgsql volatile security definer set search_path = public as $$
+declare
+  me public.staff := public.my_staff();
+  dc text;
+  left_n int := public.dept_missing(d);
+  listed int := coalesce(jsonb_array_length(missing_list), 0);
+begin
+  if me.email is null then raise exception 'Your account has no role yet'; end if;
+  select distinct college into dc from public.classes where department = d;
+  if dc is null then raise exception 'Unknown department %', d; end if;
+  if not (public.is_admin() or (me.role = 'chair' and me.department = d) or (me.role = 'associate_dean' and me.college = dc)) then
+    raise exception 'Only the % chair can submit this schedule', d;
+  end if;
+  if left_n > 0 or listed > 0 then
+    raise exception 'You have % unscheduled or incomplete classes. Finish them before submitting', greatest(left_n, listed);
+  end if;
+  insert into public.submissions (department, college, submitted_by, submitted_at, complete, missing, missing_list, reason)
+    values (d, dc, me.email, now(), left_n = 0 and listed = 0, greatest(left_n, listed), coalesce(missing_list, '[]'),
+            nullif(btrim(submit_schedule.reason), ''))
+    on conflict (department) do update set college = excluded.college, submitted_by = excluded.submitted_by,
+      submitted_at = excluded.submitted_at, complete = excluded.complete, missing = excluded.missing,
+      missing_list = excluded.missing_list, reason = excluded.reason;
+  return case when left_n = 0 and listed = 0 then 'complete' else 'incomplete' end;
+end $$;
+
 -- Publish the schedule (registrar and dean only).
 create or replace function public.publish_schedule() returns timestamptz
 language plpgsql volatile security definer set search_path = public as $$
@@ -383,6 +437,7 @@ alter table public.teacher_changes enable row level security;
 alter table public.ge_requests     enable row level security;
 alter table public.ge_decisions    enable row level security;
 alter table public.settings        enable row level security;
+alter table public.submissions     enable row level security;
 
 drop policy if exists read_faculty on public.faculty;
 create policy read_faculty on public.faculty for select to authenticated using (public.has_role());
@@ -426,13 +481,17 @@ create policy read_ge_requests on public.ge_requests for select to authenticated
 drop policy if exists read_ge_decisions on public.ge_decisions;
 create policy read_ge_decisions on public.ge_decisions for select to authenticated using (public.has_role());
 
+-- Submissions are written only through submit_schedule().
+drop policy if exists read_submissions on public.submissions;
+create policy read_submissions on public.submissions for select to authenticated using (public.has_role());
+
 drop policy if exists read_settings on public.settings;
 create policy read_settings on public.settings for select to authenticated using (public.has_role());
 drop policy if exists admin_settings on public.settings;
 create policy admin_settings on public.settings for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 grant usage on schema public to authenticated;
-grant select on public.faculty, public.classes, public.ge_requests, public.ge_decisions to authenticated;
+grant select on public.faculty, public.classes, public.ge_requests, public.ge_decisions, public.submissions to authenticated;
 grant select, insert, update, delete on public.staff, public.bookings, public.teacher_changes, public.ge_teachers to authenticated;
 grant select, update on public.settings to authenticated;
 -- Every helper the access rules call must be runnable by signed-in users (some projects do not grant this by default).
@@ -440,7 +499,8 @@ grant execute on function public.my_staff(), public.is_admin(), public.has_role(
   public.class_schedule(text), public.may_teach(text, text), public.class_kind(text), public.own_ge_left(text),
   public.request_dept(text), public.request_college(text), public.can_edit_class(text), public.can_decide(text),
   public.can_assign(text, text), public.needs_approval(text), public.request_ge(text, text),
-  public.decide_ge(text, text, text, text), public.publish_schedule(), public.stamp_row() to authenticated;
+  public.decide_ge(text, text, text, text), public.dept_missing(text), public.submit_schedule(text, text, jsonb),
+  public.publish_schedule(), public.stamp_row() to authenticated;
 revoke all on all tables in schema public from anon;
 
 -- ---------- live updates ----------
@@ -449,6 +509,7 @@ alter table public.teacher_changes replica identity full;
 alter table public.ge_requests replica identity full;
 alter table public.ge_decisions replica identity full;
 alter table public.ge_teachers replica identity full;
+alter table public.submissions replica identity full;
 do $$ begin
   begin alter publication supabase_realtime add table public.bookings; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.teacher_changes; exception when duplicate_object then null; end;
@@ -456,6 +517,7 @@ do $$ begin
   begin alter publication supabase_realtime add table public.ge_decisions; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.ge_teachers; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.settings; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.submissions; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.staff; exception when duplicate_object then null; end;
 end $$;
 

@@ -257,6 +257,13 @@ dl.about dd { margin: 0; }
 .block .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #c48a00; }
 .block.rejected .dot { background: var(--bad); }
 .legend i.pend { background: #fff; border: 1px dashed #b07800; position: relative; }
+.bell { position: relative; font: inherit; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.35); border-radius: 6px; padding: 4px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.bell .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.bell b { font-family: var(--f-mono); font-size: .72rem; background: #e5484d; color: #fff; border-radius: 999px; padding: 0 6px; }
+.misslist { max-height: 46vh; overflow-y: auto; display: grid; gap: 8px; }
+.misslist h3 { font-size: .85rem; margin: 4px 0 2px; }
+.misslist li { font-size: .84rem; }
+.dialog textarea { font: inherit; font-size: .9rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-height: 70px; resize: vertical; }
 .legend i.pend::after { content: ""; position: absolute; left: 2px; top: 2px; width: 6px; height: 6px; border-radius: 50%; background: #c48a00; }
 .appr { display: inline-flex; gap: 4px; align-items: center; font-size: .78rem; white-space: nowrap; }
 .appr.ok { color: var(--good); }
@@ -307,6 +314,7 @@ dl.about dd { margin: 0; }
     <div class="tb-field"><select id="scopeSel" aria-label="College filter"></select></div>
     <div class="search"><input id="search" type="search" placeholder="Search sections, faculty, rooms, courses" aria-label="Search" autocomplete="off"><div class="results" id="results" hidden></div></div>
     <button type="button" class="publish" id="publishBtn">Publish schedule</button>
+    <button type="button" class="bell" id="bellBtn" data-view="submissions" hidden title="Submitted schedules"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5v2.6L2 11v1h12v-1l-1.5-2.4V6A4.5 4.5 0 0 0 8 1.5Zm-1.8 11.5a1.8 1.8 0 0 0 3.6 0Z"/></svg><span class="sr">Submissions</span><b id="bellCount" hidden></b></button>
     <div class="userchip" id="userchip" hidden></div>
   </header>
   <nav class="side" id="side" aria-label="Main menu"></nav>
@@ -315,6 +323,7 @@ dl.about dd { margin: 0; }
 </div>
 <div class="overlay" id="printPanel" hidden></div>
 <div class="overlay" id="publishPanel" hidden></div>
+<div class="overlay" id="submitPanel" hidden></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -329,7 +338,7 @@ const PART = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Superv
 const COLLEGE_KEYS = ["CSS", "CISC", "CBE", "COE", "CCJPS"];
 const SCOPES = [["ALL", "All colleges"], ["CSS", "CSS"], ["CISC", "CISC"], ["CBE", "CBE"], ["COE", "COE"], ["CCJPS", "CCJPS"], ["GE", "GE Department"]];
 const VIEWS = [["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["rooms", "Rooms"], ["sections", "Sections"],
-               ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["reports", "Reports"], ["settings", "Settings"]];
+               ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["submissions", "Submissions"], ["reports", "Reports"], ["settings", "Settings"]];
 const ROLE_NAME = { registrar: "Registrar", dean: "Dean", associate_dean: "Associate Dean", chair: "Department Chair", ge_coordinator: "GE Coordinator" };
 const TYPE_LABEL = { lec: "Lecture (major)", lab: "Laboratory block (3 h)", ge: "General education", pe: "PE", cwts: "CWTS (Saturday)", prac: "Practicum supervision" };
 const INTRO = new Set(DATA.intro || []);
@@ -403,6 +412,7 @@ let me = { email: null, name: "", role: "registrar", college: null, department: 
 let settings = { geOpen: true };
 let approvals = {};          // class id -> decision on a borrowed GE class
 let requests = {};           // class id -> { department, college }: the department a section asked
+let submissions = null;      // department -> its submitted schedule (null until first loaded)
 let geLists = {};            // GE course -> departments that may teach it (hosted: from the database)
 let geRows = [];             // the ge_teachers rows, for the Settings page
 Object.entries(DATA.geTeachers || {}).forEach(([code, depts]) => (geLists[code] = depts.slice()));
@@ -539,6 +549,15 @@ const sbLoad = {
     pubStatus = s.published_at ? { at: s.published_at, by: s.published_by } : null;
   },
   staff: async () => { if (isAdmin()) staffList = await sbAll(sb.from("staff").select("*").order("email")); },
+  submissions: async () => {
+    const before = submissions;
+    submissions = {};
+    (await sbAll(sb.from("submissions").select("*"))).forEach((r) => (submissions[r.department] = r));
+    if (before !== null) Object.values(submissions).forEach((r) => {        // tell people as it happens
+      if (r.department !== me.department && (!before[r.department] || before[r.department].submitted_at !== r.submitted_at))
+        toast(`Department of ${r.department} submitted its schedule${r.complete ? "" : " (incomplete)"}.`);
+    });
+  },
 };
 const refreshTimers = {};
 function sbRefresh(table) {
@@ -573,7 +592,7 @@ async function enter(session) {
   rebuild(); render();
   if (!window._sbChannel) {
     window._sbChannel = sb.channel("schedule");
-    ["bookings", "teacher_changes", "ge_requests", "ge_decisions", "ge_teachers", "settings", "staff"].forEach((t) =>
+    ["bookings", "teacher_changes", "ge_requests", "ge_decisions", "ge_teachers", "settings", "staff", "submissions"].forEach((t) =>
       window._sbChannel.on("postgres_changes", { event: "*", schema: "public", table: t }, () => sbRefresh(t)));
     window._sbChannel.subscribe();
   }
@@ -923,9 +942,12 @@ function renderShell() {
   const nConf = conflictsInScope().filter((c) => c.sev === "bad").length;
   const unsched = DATA.classes.filter(classInScope).reduce((a, c) => a + c.meetings.filter((m) => !bookings[`${c.id}|${m.part}`]).length, 0);
   const nMine = BACKEND ? DATA.classes.filter((c) => { const a = approvalOf(c); return a && needsMe(c, a); }).length : 0;
-  $("side").innerHTML = VIEWS.filter(([k]) => k !== "approvals" || BACKEND).map(([k, l]) => {
+  const unseen = unseenSubmissions().length;
+  $("bellBtn").hidden = !BACKEND || !me.email;
+  $("bellCount").hidden = !unseen; $("bellCount").textContent = unseen;
+  $("side").innerHTML = VIEWS.filter(([k]) => (k !== "approvals" && k !== "submissions") || BACKEND).map(([k, l]) => {
     const count = k === "conflicts" ? `<span class="count${nConf ? " bad" : ""}">${nConf}</span>` : k === "timetable" ? `<span class="count">${unsched}</span>`
-      : k === "approvals" && nMine ? `<span class="count bad">${nMine}</span>` : "";
+      : k === "approvals" && nMine ? `<span class="count bad">${nMine}</span>` : k === "submissions" && unseen ? `<span class="count bad">${unseen}</span>` : "";
     return `${k === "reports" ? `<div class="sep"></div>` : ""}<button type="button" data-view="${k}" aria-current="${state.view === k ? "page" : "false"}">${l}${count}</button>`;
   }).join("");
   const pub = pubState();
@@ -952,11 +974,11 @@ function pubState() {
 function render() {
   if (BACKEND && !me.email) return;
   if (!allowedScopes().includes(state.scope)) state.scope = allowedScopes()[0];
-  if (state.view === "approvals" && !BACKEND) state.view = "dashboard";
+  if ((state.view === "approvals" || state.view === "submissions") && !BACKEND) state.view = "dashboard";
   renderShell(); remember();
   const page = $("page");
   const fn = { dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, rooms: renderRooms, sections: renderSections,
-               courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, reports: renderReports, settings: renderSettings }[state.view] || renderDashboard;
+               courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, submissions: renderSubmissions, reports: renderReports, settings: renderSettings }[state.view] || renderDashboard;
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
   fn(page);
   if (banner) page.insertAdjacentHTML("afterbegin", banner);
@@ -1090,6 +1112,100 @@ function conflictList(list, limit) {
     <button type="button" class="btn" data-goconf="${conflicts.indexOf(c)}">Go to</button></div>`).join("")}
     ${limit && list.length > limit ? `<button type="button" class="btn link" data-view="conflicts">See all ${list.length}</button>` : ""}</div>`;
 }
+// ===== Submitting a department schedule (hosted version) =====
+// What is still incomplete for the sections of a department: no time, no room, no teacher, or a
+// borrowed GE class not yet approved. GE Department courses are left out. Mirrors dept_missing().
+function missingFor(dept) {
+  const out = [];
+  DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) !== "gedept" && c.meetings.length).forEach((c) => {
+    const issues = [];
+    c.meetings.forEach((m) => {
+      const b = bookings[`${c.id}|${m.part}`];
+      if (!b) issues.push(`${PART[m.part].toLowerCase()} has no time`);
+      else if (m.pools.some((p) => p) && !b.room) issues.push(`${PART[m.part].toLowerCase()} has no room`);
+    });
+    const a = approvalOf(c);
+    if (a && a.state !== "approved" && a.state !== "unscheduled")
+      issues.push(a.state === "unasked" ? "no department asked to teach it" : a.state === "rejected" ? `not approved by ${a.approver}` : `waiting for ${a.approver}`);
+    else if (!teacherOf(c)) issues.push("no teacher");
+    if (issues.length) out.push({ cls: c, issues });
+  });
+  return out;
+}
+const myDept = () => (BACKEND && me.role === "chair" ? me.department : null);
+const canSubmit = (dept) => BACKEND && (isAdmin() || (me.role === "chair" && me.department === dept)
+  || (me.role === "associate_dean" && DATA.deptCollege[dept] === me.college));
+function submitButton() {
+  const d = myDept();
+  if (!d) return "";
+  const sub = submissions?.[d];
+  return `<div class="row">${sub ? `<span class="chip ${changedSince(d) ? "warn" : "good"}">${changedSince(d) ? "Changed since submitting" : `Submitted ${new Date(sub.submitted_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}</span>` : ""}
+    <button type="button" class="btn primary" data-submit="${esc(d)}">${sub ? "Submit again" : "Submit schedule"}</button></div>`;
+}
+// Has anything of the department changed since it submitted?
+function changedSince(dept) {
+  const sub = submissions?.[dept];
+  if (!sub) return false;
+  const t0 = Date.parse(sub.submitted_at);
+  const mine = (id) => progDept(CLASS[id].section) === dept;
+  return Object.values(bookings).some((b) => mine(b.class) && Date.parse(b.at) > t0)
+      || Object.values(assigned).some((a) => mine(a.class) && Date.parse(a.at) > t0);
+}
+function seenKey() { return `cs-seen-${me.email}`; }
+function unseenSubmissions() {
+  if (!BACKEND || !submissions) return [];
+  let seen = 0;
+  try { seen = Date.parse(localStorage.getItem(seenKey()) || "") || 0; } catch (e) {}
+  return Object.values(submissions).filter((r) => r.department !== me.department && Date.parse(r.submitted_at) > seen);
+}
+function openSubmit(dept) {
+  const miss = missingFor(dept);
+  const el = $("submitPanel");
+  const bySection = {};
+  miss.forEach((x) => (bySection[x.cls.section] = bySection[x.cls.section] || []).push(x));
+  const total = DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) !== "gedept" && c.meetings.length).length;
+  el.hidden = false;
+  el.innerHTML = `<div class="dialog" role="dialog" aria-modal="true" aria-labelledby="subTitle" style="width:min(640px,100%)">
+    <h2 id="subTitle">Submit the schedule of the Department of ${esc(dept)}</h2>
+    ${miss.length ? `<div class="banner" style="background:var(--bad-soft);color:var(--bad)"><b>You have unscheduled courses.</b> ${miss.length} of ${total} classes are not complete:</div>
+      <div class="misslist">${Object.entries(bySection).sort((a, b) => numSort(a[0], b[0])).map(([sec, list]) => `<div><h3>${esc(sec)}</h3><ul style="margin:0;padding-left:18px">${list.map((x) =>
+        `<li><b>${esc(x.cls.course)}</b> ${esc(DATA.courses[x.cls.course].title)}: ${esc(x.issues.join(", "))}</li>`).join("")}</ul></div>`).join("")}</div>
+      <p class="small" style="margin:0">Finish these, then submit. Other departments rely on a submitted schedule to see which of your instructors are free.</p>`
+    : `<ul class="checks"><li class="good">All ${total} classes have a time, a room where needed, and a teacher, and every borrowed GE class is approved.</li></ul>`}
+    <p class="small muted" style="margin:0">Submitting tells the other departments and the Registrar that this schedule is done. You can still make changes; they will show as changed since submitting until you submit again. GE Department courses are not counted.</p>
+    <div class="actions">${miss.length ? "" : `<button type="button" class="btn primary" data-subgo="${esc(dept)}">Submit</button>`}
+      <button type="button" class="btn${miss.length ? " primary" : ""}" data-subcancel="1">${miss.length ? "Go back and finish" : "Cancel"}</button><span class="msg bad" id="submsg"></span></div></div>`;
+}
+async function doSubmit(dept) {
+  const miss = missingFor(dept);
+  const reason = null;
+  if (miss.length) { $("submsg").textContent = "Finish the unscheduled courses first."; return; }
+  const list = miss.map((x) => ({ course: x.cls.course, section: x.cls.section, issues: x.issues }));
+  const { error } = await sb.rpc("submit_schedule", { d: dept, reason, missing_list: list });
+  if (error) { $("submsg").textContent = sbMessage(error); return; }
+  $("submitPanel").hidden = true;
+  await sbLoad.submissions(); render();
+  toast(`Submitted. The other departments can now see that ${dept} is ${miss.length ? "done, with notes" : "done"}.`);
+}
+function renderSubmissions(page) {
+  try { localStorage.setItem(seenKey(), new Date().toISOString()); } catch (e) {}
+  const depts = [...new Set(Object.values(DATA.programs).map((p) => p.dept))].sort();
+  const rows = depts.map((dept) => {
+    const sub = submissions?.[dept], miss = missingFor(dept).length;
+    const total = DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) !== "gedept" && c.meetings.length).length;
+    const when = sub ? new Date(sub.submitted_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
+    const status = !sub ? `<span class="chip none">Not submitted</span>`
+      : `<span class="chip ${sub.complete ? "good" : "warn"}">${sub.complete ? "Submitted, complete" : `Submitted with ${sub.missing} incomplete`}</span>${changedSince(dept) ? ` <span class="chip warn">Changed since</span>` : ""}`;
+    return `<tr><td><b>${esc(dept)}</b><div class="small muted">${esc(DATA.deptCollege[dept])}</div></td><td>${status}${sub?.reason ? `<div class="small muted">“${esc(sub.reason)}”</div>` : ""}</td>
+      <td class="small">${esc(when)}${sub ? `<div class="muted">${esc((sub.submitted_by || "").split("@")[0])}</div>` : ""}</td>
+      <td class="num">${total - miss}/${total}<div class="bar"><i style="width:${total ? (100 * (total - miss)) / total : 0}%"></i></div></td>
+      <td>${canSubmit(dept) ? `<button type="button" class="btn${dept === myDept() ? " primary" : ""}" data-submit="${esc(dept)}">${sub ? "Submit again" : "Submit"}</button>` : ""}</td></tr>`;
+  }).join("");
+  const n = depts.filter((d) => submissions?.[d]).length;
+  page.innerHTML = `${head("Submissions", `${n} of ${depts.length} departments have submitted their schedules. A department submits when it has finished scheduling its sections; others are told here and by the bell at the top.`, submitButton())}
+    <div class="card"><div class="scroll"><table><thead><tr><th>Department</th><th>Status</th><th>Submitted</th><th class="num">Classes complete</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
 function renderDashboard(page) {
   const { key, html: picker } = gridPicker();
   const g = gridSessions(key);
@@ -1098,7 +1214,7 @@ function renderDashboard(page) {
   const confs = conflictsInScope().sort((a, b) => (a.sev === "bad" ? 0 : 1) - (b.sev === "bad" ? 0 : 1));
   const done = DATA.classes.filter(classInScope).reduce((a, c) => a + c.meetings.filter((m) => bookings[`${c.id}|${m.part}`]).length, 0);
   const all = DATA.classes.filter(classInScope).reduce((a, c) => a + c.meetings.length, 0);
-  page.innerHTML = `${head("Dashboard", `1st Semester, SY ${esc(printCfg.ay)} · ${esc(scopeName())} · ${done} of ${all} class meetings booked`)}
+  page.innerHTML = `${head("Dashboard", `1st Semester, SY ${esc(printCfg.ay)} · ${esc(scopeName())} · ${done} of ${all} class meetings booked`, submitButton())}
     ${kpis()}
     <div class="dash">
       <div class="card">
@@ -1152,7 +1268,7 @@ function renderTimetable(page) {
     `<button type="button" class="pill" data-college="${c}" aria-pressed="${state.college === c}" title="${esc(DATA.colleges[c])}">${c}</button>`).join("")}</div></div>`;
   nav += `<div class="row"><span class="navlabel">Program</span><div class="pills">${programsOf(state.college).map((p) =>
     `<button type="button" class="pill" data-program="${esc(p)}" aria-pressed="${state.program === p}" title="${esc(DATA.programs[p].name)}">${esc(p)}<small>${progress(p)}</small></button>`).join("")}</div></div>`;
-  page.innerHTML = `${head("Timetable", `Book a time, a room, and a teacher for each class. Every choice is checked against the students, the teacher, and the room as you make it.`)}
+  page.innerHTML = `${head("Timetable", `Book a time, a room, and a teacher for each class. Every choice is checked against the students, the teacher, and the room as you make it.`, submitButton())}
     <div class="card" style="gap:8px">${nav}<span class="muted small">${esc(DATA.programs[state.program]?.name || "")} · Department of ${esc(DATA.programs[state.program]?.dept || "")} · ${esc(DATA.colleges[state.college])}</span></div>
     ${sectionDesk()}`;
 }
@@ -1781,6 +1897,9 @@ document.addEventListener("click", async (ev) => {
     await Promise.all([sbLoad.ge_decisions(), sbLoad.teacher_changes()]); rebuild(); render(); return;
   }
   if (ds.apprfilter) { state.apprFilter = ds.apprfilter; render(); return; }
+  if (ds.submit) { openSubmit(ds.submit); return; }
+  if (ds.subgo) { t.disabled = true; await doSubmit(ds.subgo); t.disabled = false; return; }
+  if (ds.subcancel) { $("submitPanel").hidden = true; return; }
   if (ds.geremove) {
     const [course, department] = ds.geremove.split("|");
     if (!window.confirm(`Remove ${department} from the departments that may teach ${course}?`)) return;
@@ -1840,7 +1959,7 @@ document.addEventListener("keydown", (ev) => {
     else if (ev.key === "Enter") { ev.preventDefault(); goHit(searchOn); }
     else if (ev.key === "Escape") $("results").hidden = true;
   }
-  if (ev.key === "Escape") { if (printJob) { printJob = null; renderPrintPanel(); } $("publishPanel").hidden = true; }
+  if (ev.key === "Escape") { if (printJob) { printJob = null; renderPrintPanel(); } $("publishPanel").hidden = true; $("submitPanel").hidden = true; }
 });
 document.addEventListener("change", async (ev) => {
   const id = ev.target.id;
