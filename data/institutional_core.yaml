@@ -22,5 +22,6 @@ courses:
   ENGL 302: {title: Research and Professional Writing, credits: 3, lec: 3, housed_by: GE Department}
   FIL 207: {title: Kultura at Panitikang Pilipino, credits: 3, lec: 3, housed_by: Dept. of Secondary Education (COE)}
   UNI 103: {title: Navigating University Life, credits: 1, lec: 1, housed_by: Program's own department}
+  # CWTS: all sections meet together on the campus grounds, Saturday 8-11.
   CWTS 101: {title: Civic Welfare Training Service 1 (NSTP 1), credits: 3, lec: 3, kind: nstp, housed_by: GE Department}
   CWTS 102: {title: Civic Welfare Training Service 2 (NSTP 2), credits: 3, lec: 3, kind: nstp, housed_by: GE Department}

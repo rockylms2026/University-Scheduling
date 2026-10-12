@@ -42,9 +42,9 @@ def verify(uni: University, schedule: Schedule) -> list[str]:
                 by_student[(sub, s.day)].append((s.start, s.end, tag))
                 if s.day in placement[sub]:
                     problems.append(f"{tag}: {sub.label} is at placement on {s.day}")
-            if s.room is None:
+            if s.room is None and s.part != "NSTP":
                 problems.append(f"{tag}: no room")
-            else:
+            elif s.room is not None:
                 by_room[(s.room, s.day)].append((s.start, s.end, tag))
         if s.klass.faculty and s.part != "NSTP":
             by_teacher[(s.klass.faculty.key, s.day)].append((s.start, s.end, tag))

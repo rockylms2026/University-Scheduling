@@ -111,6 +111,12 @@ def time_options(uni: University, kind: str) -> list[Option]:
     if kind in ("lecture", "supervision"):
         opts += [Option(f"{p.name} MWF", on(p, p.days)) for p in mwf]
         opts += [Option(f"{p.name} TTh", on(p, p.days)) for p in tth]
+        if kind == "lecture":
+            # Exception: Saturday morning make-up slot, for sections whose
+            # placement days leave too few periods for their lectures.
+            n = tf.nstp
+            opts.append(Option("Sat make-up", ((n.days[0], n.start, n.end),), W_EXCEPTION * 2,
+                               exception="lecture on Saturday morning (make-up slot)"))
     elif kind == "lab_lecture":
         for a, b in (("Mon", "Wed"), ("Mon", "Fri"), ("Wed", "Fri")):
             opts += [Option(f"{p.name} {a[0]}{b[0]}", on(p, (a, b))) for p in mwf]
@@ -150,7 +156,7 @@ def room_pools(uni: University, m: Meeting) -> list[tuple[str | None, int]]:
     classroom = [(f"classrooms:{sec.college}", 0), ("shared", W_SHARED_ROOM)]
     if sec.is_small and uni.campus.pool(f"seminar:{sec.college}"):
         classroom.append((f"seminar:{sec.college}", 0))
-    if m.kind == "supervision":
+    if m.kind in ("supervision", "nstp"):   # CWTS meets on the grounds as one group
         return [(None, 0)]
     if m.kind == "pe":
         return [("pe", 0)]
@@ -187,8 +193,16 @@ def _choices(uni: University, m: Meeting, blocked: dict) -> list[Choice]:
         for p in tf.lab_day_preferences:
             if p["college"] == sec.college and p["year"] == sec.year:
                 lab_pref = p
+    pin = uni.fixed.get(m.klass.semester, {}).get((course.code, sec.name, m.part))
+    pinned_pool = None
+    if pin and pin.get("room"):
+        pinned_pool = next((r.pool for r in uni.campus.rooms if r.name == pin["room"]), None)
     choices = []
     for opt in time_options(uni, m.kind):
+        if pin and opt.label != pin["pattern"]:
+            continue
+        if opt.exception and (course.code, sec.name, m.part) in uni.avoid.get(m.klass.semester, set()):
+            continue
         if any(d in off_days for d, _, _ in opt.intervals):
             continue
         if any(d == ud and s < ue and us < e for d, s, e in opt.intervals for ud, us, ue in unavailable):
@@ -198,6 +212,8 @@ def _choices(uni: University, m: Meeting, blocked: dict) -> list[Choice]:
             base += W_LAB_DAY
         for pool, pen in room_pools(uni, m):
             if pool is not None and not uni.campus.pool(pool):
+                continue
+            if pinned_pool and pool != pinned_pool:
                 continue
             extra = 0
             if m.kind == "lab" and pool:
@@ -353,6 +369,9 @@ def assign_rooms(uni: University, meetings: list[Meeting], picked: dict[str, Cho
         if not c.pool:
             continue
         rooms = uni.campus.pool(c.pool)
+        pin = uni.fixed.get(m.klass.semester, {}).get((m.klass.course.code, m.klass.section.name, m.part))
+        if pin and pin.get("room"):
+            rooms = [r for r in rooms if r.name == pin["room"]] or rooms
         home = uni.campus.home_buildings(m.klass.section.department)
         for d, s, e in c.option.intervals:
             y[(m.id, d)] = {}
@@ -400,7 +419,7 @@ def evaluate(uni: University, schedule: Schedule) -> dict:
         if s.part != "Supervision":
             for sub in s.klass.section.subcohorts:
                 stu[sub][s.day].append((s.start, s.end))
-            if s.room is None:
+            if s.room is None and s.part != "NSTP":
                 no_room += 1
             elif s.room.startswith("LIN"):
                 shared += 1

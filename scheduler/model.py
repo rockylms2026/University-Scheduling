@@ -204,6 +204,10 @@ class University:
     campus: Campus
     intro_courses: set[str]
     issues: list[Issue] = field(default_factory=list)
+    # semester -> (course, section, part) -> {"pattern": ..., "room": ...}
+    fixed: dict[int, dict[tuple[str, str, str], dict]] = field(default_factory=dict)
+    # semester -> {(course, section, part)} whose time-frame exceptions were declined
+    avoid: dict[int, set[tuple[str, str, str]]] = field(default_factory=dict)
 
     def classes_for(self, semester: int) -> list[Klass]:
         return self.classes[semester]
@@ -413,4 +417,38 @@ def load_university(data_dir: Path = DATA_DIR) -> University:
             continue
         k.faculty = fac
 
-    return University(courses, programs, faculty, sections, classes, timeframe, campus, intro, issues)
+    fixed, avoid = _apply_overrides(data_dir / "overrides.yaml", faculty, index, issues)
+    return University(courses, programs, faculty, sections, classes, timeframe, campus, intro, issues, fixed, avoid)
+
+
+def _apply_overrides(path: Path, faculty: dict, index: dict, issues: list) -> tuple[dict, dict]:
+    """Apply changes made in the scheduling system (data/overrides.yaml)."""
+    fixed: dict[int, dict] = {1: {}, 2: {}}
+    avoid: dict[int, set] = {1: set(), 2: set()}
+    if not path.exists():
+        return fixed, avoid
+    raw = yaml.safe_load(path.read_text()) or {}
+    for f in raw.get("extra_faculty") or []:
+        faculty[f["key"]] = Faculty(f["key"], f["key"], f["name"], f.get("rank", "Part-time Lecturer"),
+                                    f.get("department", ""), f.get("college", "PT"),
+                                    f.get("designation", "Part-time"), f.get("max_lu", 12), None)
+    for sem, items in (raw.get("teacher_assignments") or {}).items():
+        for a in items or []:
+            k = index.get((int(sem), a["course"], a["section"]))
+            fac = faculty.get(a["teacher"])
+            if k is None or fac is None:
+                issues.append(Issue("error", "overrides",
+                                    f"Semester {sem}: cannot assign {a['teacher']} to {a['course']} {a['section']}"))
+                continue
+            k.faculty = fac
+    for sem, items in (raw.get("fixed") or {}).items():
+        for f in items or []:
+            if (int(sem), f["course"], f["section"]) not in index:
+                issues.append(Issue("error", "overrides",
+                                    f"Semester {sem}: pinned class {f['course']} {f['section']} does not exist"))
+                continue
+            fixed[int(sem)][(f["course"], f["section"], f.get("part", "Lec"))] = f
+    for sem, items in (raw.get("avoid_exceptions") or {}).items():
+        for f in items or []:
+            avoid[int(sem)].add((f["course"], f["section"], f.get("part", "Lec")))
+    return fixed, avoid

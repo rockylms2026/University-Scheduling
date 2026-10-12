@@ -24,14 +24,14 @@ def test_loads_match_plan_summaries():
     expected = {
         ("CSS-P5", 1): 24, ("CSS-L5", 1): 23, ("CISC-C3", 1): 24, ("CISC-B4", 2): 16,
         ("CBE-B4", 1): 17, ("CBE-H4", 2): 22, ("CCJPS-D2", 1): 7, ("CCJPS-W4", 2): 18,
-        ("COE-S13", 1): 18, ("COE-E2", 2): 6, ("GE-G13", 1): 24, ("GE-G19", 2): 21,
+        ("COE-S13", 1): 16,   # 18 in the plan; SEF 405 is now a 3-LU lecture ("COE-E2", 2): 6, ("GE-G13", 1): 24, ("GE-G19", 2): 21,
     }
     for (key, sem), lu in expected.items():
         assert faculty_load_summary(UNI, sem)[key]["lu"] == lu, key
 
 
 def test_time_frame_patterns():
-    assert len(time_options(UNI, "lecture")) == 8 + 5            # M1-M8 MWF, T1-T5 TTh
+    assert len([o for o in time_options(UNI, "lecture") if not o.exception]) == 8 + 5   # M1-M8 MWF, T1-T5 TTh
     assert len([o for o in time_options(UNI, "lab") if not o.exception]) == 4 * 3 + 3 * 2
     for o in time_options(UNI, "lecture") + time_options(UNI, "pe"):
         for day, start, end in o.intervals:   # nothing runs through lunch

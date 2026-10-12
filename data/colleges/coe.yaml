@@ -57,7 +57,7 @@ courses:
   SEE 307: Language Learning Materials Development
   SEE 401: "Contemporary, Popular, and Emergent Literature"
   SEE 402: Language Education Research
-  SEE 403: {title: "Technology for Teaching and Learning 2: Technology in Language Education", lab: edtech_lab}
+  SEE 403: "Technology for Teaching and Learning 2: Technology in Language Education"   # lecture course, not a lab (confirmed)
   SEE 404: Campus Journalism
   SEE 405: Stylistics and Discourse Analysis
   SEM 101: History of Mathematics
@@ -80,7 +80,7 @@ courses:
   SEM 402: Assessment and Evaluation in Mathematics
   SEM 403: "Problem Solving, Mathematical Investigation, and Modeling"
   SEM 404: Research in Mathematics Education
-  SEM 405: {title: "Technology for Teaching and Learning 2: Instrumentation and Technology in Mathematics", lab: edtech_lab}
+  SEM 405: "Technology for Teaching and Learning 2: Instrumentation and Technology in Mathematics"   # lecture course, not a lab (confirmed)
   SES 101: Foundations of Social Studies
   SES 102: Geography of the World and the Philippines
   SES 103: Introduction to Sociology and Anthropology
@@ -100,7 +100,7 @@ courses:
   SES 401: Philosophy of Social Science
   SES 402: Research Methods in Social Studies
   SES 403: Trends and Issues in Social Studies
-  SES 404: {title: "Technology for Teaching and Learning 2: Technology in Social Studies Education", lab: edtech_lab}
+  SES 404: "Technology for Teaching and Learning 2: Technology in Social Studies Education"   # lecture course, not a lab (confirmed)
   SES 405: Local History and Heritage Studies
   SEF 101: Introduksyon sa Pag-aaral ng Wika
   SEF 102: Sanaysay at Talumpati
@@ -122,7 +122,7 @@ courses:
   SEF 402: Introduksyon sa Pananaliksik sa Wika at Panitikan
   SEF 403: Malikhaing Pagsulat
   SEF 404: Pagsasaling-Wika
-  SEF 405: {title: "Teknolohiya sa Pagtuturo at Pagkatuto 2: Teknolohiya sa Pagtuturo ng Filipino", lab: edtech_lab}
+  SEF 405: "Teknolohiya sa Pagtuturo at Pagkatuto 2: Teknolohiya sa Pagtuturo ng Filipino"   # lecture course, not a lab (confirmed)
 
 programs:
   BEEd:

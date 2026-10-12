@@ -12,10 +12,13 @@
   --muted: #5d6877;
   --line: #dde2e9;
   --accent: #1f4fd1;
+  --accent-ink: #ffffff;
   --accent-soft: #e5ecfd;
   --lunch: #eef0f4;
   --warn: #9a6400;
   --warn-soft: #fff3cf;
+  --bad: #b42318;
+  --bad-soft: #fde4e1;
   --good: #1d7a46;
   --good-soft: #def4e6;
   --c-css: #d8e6fb;   --c-css-ink: #1b4a8f;
@@ -32,8 +35,8 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #11151b; --panel: #181e26; --ink: #e6eaf0; --muted: #9aa5b4; --line: #2a323d;
-    --accent: #8fb0ff; --accent-soft: #1d2a4a; --lunch: #1c222b;
-    --warn: #f2c35b; --warn-soft: #3a2f12; --good: #6fd39a; --good-soft: #15301f;
+    --accent: #8fb0ff; --accent-ink: #0d1424; --accent-soft: #1d2a4a; --lunch: #1c222b;
+    --warn: #f2c35b; --warn-soft: #3a2f12; --bad: #ff9b8f; --bad-soft: #3d1a17; --good: #6fd39a; --good-soft: #15301f;
     --c-css: #1d3352; --c-css-ink: #b9d3ff;
     --c-cisc: #183a27; --c-cisc-ink: #a9e8c0;
     --c-cbe: #43301a; --c-cbe-ink: #f8d3a3;
@@ -45,8 +48,8 @@
 }
 :root[data-theme="dark"] {
   --bg: #11151b; --panel: #181e26; --ink: #e6eaf0; --muted: #9aa5b4; --line: #2a323d;
-  --accent: #8fb0ff; --accent-soft: #1d2a4a; --lunch: #1c222b;
-  --warn: #f2c35b; --warn-soft: #3a2f12; --good: #6fd39a; --good-soft: #15301f;
+  --accent: #8fb0ff; --accent-ink: #0d1424; --accent-soft: #1d2a4a; --lunch: #1c222b;
+  --warn: #f2c35b; --warn-soft: #3a2f12; --bad: #ff9b8f; --bad-soft: #3d1a17; --good: #6fd39a; --good-soft: #15301f;
   --c-css: #1d3352; --c-css-ink: #b9d3ff;
   --c-cisc: #183a27; --c-cisc-ink: #a9e8c0;
   --c-cbe: #43301a; --c-cbe-ink: #f8d3a3;
@@ -62,17 +65,21 @@ header { display: flex; flex-wrap: wrap; align-items: end; justify-content: spac
 h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
 .sub { color: var(--muted); margin: 2px 0 0; font-size: .92rem; }
 .status { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { font-size: .8rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; border: 1px solid transparent; white-space: nowrap; }
+.chip { font-size: .8rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
 .chip.good { background: var(--good-soft); color: var(--good); }
 .chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
 .chip.info { background: var(--accent-soft); color: var(--accent); }
+.banner { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; justify-content: space-between; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: .9rem; }
+.banner b { font-weight: 600; }
 .controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
 .seg button { font: inherit; font-size: .9rem; border: 0; background: transparent; color: var(--muted); padding: 7px 14px; cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
-.seg button:focus-visible, input:focus-visible, .item:focus-visible, .block:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .main { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: start; }
+.main.wide { grid-template-columns: minmax(0, 1fr); }
 .finder { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100vh - 140px); position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
 .finder input { font: inherit; margin: 10px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink); }
 .list { overflow-y: auto; padding: 0 6px 10px; }
@@ -83,7 +90,7 @@ h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; margin:
 .item small { color: var(--muted); font-family: var(--f-mono); font-size: .75rem; font-variant-numeric: tabular-nums; }
 .board { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 14px; min-width: 0; }
 .who h2 { font-family: var(--f-display); font-weight: 700; font-size: 1.3rem; margin: 0; }
-.who p { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
+.who p { margin: 2px 0 0; color: var(--muted); font-size: .9rem; max-width: 75ch; }
 .facts { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font-size: .85rem; }
 .facts b { font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
 .scroll { overflow-x: auto; }
@@ -101,6 +108,8 @@ h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; margin:
 .block span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .block.sel { box-shadow: 0 0 0 2px var(--accent); }
 .block.ex { border: 1.5px dashed var(--warn); background-image: repeating-linear-gradient(135deg, transparent 0 6px, var(--warn-soft) 6px 9px); }
+.block.pending { border: 1.5px dashed var(--accent); }
+.block.ghost { pointer-events: none; z-index: 2; background: var(--panel); color: var(--accent); border: 2px dashed var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,.18); }
 .k-CSS { background-color: var(--c-css); color: var(--c-css-ink); }
 .k-CISC { background-color: var(--c-cisc); color: var(--c-cisc-ink); }
 .k-CBE { background-color: var(--c-cbe); color: var(--c-cbe-ink); }
@@ -109,15 +118,33 @@ h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; margin:
 .k-CORE { background-color: var(--c-core); color: var(--c-core-ink); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .78rem; color: var(--muted); }
 .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
-.detail { border-top: 1px solid var(--line); padding-top: 12px; font-size: .9rem; min-height: 3.2em; }
-.detail dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 6px 0 0; }
+.legend i.ex { border: 1.5px dashed var(--warn); }
+.legend i.pending { border: 1.5px dashed var(--accent); }
+.detail { border-top: 1px solid var(--line); padding-top: 12px; font-size: .9rem; min-height: 3.2em; display: grid; gap: 10px; }
+.detail dl { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 0; }
 .detail dt { color: var(--muted); }
 .detail dd { margin: 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { font: inherit; font-size: .88rem; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.editor { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 10px; background: var(--bg); }
+.editor label { display: grid; gap: 3px; font-size: .82rem; color: var(--muted); }
+.editor select, .editor input, .editor textarea { font: inherit; font-size: .9rem; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; width: 100%; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.checks { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: .86rem; }
+.checks li { padding: 5px 8px; border-radius: 6px; }
+.checks .bad { background: var(--bad-soft); color: var(--bad); }
+.checks .warn { background: var(--warn-soft); color: var(--warn); }
+.checks .good { background: var(--good-soft); color: var(--good); }
 .hint { color: var(--muted); }
+.msg { font-size: .86rem; }
+.msg.bad { color: var(--bad); }
 table { border-collapse: collapse; width: 100%; font-size: .88rem; }
 th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { font-size: .74rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
-td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .note { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 10px 12px; font-size: .9rem; }
 @media (max-width: 860px) {
   .main { grid-template-columns: minmax(0, 1fr); }
@@ -135,13 +162,15 @@ td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
     <div class="status" id="status"></div>
   </header>
 
+  <div class="banner" id="banner"><span class="hint">Loading shared changes…</span></div>
+
   <div class="controls">
     <div class="seg" id="semSeg" role="group" aria-label="Semester"></div>
     <div class="seg" id="viewSeg" role="group" aria-label="View"></div>
   </div>
 
   <div class="main" id="main">
-    <aside class="finder">
+    <aside class="finder" id="finder">
       <input id="q" type="search" placeholder="Search" aria-label="Search the list">
       <div class="list" id="list"></div>
     </aside>
@@ -154,45 +183,122 @@ const DATA = /*__DATA__*/null;
 const DAYS = DATA.days;
 const ROW_MIN = DATA.slot;
 const LUNCH = { Mon: [690, 750], Wed: [690, 750], Fri: [690, 750], Tue: [720, 810], Thu: [720, 810] };
-const VIEWS = [["groups", "Student groups"], ["teachers", "Teachers"], ["rooms", "Rooms"], ["approval", "Needs approval"]];
-const COLLEGE_ORDER = ["CSS", "CISC", "CBE", "COE", "CCJPS", "GE"];
+const COLLEGE_ORDER = ["CSS", "CISC", "CBE", "COE", "CCJPS", "GE", "PT"];
+const PART_NAME = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Supervision: "Practicum supervision" };
 
-const state = { sem: Object.keys(DATA.sems)[0], view: "groups", pick: {}, q: "", sel: null };
-try { Object.assign(state, JSON.parse(localStorage.getItem("ucs-state") || "{}"), { sel: null, q: "" }); } catch (e) {}
+// ---------- state ----------
+const state = { sem: Object.keys(DATA.sems)[0], view: "groups", pick: {}, q: "", sel: null, edit: null };
+try { Object.assign(state, JSON.parse(localStorage.getItem("ucs-state") || "{}"), { sel: null, q: "", edit: null }); } catch (e) {}
 if (!DATA.sems[state.sem]) state.sem = Object.keys(DATA.sems)[0];
 function save() { try { localStorage.setItem("ucs-state", JSON.stringify({ sem: state.sem, view: state.view, pick: state.pick })); } catch (e) {} }
+
+let db = null, user = null, canWrite = false, dbReady = false;
+let changes = [];                 // shared change documents
+let effCache = {};
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function hm(m) { const h = Math.floor(m / 60), mm = m % 60; return `${h % 12 || 12}:${String(mm).padStart(2, "0")}`; }
-function S(row) {
-  const [code, part, section, groups, tkey, tba, room, day, start, end, label, exception] = row;
-  const c = DATA.courses[code];
-  return { code, part, section, groups, tkey, tba, room, day, start, end, label, exception,
-           title: c[0], college: c[1] === "GE" ? "CORE" : c[1] };
-}
-function sessions() { return DATA.sems[state.sem].sessions.map(S); }
-function teacherName(s) { return s.tkey ? DATA.teachers[s.tkey].name : s.tba; }
-function shortName(key) { const p = DATA.teachers[key].name.split(" "); return p[0] + " " + p[p.length - 1]; }
+const mkey = (code, section, part) => `${code}|${section}|${part}`;
+const docId = (...parts) => parts.join("~").replace(/[^A-Za-z0-9_\-.~:@+]/g, "_");
 
-function entities() {
-  const all = sessions();
-  if (state.view === "groups") {
-    const count = {};
-    all.forEach((s) => s.groups.forEach((g) => count[g] = (count[g] || 0) + (s.end - s.start)));
-    return Object.keys(count).map((g) => ({ id: g, name: g, group: DATA.groups[g].college, meta: `${Math.round(count[g] / 60)} h` }));
+function S(row) {
+  const [code, part, section, groups, tkey, tba, room, day, start, end, label, exception, kind, pools] = row;
+  const c = DATA.courses[code];
+  return { code, part, section, groups, tkey, tba, room, day, start, end, label, exception, kind, pools,
+           key: mkey(code, section, part), title: c[0], college: c[1] === "GE" ? "CORE" : c[1] };
+}
+
+// ---------- the timetable with shared changes applied ----------
+function semChanges(sem) { return changes.filter((c) => String(c.sem) === String(sem)); }
+function teacherInfo(key) { return DATA.teachers[key] || null; }
+
+function effective(sem = state.sem) {
+  if (effCache[sem]) return effCache[sem];
+  const base = DATA.sems[sem].sessions.map(S);
+  const moves = {}, assigns = {}, decisions = {};
+  semChanges(sem).forEach((c) => {
+    if (c.type === "move") moves[mkey(c.course, c.section, c.part)] = c;
+    if (c.type === "assign") assigns[`${c.course}|${c.section}`] = c;
+    if (c.type === "approve") decisions[mkey(c.course, c.section, c.part)] = c;
+  });
+  const out = [], done = new Set();
+  base.forEach((s) => {
+    const a = assigns[`${s.code}|${s.section}`];
+    if (a) {
+      s.assignPending = true;
+      if (a.teacher && DATA.teachers[a.teacher]) { s.tkey = a.teacher; s.tba = null; }
+      else { s.tkey = null; s.tba = `${a.newTeacher} (new)`; s.newTeacher = a.newTeacher; }
+    }
+    s.decision = decisions[s.key]?.decision || null;
+    const mv = moves[s.key];
+    if (!mv) { out.push(s); return; }
+    if (done.has(s.key)) return;
+    done.add(s.key);
+    const opt = (DATA.options[s.kind] || []).find((o) => o.label === mv.pattern);
+    if (!opt) { out.push(s); return; }
+    opt.iv.forEach(([day, start, end]) => out.push({ ...s, day, start, end, label: opt.label,
+      room: mv.room || null, exception: opt.ex, pending: true, movedFrom: s.label }));
+  });
+  effCache[sem] = out;
+  return out;
+}
+function sessionsOf(key, sem = state.sem) { return effective(sem).filter((s) => s.key === key); }
+
+// ---------- rule checks (same hard rules as the solver) ----------
+function overlaps(a, b) { return a.day === b.day && a.start < b.end && b.start < a.end; }
+
+function checkPlacement(cands, ignoreKey, teacherKey, sem = state.sem) {
+  const issues = [];
+  const all = effective(sem).filter((s) => s.key !== ignoreKey);
+  const placements = DATA.sems[sem].placements;
+  cands.forEach((c) => {
+    if (LUNCH[c.day] && c.start < LUNCH[c.day][1] && LUNCH[c.day][0] < c.end) issues.push(["bad", `${c.day}: runs through lunch`]);
+    c.groups.forEach((g) => (placements[g] || []).forEach(([code, days]) => {
+      if (days.includes(c.day)) issues.push(["bad", `${g} is at ${code} placement on ${c.day}`]);
+    }));
+    all.forEach((o) => {
+      if (!overlaps(c, o)) return;
+      const shared = c.groups.filter((g) => o.groups.includes(g));
+      if (shared.length) issues.push(["bad", `Students of ${shared.join(", ")} have ${o.code} (${o.section}) ${o.day} ${hm(o.start)}–${hm(o.end)}`]);
+      if (teacherKey && o.tkey === teacherKey && o.part !== "NSTP" && c.part !== "NSTP")
+        issues.push(["bad", `${DATA.teachers[teacherKey].name} teaches ${o.code} (${o.section}) ${o.day} ${hm(o.start)}–${hm(o.end)}`]);
+    });
+    if (c.room) {
+      const cap = DATA.rooms[c.room]?.cap || 1;
+      const busy = all.filter((o) => o.room === c.room && overlaps(c, o));
+      if (busy.length >= cap) issues.push(["bad", `${c.room} is booked ${c.day} by ${busy.map((o) => `${o.code} (${o.section})`).join(", ")}`]);
+    }
+  });
+  if (teacherKey) {
+    const perDay = {};
+    all.concat(cands).forEach((s) => { if (s.tkey === teacherKey && s.part !== "NSTP") perDay[s.day] = (perDay[s.day] || 0) + (s.end - s.start); });
+    cands.forEach((c) => { if (!c.tkey) perDay[c.day] = (perDay[c.day] || 0) + (c.end - c.start); });
+    Object.entries(perDay).forEach(([d, m]) => {
+      if (m > DATA.maxTeachHours * 60) issues.push(["bad", `${DATA.teachers[teacherKey].name} would teach ${(m / 60).toFixed(1)} h on ${d} (limit ${DATA.maxTeachHours})`]);
+      else if (m > 6 * 60) issues.push(["warn", `${DATA.teachers[teacherKey].name} would teach ${(m / 60).toFixed(1)} h on ${d} (more than 6)`]);
+    });
   }
-  if (state.view === "teachers") {
-    return Object.entries(DATA.teachers).map(([k, t]) => ({ id: k, name: t.name, group: t.college, meta: `${t.lu[state.sem] ?? 0} LU` }));
-  }
-  if (state.view === "rooms") {
-    const mins = {};
-    all.forEach((s) => { if (s.room && s.day !== "Sat") mins[s.room] = (mins[s.room] || 0) + (s.end - s.start); });
-    return Object.entries(DATA.rooms).map(([r, info]) => ({
-      id: r, name: r, group: roomGroup(info.pool),
-      meta: `${Math.round(100 * (mins[r] || 0) / (39 * 60 * info.cap))}%` }));
-  }
-  return [];
+  const seen = new Set();
+  return issues.filter(([, t]) => !seen.has(t) && seen.add(t));
+}
+
+// ---------- lists ----------
+function viewsList() {
+  const sem = semChanges(state.sem).length;
+  return [["groups", "Student groups"], ["teachers", "Teachers"], ["rooms", "Rooms"],
+          ["unstaffed", `Unstaffed (${unstaffed().length})`], ["approval", `Needs approval (${approvals().length})`],
+          ["changes", `Changes (${sem})`]];
+}
+function approvals() {
+  const seen = new Map();
+  effective().forEach((s) => { if (s.exception) seen.set(s.key, s); });
+  return [...seen.values()];
+}
+function unstaffed() {
+  const seen = new Map();
+  effective().forEach((s) => { if (!s.tkey && !s.newTeacher && s.part !== "Supervision") seen.set(`${s.code}|${s.section}`, s); });
+  return [...seen.values()].sort((a, b) => a.code.localeCompare(b.code) || a.section.localeCompare(b.section, undefined, { numeric: true }));
 }
 function roomGroup(pool) {
   if (pool.startsWith("classrooms:")) return pool.split(":")[1] + " classrooms";
@@ -201,38 +307,54 @@ function roomGroup(pool) {
   if (pool === "pe") return "PE venues";
   return "Laboratories";
 }
+function entities() {
+  const all = effective();
+  if (state.view === "groups") {
+    const count = {};
+    all.forEach((s) => s.groups.forEach((g) => count[g] = (count[g] || 0) + (s.end - s.start)));
+    return Object.keys(count).map((g) => ({ id: g, name: g, group: DATA.groups[g].college, meta: `${Math.round(count[g] / 60)} h` }));
+  }
+  if (state.view === "teachers") {
+    return Object.entries(DATA.teachers).map(([k, t]) => ({ id: k, name: t.name, group: t.college, meta: `${t.lu[state.sem] ?? 0} LU` }));
+  }
+  const mins = {};
+  all.forEach((s) => { if (s.room && s.day !== "Sat") mins[s.room] = (mins[s.room] || 0) + (s.end - s.start); });
+  return Object.entries(DATA.rooms).map(([r, info]) => ({
+    id: r, name: r, group: roomGroup(info.pool), meta: `${Math.round(100 * (mins[r] || 0) / (39 * 60 * info.cap))}%` }));
+}
 
-function renderControls() {
+// ---------- rendering ----------
+function renderTop() {
   $("semSeg").innerHTML = Object.keys(DATA.sems).map((s) =>
     `<button type="button" data-sem="${s}" aria-pressed="${s === state.sem}">${s === "1" ? "1st" : "2nd"} semester</button>`).join("");
-  $("viewSeg").innerHTML = VIEWS.map(([v, label]) => {
-    const n = v === "approval" ? ` (${approvals().length})` : "";
-    return `<button type="button" data-view="${v}" aria-pressed="${v === state.view}">${label}${n}</button>`;
-  }).join("");
+  $("viewSeg").innerHTML = viewsList().map(([v, label]) =>
+    `<button type="button" data-view="${v}" aria-pressed="${v === state.view}">${esc(label)}</button>`).join("");
   const sem = DATA.sems[state.sem];
-  const q = sem.quality || {};
-  const chips = [];
-  chips.push(sem.problems.length ? `<span class="chip warn">${sem.problems.length} rule problems</span>`
-                                 : `<span class="chip good">No double bookings</span>`);
-  const ap = approvals().length;
+  const chips = [sem.problems.length ? `<span class="chip bad">${sem.problems.length} rule problems</span>`
+                                     : `<span class="chip good">No double bookings</span>`];
+  const ap = approvals().filter((s) => s.decision !== "approved").length;
   if (ap) chips.push(`<span class="chip warn">${ap} need approval</span>`);
+  const q = sem.quality || {};
   if (q.avg_idle_hours_per_student_group_per_week !== undefined)
     chips.push(`<span class="chip info">Idle time ${q.avg_idle_hours_per_student_group_per_week} h per group per week</span>`);
   $("status").innerHTML = chips.join("");
-  $("sub").textContent = `${sessions().length} weekly sessions, ${Object.keys(DATA.groups).length} student groups, `
-    + `${Object.keys(DATA.teachers).length} teachers. Generated ${DATA.generated}.`;
-}
-
-function approvals() {
-  const seen = new Map();
-  sessions().forEach((s) => { if (s.exception) seen.set(s.code + s.section + s.part, s); });
-  return [...seen.values()];
+  $("sub").textContent = `${DATA.sems[state.sem].sessions.length} weekly sessions, ${Object.keys(DATA.groups).length} student groups, `
+    + `${Object.keys(DATA.teachers).length} teachers. Timetable built ${DATA.generated}.`;
+  const n = changes.length;
+  if (!dbReady) {
+    $("banner").innerHTML = `<span class="hint">Viewing only. To move classes or assign teachers, open this page on claude.ai while signed in.</span>`;
+  } else {
+    $("banner").innerHTML = `<span>${n ? `<b>${n} saved change${n > 1 ? "s" : ""}</b> waiting to be built into the timetable.` : "No pending changes."}
+      ${canWrite ? "Select any class to move it, assign a teacher, or approve it." : "You can view changes but not make them."}</span>
+      <span class="hint">To rebuild with the changes, tell Claude: “apply the schedule changes”.</span>`;
+  }
 }
 
 function renderList() {
-  const finder = document.querySelector(".finder");
-  finder.hidden = state.view === "approval";
-  if (state.view === "approval") return;
+  const listViews = ["groups", "teachers", "rooms"];
+  $("finder").hidden = !listViews.includes(state.view);
+  $("main").classList.toggle("wide", !listViews.includes(state.view));
+  if (!listViews.includes(state.view)) return;
   const q = state.q.trim().toLowerCase();
   const items = entities().filter((e) => !q || e.name.toLowerCase().includes(q) || e.group.toLowerCase().includes(q));
   const groups = {};
@@ -251,10 +373,16 @@ function renderList() {
 function renderBoard() {
   const board = $("board");
   if (state.view === "approval") return renderApproval(board);
-  let list = entities();
+  if (state.view === "unstaffed") return renderUnstaffed(board);
+  if (state.view === "changes") return renderChanges(board);
+  if (state.edit?.type === "move") {      // work out the preview before drawing the grid
+    const cur = sessionsOf(state.edit.key)[0];
+    if (cur) moveEditor(cur);
+  }
+  const list = entities();
   let id = state.pick[state.view];
-  if (!list.find((e) => e.id === id)) { id = list.sort((a, b) => a.name.localeCompare(b.name))[0]?.id; state.pick[state.view] = id; }
-  const all = sessions();
+  if (!list.find((e) => e.id === id)) { id = list.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))[0]?.id; state.pick[state.view] = id; }
+  const all = effective();
   let mine, head, offDays = [];
   if (state.view === "groups") {
     mine = all.filter((s) => s.groups.includes(id));
@@ -283,14 +411,16 @@ function renderBoard() {
   board.innerHTML = `<div class="who">${head}</div>
     <div class="scroll">${weekGrid(mine, offDays)}</div>
     <div class="legend">${["CSS", "CISC", "CBE", "COE", "CCJPS"].map((c) => `<span><i class="k-${c}"></i>${c}</span>`).join("")}
-      <span><i class="k-CORE"></i>General education</span><span><i class="k-CORE ex block" style="position:static;display:inline-block;width:12px;height:12px;padding:0"></i>Needs approval</span></div>
-    <div class="detail" id="detail"><span class="hint">Select a class to see its details.</span></div>`;
+      <span><i class="k-CORE"></i>General education</span><span><i class="ex"></i>Needs approval</span><span><i class="pending"></i>Changed, not yet rebuilt</span></div>
+    <div class="detail" id="detail"></div>`;
+  renderDetail();
 }
 
 function weekGrid(list, offDays) {
   const rows = (DATA.end - DATA.start) / ROW_MIN;
   const px = (m) => `calc(var(--row) * ${(m - DATA.start) / ROW_MIN})`;
   const len = (a, b) => `calc(var(--row) * ${(b - a) / ROW_MIN})`;
+  const preview = state.edit?.type === "move" ? state.edit.cands || [] : [];
   let html = `<div class="week" style="--days:${DAYS.length}"><div></div>`;
   html += DAYS.map((d) => `<div class="dayhead${offDays.includes(d) ? " off" : ""}">${d}</div>`).join("");
   html += `<div class="times" style="height:calc(var(--row) * ${rows})">`;
@@ -301,63 +431,266 @@ function weekGrid(list, offDays) {
     if (LUNCH[d]) html += `<div class="lunch" style="top:${px(LUNCH[d][0])};height:${len(...LUNCH[d])}">Lunch</div>`;
     if (offDays.includes(d)) html += `<div class="away">At placement</div>`;
     list.filter((s) => s.day === d).forEach((s) => {
-      const idx = DATA.sems[state.sem].sessions.findIndex((r) => r[0] === s.code && r[2] === s.section && r[1] === s.part && r[7] === s.day);
-      const line2 = state.view === "groups" ? (s.room || "") : s.section;
-      const line3 = state.view === "teachers" ? (s.room || "") : (s.tkey ? shortName(s.tkey) : "TBA");
+      const line2 = state.view === "groups" ? (s.room || (s.part === "NSTP" ? "Grounds" : "")) : s.section;
+      const line3 = state.view === "teachers" ? (s.room || "") : (s.tkey ? shortName(s.tkey) : s.newTeacher || "TBA");
       const part = s.part === "Lec" ? "" : " · " + s.part;
-      html += `<button type="button" class="block k-${s.college}${s.exception ? " ex" : ""}${state.sel === idx ? " sel" : ""}" data-idx="${idx}"
+      const cls = [`k-${s.college}`, s.exception && s.decision !== "approved" ? "ex" : "", s.pending || s.assignPending ? "pending" : "",
+                   state.sel === s.key ? "sel" : ""].filter(Boolean).join(" ");
+      html += `<button type="button" class="block ${cls}" data-key="${esc(s.key)}"
         style="top:${px(s.start)};height:calc(${len(s.start, s.end)} - 2px)" title="${esc(s.code + " " + s.title)}">
         <strong>${esc(s.code)}${esc(part)}</strong><span>${esc(line2)}</span><span>${esc(line3)}</span></button>`;
+    });
+    preview.filter((c) => c.day === d).forEach((c) => {
+      html += `<div class="block ghost" style="top:${px(c.start)};height:calc(${len(c.start, c.end)} - 2px)"><strong>${esc(c.code)}</strong><span>New time</span></div>`;
     });
     html += `</div>`;
   });
   return html + `</div>`;
 }
+function shortName(key) { const p = DATA.teachers[key].name.split(" "); return p[0] + " " + p[p.length - 1]; }
+function teacherLabel(s) { return s.tkey ? DATA.teachers[s.tkey].name : s.tba; }
 
-function renderDetail(idx) {
-  const row = DATA.sems[state.sem].sessions[idx];
-  if (!row) return;
-  const s = S(row);
-  const others = sessions().filter((x) => x.code === s.code && x.section === s.section && x.part === s.part).map((x) => x.day);
-  $("detail").innerHTML = `<strong>${esc(s.code)} ${esc(s.title)}</strong>
+// ---------- class detail and editors ----------
+function renderDetail() {
+  const el = $("detail");
+  if (!el) return;
+  const ss = state.sel ? sessionsOf(state.sel) : [];
+  if (!ss.length) { el.innerHTML = `<span class="hint">Select a class to see its details${canWrite ? " or change it" : ""}.</span>`; return; }
+  const s = ss[0];
+  const days = ss.map((x) => x.day).join(", ");
+  const myChanges = semChanges(state.sem).filter((c) => (c.course === s.code && c.section === s.section) && (c.type === "assign" || c.part === s.part));
+  let html = `<strong>${esc(s.code)} ${esc(s.title)}</strong>
     <dl><dt>Section</dt><dd>${esc(s.section)}</dd>
-    <dt>Meets</dt><dd>${esc(s.part === "Lec" ? "Lecture" : s.part)} · ${others.join(", ")} ${hm(s.start)}–${hm(s.end)} (${esc(s.label)})</dd>
-    <dt>Room</dt><dd>${esc(s.room || (s.part === "Supervision" ? "Placement supervision, no room" : "Not assigned"))}</dd>
-    <dt>Teacher</dt><dd>${esc(teacherName(s))}</dd>
-    ${s.exception ? `<dt>Needs approval</dt><dd>${esc(s.exception)}</dd>` : ""}</dl>`;
+    <dt>Meets</dt><dd>${esc(PART_NAME[s.part] || s.part)} · ${days} ${hm(s.start)}–${hm(s.end)} (${esc(s.label)})${s.pending ? ` <span class="chip info">moved from ${esc(s.movedFrom)}</span>` : ""}</dd>
+    <dt>Room</dt><dd>${esc(s.room || (s.part === "NSTP" ? "Campus grounds (all sections together)" : s.part === "Supervision" ? "No room: practicum supervision" : "Not assigned"))}</dd>
+    <dt>Teacher</dt><dd>${esc(teacherLabel(s))}${s.assignPending ? ` <span class="chip info">assigned, not yet rebuilt</span>` : ""}</dd>
+    ${s.exception ? `<dt>Needs approval</dt><dd>${esc(s.exception)}${s.decision ? ` <span class="chip ${s.decision === "approved" ? "good" : "warn"}">${s.decision === "approved" ? "Approved" : "Asked for another time"}</span>` : ""}</dd>` : ""}</dl>`;
+  if (canWrite && !state.edit) {
+    const btns = [];
+    if (s.kind !== "nstp") btns.push(`<button type="button" class="btn" data-act="move">Move this class</button>`);
+    if (s.part !== "NSTP") btns.push(`<button type="button" class="btn" data-act="assign">${s.tkey || s.newTeacher ? "Change teacher" : "Assign a teacher"}</button>`);
+    if (s.exception) {
+      btns.push(`<button type="button" class="btn" data-act="approve">Approve as is</button>`);
+      btns.push(`<button type="button" class="btn" data-act="reject">Ask for another time</button>`);
+    }
+    myChanges.forEach((c) => btns.push(`<button type="button" class="btn" data-act="undo" data-doc="${esc(c.id)}">Undo ${c.type === "move" ? "move" : c.type === "assign" ? "teacher change" : "decision"}</button>`));
+    html += `<div class="actions">${btns.join("")}</div>`;
+  }
+  if (state.edit?.key === s.key) html += state.edit.type === "move" ? moveEditor(s) : assignEditor(s);
+  el.innerHTML = html;
 }
 
+function moveEditor(s) {
+  const e = state.edit;
+  const opts = DATA.options[s.kind] || [];
+  if (!e.pattern) { e.pattern = s.label; e.room = s.room || ""; }
+  const opt = opts.find((o) => o.label === e.pattern);
+  // Rooms that can hold this class, free ones first for the chosen time.
+  const others = effective().filter((o) => o.key !== s.key && o.room);
+  const rooms = Object.entries(DATA.rooms).filter(([, r]) => s.pools.includes(r.pool)).map(([n, r]) => {
+    const busy = opt ? opt.iv.some(([day, start, end]) =>
+      others.filter((o) => o.room === n && overlaps({ day, start, end }, o)).length >= r.cap) : false;
+    return { n, busy };
+  }).sort((a, b) => a.busy - b.busy || a.n.localeCompare(b.n, undefined, { numeric: true }));
+  e.cands = opt ? opt.iv.map(([day, start, end]) => ({ ...s, day, start, end, room: e.room || null })) : [];
+  const checks = opt ? checkPlacement(e.cands, s.key, s.tkey) : [];
+  if (opt?.ex) checks.unshift(["warn", `Outside the time frame: ${opt.ex}`]);
+  if (s.pools.some((p) => p) && !e.room) checks.unshift(["bad", "Choose a room"]);
+  const ok = !checks.some(([lvl]) => lvl === "bad");
+  return `<div class="editor"><strong>Move ${esc(s.code)} ${esc(PART_NAME[s.part] || s.part)} for ${esc(s.section)}</strong>
+    <div class="fields">
+      <label for="movePattern">New time
+        <select id="movePattern">${opts.map((o) => `<option value="${esc(o.label)}"${o.label === e.pattern ? " selected" : ""}>${esc(o.label)} · ${o.iv.map((i) => i[0]).join("/")} ${hm(o.iv[0][1])}–${hm(o.iv[0][2])}${o.ex ? " (exception)" : ""}</option>`).join("")}</select></label>
+      ${s.pools.some((p) => p) ? `<label for="moveRoom">Room
+        <select id="moveRoom"><option value="">Choose a room</option>${rooms.map((r) => `<option value="${esc(r.n)}"${r.n === e.room ? " selected" : ""}>${esc(r.n)}${r.busy ? " (busy)" : " (free)"}</option>`).join("")}</select></label>` : ""}
+      <label for="moveNote">Note (optional)<input id="moveNote" value="${esc(e.note || "")}" placeholder="Reason for the change"></label>
+    </div>
+    <ul class="checks">${checks.length ? checks.map(([l, t]) => `<li class="${l}">${esc(t)}</li>`).join("") : `<li class="good">No conflicts: students, teacher, and room are all free.</li>`}</ul>
+    <div class="actions"><button type="button" class="btn primary" data-act="saveMove"${ok ? "" : " disabled"}>Save change</button>
+      <button type="button" class="btn" data-act="cancel">Cancel</button><span class="msg" id="editMsg"></span></div></div>`;
+}
+
+function assignEditor(s) {
+  const e = state.edit;
+  const ss = sessionsOf(s.key);
+  const all = sessionsOf(s.key).concat(effective().filter((x) => x.code === s.code && x.section === s.section && x.key !== s.key));
+  const teachers = Object.entries(DATA.teachers).sort((a, b) =>
+    (COLLEGE_ORDER.indexOf(a[1].college) - COLLEGE_ORDER.indexOf(b[1].college)) || a[1].name.localeCompare(b[1].name));
+  let checks = [];
+  if (e.teacher && e.teacher !== "__new") {
+    const cands = all.map((x) => ({ ...x, tkey: e.teacher }));
+    checks = checkPlacement(cands, null, e.teacher).filter(([, t]) => !t.startsWith("Students") && !t.includes(" is booked "));
+    const t = DATA.teachers[e.teacher];
+    const lu = (t.lu[state.sem] ?? 0) + (s.kind === "lab" || s.kind === "lab_lecture" ? 5 : 3);
+    if (lu > t.max) checks.push(["warn", `${t.name} would carry ${lu} LU (limit ${t.max})`]);
+  }
+  if (e.teacher === "__new" && !(e.newTeacher || "").trim()) checks.push(["bad", "Type the new teacher's name"]);
+  if (!e.teacher) checks.push(["bad", "Choose a teacher"]);
+  const ok = !checks.some(([lvl]) => lvl === "bad");
+  let lastCollege = null;
+  const opts = teachers.map(([k, t]) => {
+    let g = "";
+    if (t.college !== lastCollege) { g = (lastCollege ? "</optgroup>" : "") + `<optgroup label="${esc(DATA.colleges[t.college] || t.college)}">`; lastCollege = t.college; }
+    return g + `<option value="${esc(k)}"${k === e.teacher ? " selected" : ""}>${esc(t.name)} · ${t.lu[state.sem] ?? 0}/${t.max} LU</option>`;
+  }).join("") + "</optgroup>";
+  return `<div class="editor"><strong>Teacher for ${esc(s.code)} ${esc(s.section)}</strong>
+    <div class="fields">
+      <label for="assignTeacher">Teacher
+        <select id="assignTeacher"><option value="">Choose a teacher</option>${opts}<option value="__new"${e.teacher === "__new" ? " selected" : ""}>New part-time teacher…</option></select></label>
+      ${e.teacher === "__new" ? `<label for="newTeacher">Name of the new teacher<input id="newTeacher" value="${esc(e.newTeacher || "")}" placeholder="e.g. Ms. Ana Cruz"></label>` : ""}
+      <label for="assignNote">Note (optional)<input id="assignNote" value="${esc(e.note || "")}"></label>
+    </div>
+    <ul class="checks">${checks.length ? checks.map(([l, t]) => `<li class="${l}">${esc(t)}</li>`).join("") : `<li class="good">This teacher is free at every meeting of this class.</li>`}</ul>
+    <div class="actions"><button type="button" class="btn primary" data-act="saveAssign"${ok ? "" : " disabled"}>Save change</button>
+      <button type="button" class="btn" data-act="cancel">Cancel</button><span class="msg" id="editMsg"></span></div></div>`;
+}
+
+async function writeChange(id, body) {
+  const me = user ? await user.id() : null;
+  try {
+    await db.collection("changes").doc(id).set({ ...body, sem: Number(state.sem), by: me, at: new Date().toISOString() });
+    return true;
+  } catch (err) {
+    const m = $("editMsg");
+    const text = err?.code === "quota_exceeded" ? "The change list is full. Ask Claude to apply the pending changes first."
+      : err?.code === "invalid_argument" ? "You have view-only access, so changes can't be saved." : "Could not save. Try again.";
+    if (m) { m.textContent = text; m.className = "msg bad"; }
+    return false;
+  }
+}
+
+// ---------- other tabs ----------
 function renderApproval(board) {
   const list = approvals();
   const sem = DATA.sems[state.sem];
   board.innerHTML = `<div class="who"><h2>Needs approval</h2>
-    <p>These classes could only be placed by bending the University Class Time Frame. Each one comes from a conflict in the plans; see the notes for the decision needed.</p></div>
-    ${list.length ? `<div class="scroll"><table><thead><tr><th>Course</th><th>Section</th><th>When</th><th>Room</th><th>Teacher</th><th>Reason</th></tr></thead><tbody>
-    ${list.map((s) => `<tr><td><b>${esc(s.code)}</b> ${esc(s.title)}</td><td>${esc(s.section)}</td><td class="num">${esc(s.label)} ${hm(s.start)}–${hm(s.end)}</td>
-      <td>${esc(s.room || "")}</td><td>${esc(teacherName(s))}</td><td>${esc(s.exception)}</td></tr>`).join("")}</tbody></table></div>`
+    <p>These classes could only be placed by bending the University Class Time Frame, because of a conflict in the plans. Approve one as is, or ask for another time; select a row to see it.</p></div>
+    ${list.length ? `<div class="scroll"><table><thead><tr><th>Course</th><th>Section</th><th>When</th><th>Teacher</th><th>Reason</th><th>Decision</th></tr></thead><tbody>
+    ${list.map((s) => `<tr><td><button type="button" class="btn" data-pick="${esc(s.key)}">${esc(s.code)}</button> ${esc(s.title)}</td><td>${esc(s.section)}</td><td class="num">${esc(s.label)} ${hm(s.start)}–${hm(s.end)}</td>
+      <td>${esc(teacherLabel(s))}</td><td>${esc(s.exception)}</td><td>${s.decision ? (s.decision === "approved" ? "Approved" : "Another time") : "Pending"}</td></tr>`).join("")}</tbody></table></div>`
     : `<p class="hint">Every class follows the time frame this semester.</p>`}
-    ${sem.problems.length ? `<div class="note"><b>Rule problems found by the independent check:</b><br>${sem.problems.map(esc).join("<br>")}</div>` : ""}`;
+    ${sem.problems.length ? `<div class="note"><b>Rule problems found by the independent check:</b><br>${sem.problems.map(esc).join("<br>")}</div>` : ""}
+    <div class="detail" id="detail"></div>`;
+  renderDetail();
 }
 
-function render() { renderControls(); renderList(); renderBoard(); save(); }
+function renderUnstaffed(board) {
+  const list = unstaffed();
+  const by = {};
+  list.forEach((s) => (by[s.code] = by[s.code] || []).push(s));
+  board.innerHTML = `<div class="who"><h2>Unstaffed sections</h2>
+    <p>No college or GE Department plan names a teacher for these sections. Each still has a time and a room. Select a section to assign a teacher; the check shows whether that teacher is free at the section's time.</p>
+    <div class="facts"><span><b>${list.length}</b> sections</span><span><b>${Object.keys(by).length}</b> courses</span></div></div>
+    <div class="detail" id="detail"></div>
+    <div class="scroll"><table><thead><tr><th>Course</th><th>Usually taught by</th><th>Sections</th></tr></thead><tbody>
+    ${Object.entries(by).map(([code, ss]) => `<tr><td><b>${esc(code)}</b><br><span class="hint">${esc(ss[0].title)}</span></td>
+      <td>${esc(ss[0].tba.replace(/^TBA \(|\)$/g, ""))}</td>
+      <td><div class="actions">${ss.map((s) => `<button type="button" class="btn" data-pick="${esc(s.key)}" title="${esc(s.label + " " + hm(s.start))}">${esc(s.section)}</button>`).join("")}</div></td></tr>`).join("")}
+    </tbody></table></div>`;
+  renderDetail();
+}
 
-document.addEventListener("click", (e) => {
-  const t = e.target.closest("button");
+async function renderChanges(board) {
+  const list = semChanges(state.sem).slice().sort((a, b) => String(b.at).localeCompare(String(a.at)));
+  board.innerHTML = `<div class="who"><h2>Changes</h2>
+    <p>Saved by anyone with access, for everyone. They show on the timetable right away and are built into it, with a full re-check of every rule, when Claude next rebuilds the timetable.</p></div>
+    ${list.length ? `<div class="scroll"><table><thead><tr><th>Change</th><th>Class</th><th>Details</th><th>By</th><th>When</th><th></th></tr></thead><tbody>
+    ${list.map((c) => `<tr><td>${c.type === "move" ? "Move" : c.type === "assign" ? "Teacher" : c.decision === "approved" ? "Approved" : "Another time"}</td>
+      <td><button type="button" class="btn" data-pick="${esc(mkey(c.course, c.section, c.part || firstPart(c)))}">${esc(c.course)} ${esc(c.section)}</button></td>
+      <td>${esc(changeDetail(c))}</td><td data-uid="${esc(c.by || "")}">…</td><td class="num">${esc(String(c.at || "").slice(0, 16).replace("T", " "))}</td>
+      <td>${canWrite ? `<button type="button" class="btn" data-act="undo" data-doc="${esc(c.id)}">Undo</button>` : ""}</td></tr>`).join("")}
+    </tbody></table></div>` : `<p class="hint">No saved changes for this semester.</p>`}
+    <div class="detail" id="detail"></div>`;
+  renderDetail();
+  if (user && list.length) {
+    const ids = [...new Set(list.map((c) => c.by).filter(Boolean))];
+    const ps = await user.profiles(ids);
+    document.querySelectorAll("[data-uid]").forEach((td) => { td.textContent = ps[td.dataset.uid]?.name || "Someone"; });
+  } else {
+    document.querySelectorAll("[data-uid]").forEach((td) => { td.textContent = "Someone"; });
+  }
+}
+function firstPart(c) {
+  const s = effective().find((x) => x.code === c.course && x.section === c.section);
+  return s ? s.part : "Lec";
+}
+function changeDetail(c) {
+  if (c.type === "move") return `${c.part} to ${c.pattern}${c.room ? " in " + c.room : ""}${c.note ? " · " + c.note : ""}`;
+  if (c.type === "assign") return `${c.teacher ? DATA.teachers[c.teacher]?.name || c.teacher : c.newTeacher + " (new part-time)"}${c.note ? " · " + c.note : ""}`;
+  return c.note || "";
+}
+
+function render() { effCache = {}; renderTop(); renderList(); renderBoard(); save(); }
+
+// ---------- events ----------
+document.addEventListener("click", async (ev) => {
+  const t = ev.target.closest("button");
   if (!t) return;
-  if (t.dataset.sem) { state.sem = t.dataset.sem; state.sel = null; render(); }
-  else if (t.dataset.view) { state.view = t.dataset.view; state.sel = null; render(); }
-  else if (t.dataset.id !== undefined && t.classList.contains("item")) { state.pick[state.view] = t.dataset.id; state.sel = null; renderList(); renderBoard(); save(); }
-  else if (t.dataset.idx !== undefined) {
-    state.sel = Number(t.dataset.idx);
-    document.querySelectorAll(".block.sel").forEach((b) => b.classList.remove("sel"));
-    const row = DATA.sems[state.sem].sessions[state.sel];
-    document.querySelectorAll(".block").forEach((b) => {
-      const r = DATA.sems[state.sem].sessions[Number(b.dataset.idx)];
-      if (r && r[0] === row[0] && r[2] === row[2] && r[1] === row[1]) b.classList.add("sel");
-    });
-    renderDetail(state.sel);
+  if (t.dataset.sem) { state.sem = t.dataset.sem; state.sel = null; state.edit = null; render(); return; }
+  if (t.dataset.view) { state.view = t.dataset.view; state.sel = null; state.edit = null; render(); return; }
+  if (t.classList.contains("item")) { state.pick[state.view] = t.dataset.id; state.sel = null; state.edit = null; renderList(); renderBoard(); save(); return; }
+  if (t.dataset.key) { state.sel = t.dataset.key; state.edit = null; renderBoard(); return; }
+  if (t.dataset.pick) { state.sel = t.dataset.pick; state.edit = null; renderBoard(); $("detail")?.scrollIntoView({ block: "nearest", behavior: "smooth" }); return; }
+  const act = t.dataset.act;
+  if (!act) return;
+  const s = state.sel ? sessionsOf(state.sel)[0] : null;
+  if (act === "move" && s) { state.edit = { type: "move", key: s.key }; renderBoard(); }
+  else if (act === "assign" && s) { state.edit = { type: "assign", key: s.key, teacher: s.tkey || (s.newTeacher ? "__new" : ""), newTeacher: s.newTeacher || "" }; renderBoard(); }
+  else if (act === "cancel") { state.edit = null; renderBoard(); }
+  else if (act === "saveMove" && s) {
+    const e = state.edit;
+    t.disabled = true;
+    if (await writeChange(docId("move", state.sem, s.code, s.section, s.part),
+        { type: "move", course: s.code, section: s.section, part: s.part, pattern: e.pattern, room: e.room || null, note: e.note || "" })) state.edit = null;
+  } else if (act === "saveAssign" && s) {
+    const e = state.edit;
+    t.disabled = true;
+    const body = { type: "assign", course: s.code, section: s.section, note: e.note || "" };
+    if (e.teacher === "__new") body.newTeacher = e.newTeacher.trim(); else body.teacher = e.teacher;
+    if (await writeChange(docId("assign", state.sem, s.code, s.section), body)) state.edit = null;
+  } else if ((act === "approve" || act === "reject") && s) {
+    await writeChange(docId("approve", state.sem, s.code, s.section, s.part),
+      { type: "approve", course: s.code, section: s.section, part: s.part, decision: act === "approve" ? "approved" : "another_time", note: "" });
+  } else if (act === "undo") {
+    try { await db.collection("changes").doc(t.dataset.doc).delete(); } catch (err) { t.textContent = "Could not undo"; }
   }
 });
-$("q").addEventListener("input", (e) => { state.q = e.target.value; renderList(); });
+document.addEventListener("change", (ev) => {
+  const e = state.edit;
+  if (!e) return;
+  if (ev.target.id === "movePattern") { e.pattern = ev.target.value; renderBoard(); }
+  else if (ev.target.id === "moveRoom") { e.room = ev.target.value; renderBoard(); }
+  else if (ev.target.id === "assignTeacher") { e.teacher = ev.target.value; renderBoard(); }
+});
+document.addEventListener("input", (ev) => {
+  const e = state.edit;
+  if (ev.target.id === "q") { state.q = ev.target.value; renderList(); return; }
+  if (!e) return;
+  if (ev.target.id === "moveNote" || ev.target.id === "assignNote") e.note = ev.target.value;
+  if (ev.target.id === "newTeacher") {
+    e.newTeacher = ev.target.value;
+    const btn = document.querySelector('[data-act="saveAssign"]');
+    if (btn) btn.disabled = !e.newTeacher.trim();
+  }
+});
+
 render();
+
+// ---------- shared changes (claude.ai) ----------
+(async () => {
+  if (!window.claude?.use) { renderTop(); return; }
+  try {
+    [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+  } catch (e) { db = null; }
+  if (!db) { renderTop(); return; }
+  dbReady = true;
+  const can = user ? await user.can("data.write") : null;
+  canWrite = can !== false;
+  db.collection("changes").onSnapshot((snap) => {
+    changes = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    if (state.edit && !sessionsOf(state.edit.key).length) state.edit = null;
+    render();
+  }, () => { dbReady = false; canWrite = false; render(); });
+  render();
+})();
 </script>

@@ -1,0 +1,15 @@
+# Changes made in the scheduling system (or by hand). Applied on the next solve.
+#
+# extra_faculty: part-time or new faculty not in a college plan.
+#   - {key: PT-1, name: Ms. Jane Example, department: General Education, max_lu: 12}
+# teacher_assignments: give an unstaffed (TBA) section a teacher, by faculty key.
+#   1:
+#     - {course: MATH 180, section: BSA 1A, teacher: PT-1}
+# fixed: pin a class meeting to a pattern from the time frame (and optionally a room).
+#   1:
+#     - {course: CS 230, section: BSCS 2A, part: Lec, pattern: "M2 MW", room: SIN 202}
+extra_faculty: []
+teacher_assignments: {}
+fixed: {}
+# avoid_exceptions: classes whose time-frame exception was declined ("ask for another time").
+avoid_exceptions: {}

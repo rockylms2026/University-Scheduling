@@ -60,17 +60,6 @@ def validate(uni: University) -> list[Issue]:
                 issues.append(Issue("error", "preps",
                                     f"Semester {sem}: {fac.name} has {row['preps_total']} different courses (cap 5)"))
 
-        # CWTS meets at one fixed Saturday time, so a teacher with several
-        # CWTS sections would have to meet them together.
-        cwts = defaultdict(list)
-        for k in uni.classes_for(sem):
-            if k.course.kind == "nstp" and k.faculty:
-                cwts[k.faculty.key].append(k.section.name)
-        for key, secs in cwts.items():
-            if len(secs) > 1:
-                issues.append(Issue("warning", "cwts",
-                                    f"Semester {sem}: {uni.faculty[key].name} has {len(secs)} CWTS sections, all meeting "
-                                    f"Saturday 8:00-11:00; they must run as one combined group or at staggered times"))
     return issues
 
 
