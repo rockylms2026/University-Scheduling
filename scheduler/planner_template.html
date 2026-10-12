@@ -319,7 +319,8 @@ dl.about dd { margin: 0; }
 
 <script>
 const DATA = /*__DATA__*/null;
-const BACKEND = /*__BACKEND__*/null;     // null on claude.ai; { kind: "supabase", url, key } for the hosted version
+const BACKEND = /*__BACKEND__*/null;
+const BUILD = /*__BUILD__*/"";            // shown in the footer, to tell which version is loaded     // null on claude.ai; { kind: "supabase", url, key } for the hosted version
 const UNIVERSITY = "Liberal Arts University of Cagayan Valley";
 const DAYS = DATA.days;
 const LUNCH = { Mon: [690, 750], Wed: [690, 750], Fri: [690, 750], Tue: [720, 810], Thu: [720, 810] };
@@ -864,7 +865,7 @@ function renderShell() {
   $("footer").innerHTML = `<span>Last saved: <b>${esc(when(lastSaved))}</b></span>
     <span class="chip ${pub.cls}">${esc(pub.label)}</span>
     <span>${shared ? (canWrite ? "Changes are saved for everyone" : "View-only access") : "Not connected: changes here are not saved"}</span>
-    <span class="grow"></span>
+    <span class="grow"></span>${BUILD ? `<span class="small">Version ${esc(BUILD)}</span>` : ""}
     <details class="menu" id="exportMenu"><summary class="btn">Export ▾</summary><div class="pop">
       <button type="button" data-export="pdf">PDF schedules (section, faculty, room)…</button>
       <button type="button" data-export="xlsx">Excel workbook (.xlsx)</button></div></details>`;

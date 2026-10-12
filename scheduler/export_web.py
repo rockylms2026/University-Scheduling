@@ -75,6 +75,12 @@ def import_sql(semester: int) -> str:
     return "\n".join(out) + "\n"
 
 
+def build_label() -> str:
+    """Date of the build, e.g. "Oct 12, 07:40", so people can tell which version they have open."""
+    from datetime import datetime, timezone
+    return datetime.now(timezone.utc).strftime("%b %d, %H:%M UTC")
+
+
 def write_web(uni: University, semester: int = 1) -> list[Path]:
     cfg = json.loads(CONFIG_PATH.read_text())
     SUPABASE_DIR.mkdir(exist_ok=True)
@@ -93,6 +99,7 @@ def write_web(uni: University, semester: int = 1) -> list[Path]:
     html = (TEMPLATE_PATH.read_text()
             .replace("/*__DATA__*/null", data)
             .replace("/*__BACKEND__*/null", backend)
+            .replace('/*__BUILD__*/""', json.dumps(build_label()))
             .replace("<!--__SUPABASE_JS__-->", f'<script src="{SUPABASE_JS}"></script>'))
     WEB_DIR.mkdir(exist_ok=True)
     (WEB_DIR / "index.html").write_text(html)
