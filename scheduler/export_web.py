@@ -45,11 +45,11 @@ def seed_sql(uni: University, semester: int) -> str:
     for c in data["classes"]:
         prog = data["programs"][data["sections"][c["section"]]["program"]]
         rows.append(f"({q(c['id'])}, {semester}, {q(c['course'])}, {q(c['section'])}, {q(data['sections'][c['section']]['program'])}, "
-                    f"{q(prog['college'])}, {q(prog['dept'])}, {q(data['courses'][c['course']]['college'] == 'CORE')}, {q(c['teacher'])})")
-    out.append("insert into public.classes (id, sem, course, section, program, college, department, is_ge, plan_teacher) values\n  "
+                    f"{q(prog['college'])}, {q(prog['dept'])}, {q(data['courses'][c['course']]['college'] == 'CORE')}, {q(c['teacher'])}, {q(c['holder'])})")
+    out.append("insert into public.classes (id, sem, course, section, program, college, department, is_ge, plan_teacher, holder_dept) values\n  "
                + ",\n  ".join(rows) + "\non conflict (id) do update set course = excluded.course, section = excluded.section,"
                " program = excluded.program, college = excluded.college, department = excluded.department,"
-               " is_ge = excluded.is_ge, plan_teacher = excluded.plan_teacher;")
+               " is_ge = excluded.is_ge, plan_teacher = excluded.plan_teacher, holder_dept = excluded.holder_dept;")
     out.append("commit;")
     return "\n".join(out) + "\n"
 

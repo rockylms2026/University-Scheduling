@@ -40,7 +40,12 @@ ge_css = one("select id from classes where is_ge and college='CSS' and id not in
 ge_cisc = one("select id from classes where is_ge and college='CISC' limit 1")
 psy_teacher = one("select key from faculty where department='Psychology' limit 1")
 eco_teacher = one("select key from faculty where department='Economics' limit 1")
-t2_dept, t2_college = one("select department||'|'||college from faculty where key='CISC-T2'").split("|")
+# Cross-department GE: HIST 201 (held by Secondary Education) moved to CCJPS-D2 in the claude.ai version.
+X = "S1-0666"
+t2_dept, t2_college = one("select department||'|'||college from faculty where key='CCJPS-D2'").split("|")
+# Own-department GE: a booked PSYC 160 (held by Psychology) taught by Psychology faculty.
+OWN = one("select c.id from classes c join faculty f on f.key=c.plan_teacher join bookings b on b.class_id=c.id "
+          "where c.course='PSYC 160' and f.department='Psychology' limit 1")
 
 ADMIN = "agbayanispencer@gmail.com"
 psql(f"""insert into staff (email, full_name, role, college, department) values
@@ -78,22 +83,26 @@ expect("associate dean books GE in own college sections", True, bk(ge_css, "M5 M
 expect("associate dean cannot book GE in other colleges", False, bk(ge_cisc), "adean.css@u.edu")
 expect("dean books anything", True, bk(cisc_major), "dean@u.edu")
 
-# S1-0637: STS 180 in BSP 1B, moved to CISC-T2 in the claude.ai version.
-expect("cross-college GE needs approval", True, "select needs_approval('S1-0637')", "ge@u.edu", contains="t")
+expect("cross-college GE needs approval", True, f"select needs_approval('{X}')", "ge@u.edu", contains="t")
 expect("GE Department teacher needs none", True,
        "select needs_approval((select c.id from classes c join faculty f on f.key=c.plan_teacher where c.is_ge and f.college='GE' limit 1))", "ge@u.edu", contains="f")
-expect("other chair cannot approve", False, "select decide_ge('S1-0637','approve')", "chair.psy@u.edu")
-expect("GE coordinator cannot approve", False, "select decide_ge('S1-0637','approve')", "ge@u.edu")
-expect("teacher's chair approves", True, "select decide_ge('S1-0637','approve')", "chair.t2@u.edu")
-expect("still pending without associate dean", True, "select adean_at is null from ge_approvals where class_id='S1-0637'", "chair.t2@u.edu", contains="t")
-expect("teacher's associate dean approves", True, "select decide_ge('S1-0637','approve')", "adean.t2@u.edu")
-expect("both approvals recorded", True, "select chair_by||' '||adean_by from ge_approvals where class_id='S1-0637'", ADMIN, contains="chair.t2@u.edu adean.t2@u.edu")
+expect("other chair cannot approve", False, f"select decide_ge('{X}','approve')", "chair.psy@u.edu")
+expect("GE coordinator cannot approve", False, f"select decide_ge('{X}','approve')", "ge@u.edu")
+expect("teacher's chair approves", True, f"select decide_ge('{X}','approve')", "chair.t2@u.edu")
+expect("still pending without associate dean", True, f"select adean_at is null from ge_approvals where class_id='{X}'", "chair.t2@u.edu", contains="t")
+expect("teacher's associate dean approves", True, f"select decide_ge('{X}','approve')", "adean.t2@u.edu")
+expect("both approvals recorded", True, f"select chair_by||' '||adean_by from ge_approvals where class_id='{X}'", ADMIN, contains="chair.t2@u.edu adean.t2@u.edu")
 expect("approvals cannot be written directly", False, "update ge_approvals set chair_by='me'", "chair.t2@u.edu")
-psql("update bookings set pattern='T2 TTh' where class_id='S1-0637'")
-expect("a new time starts approval over", True, "select decide_ge('S1-0637','approve'); select coalesce(adean_by,'none') from ge_approvals where class_id='S1-0637'", "chair.t2@u.edu", contains="none")
-expect("associate dean rejects", True, "select decide_ge('S1-0637','reject','Teaching a thesis class then')", "adean.t2@u.edu")
-expect("rejection recorded", True, "select rejected_by from ge_approvals where class_id='S1-0637'", ADMIN, contains="adean.t2@u.edu")
+psql(f"update bookings set pattern='T2 TTh' where class_id='{X}'")
+expect("a new time starts approval over", True, f"select decide_ge('{X}','approve'); select coalesce(adean_by,'none') from ge_approvals where class_id='{X}'", "chair.t2@u.edu", contains="none")
+expect("associate dean rejects", True, f"select decide_ge('{X}','reject','Teaching a thesis class then')", "adean.t2@u.edu")
+expect("rejection recorded", True, f"select rejected_by from ge_approvals where class_id='{X}'", ADMIN, contains="adean.t2@u.edu")
 
+expect("own-department GE needs no associate dean", True, f"select needs_adean('{OWN}')", "ge@u.edu", contains="f")
+expect("cross-department GE needs the associate dean", True, f"select needs_adean('{X}')", "ge@u.edu", contains="t")
+expect("associate dean cannot decide an own-department GE", False, f"select decide_ge('{OWN}','approve')", "adean.css@u.edu")
+expect("chair approves own-department GE alone", True, f"select decide_ge('{OWN}','approve'); select chair_by||' '||coalesce(adean_by,'none') from ge_approvals where class_id='{OWN}'",
+       "chair.psy@u.edu", contains="chair.psy@u.edu none")
 expect("chair cannot publish", False, "select publish_schedule()", "chair.psy@u.edu")
 expect("registrar publishes", True, "select publish_schedule()", ADMIN)
 expect("chair cannot add staff", False, "insert into staff (email, role) values ('x@u.edu','dean')", "chair.psy@u.edu")

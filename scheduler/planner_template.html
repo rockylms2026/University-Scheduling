@@ -436,17 +436,19 @@ function approvalOf(cls) {
   if (!t || DATA.teachers[t].college === "GE") return null;
   if (settings.approvalScope === "cross" && DATA.teachers[t].college === progCollege(cls.section)) return null;
   const sig = scheduleSig(cls);
-  if (!sig) return { state: "unscheduled", teacher: t };
+  // The associate dean is not needed when the teacher's own department holds the course.
+  const adeanNeeded = !cls.holder || DATA.teachers[t].dept !== cls.holder;
+  if (!sig) return { state: "unscheduled", teacher: t, adeanNeeded };
   const a = approvals[`${cls.id}|${t}`];
-  if (!a || a.schedule !== sig) return { state: "pending", teacher: t, chair: false, adean: false };
-  if (a.rejected_at) return { state: "rejected", teacher: t, chair: false, adean: false, row: a };
-  return { state: a.chair_at && a.adean_at ? "approved" : "pending", teacher: t, chair: !!a.chair_at, adean: !!a.adean_at, row: a };
+  if (!a || a.schedule !== sig) return { state: "pending", teacher: t, chair: false, adean: false, adeanNeeded };
+  if (a.rejected_at) return { state: "rejected", teacher: t, chair: false, adean: false, adeanNeeded, row: a };
+  return { state: a.chair_at && (a.adean_at || !adeanNeeded) ? "approved" : "pending", teacher: t, chair: !!a.chair_at, adean: !!a.adean_at, adeanNeeded, row: a };
 }
 function canDecide(teacher) {
   const f = DATA.teachers[teacher];
   return { chair: isAdmin() || (me.role === "chair" && me.department === f.dept), adean: isAdmin() || (me.role === "associate_dean" && me.college === f.college) };
 }
-const needsMe = (a) => { if (a.state !== "pending") return false; const d = canDecide(a.teacher); return (d.chair && !a.chair) || (d.adean && !a.adean); };
+const needsMe = (a) => { if (a.state !== "pending") return false; const d = canDecide(a.teacher); return (d.chair && !a.chair) || (d.adean && a.adeanNeeded && !a.adean); };
 
 // ---------- hosted version: Supabase ----------
 let sb = null;
@@ -1199,8 +1201,9 @@ function editor(cls, part) {
       && (settings.approvalScope === "all" || DATA.teachers[teacherKey].college !== progCollege(cls.section));
     if (ap) {
       const f = DATA.teachers[teacherKey], cur = approvalOf(cls);
-      checks.push(["info", `Approval: ${f.name} belongs to the ${f.college} Department of ${f.dept}, so this GE class needs the approval of that department's chair and the ${f.college} associate dean.`
-        + (cur && cur.teacher === teacherKey && cur.state !== "unscheduled" ? ` Now: ${cur.state === "approved" ? "approved" : cur.state === "rejected" ? "rejected" : `waiting for ${[!cur.chair && "the chair", !cur.adean && "the associate dean"].filter(Boolean).join(" and ")}`}.` : " Booking it sends the request.")]);
+      const own = cls.holder === f.dept;
+      checks.push(["info", `Approval: ${f.name} belongs to the ${f.college} Department of ${f.dept}, so this GE class needs the approval of that department's chair${own ? ` (the department holds ${cls.course}, so the associate dean need not approve)` : ` and the ${f.college} associate dean`}.`
+        + (cur && cur.teacher === teacherKey && cur.state !== "unscheduled" ? ` Now: ${cur.state === "approved" ? "approved" : cur.state === "rejected" ? "rejected" : `waiting for ${[!cur.chair && "the chair", cur.adeanNeeded && !cur.adean && "the associate dean"].filter(Boolean).join(" and ")}`}.` : " Booking it sends the request.")]);
     }
     detail = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${teacherSel}</div>
       <div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>
@@ -1379,7 +1382,7 @@ function renderApprovals(page) {
   const shown = all.filter(filters.find(([k]) => k === state.apprFilter)[2]).sort((x, y) => numSort(x.c.section, y.c.section) || x.c.course.localeCompare(y.c.course));
   const mark = (done, who, at) => done ? `<span class="appr ok" title="${esc(who || "")}">✓ ${esc((who || "").split("@")[0])}${at ? ` · ${new Date(at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}</span>` : `<span class="appr wait">Waiting</span>`;
   const mineNow = shown.filter((x) => needsMe(x.a));
-  page.innerHTML = `${head("Approvals", "A GE class taught by a member of a college needs the approval of that teacher's department chair and their college's associate dean. A new time or teacher asks again.")}
+  page.innerHTML = `${head("Approvals", "A GE class taught by a member of a college needs the approval of that teacher's department chair, and also their associate dean unless the teacher's department holds the course. A new time or teacher asks again.")}
     <div class="card" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="pills">${filters.map(([k, l, f]) =>
       `<button type="button" class="pill" data-apprfilter="${k}" aria-pressed="${state.apprFilter === k}">${l}<small>${all.filter(f).length}</small></button>`).join("")}</div>
       ${mineNow.length > 1 ? `<button type="button" class="btn primary" data-decideall="approve">Approve all ${mineNow.length} shown</button>` : ""}</div></div>
@@ -1388,13 +1391,13 @@ function renderApprovals(page) {
         const f = DATA.teachers[a.teacher], d = canDecide(a.teacher), r = a.row || {};
         const acts = [];
         if (needsMe(a)) acts.push(`<button type="button" class="btn primary" data-decide="approve" data-cid="${c.id}">Approve</button>`);
-        if (a.state === "pending" && (d.chair || d.adean)) acts.push(`<button type="button" class="btn danger" data-decide="reject" data-cid="${c.id}">Reject</button>`);
+        if (a.state === "pending" && (d.chair || (d.adean && a.adeanNeeded))) acts.push(`<button type="button" class="btn danger" data-decide="reject" data-cid="${c.id}">Reject</button>`);
         if (a.state === "rejected" && (!editRight(c) || d.chair || d.adean)) acts.push(`<button type="button" class="btn" data-decide="reopen" data-cid="${c.id}">Ask again</button>`);
         acts.push(`<button type="button" class="btn" data-pick="${c.id}" data-part="${c.meetings[0].part}">Open</button>`);
         return `<tr><td><b>${esc(c.course)}</b> · ${esc(c.section)}<div class="small muted">${esc(DATA.courses[c.course].title)} · ${esc(progCollege(c.section))} section</div></td>
           <td class="small">${esc(scheduleSig(c).replace(/(Lec|Lab|PE|NSTP):/g, "").trim())}</td>
           <td>${esc(f.name)}<div class="small muted">${esc(f.dept)} · ${esc(f.college)}</div></td>
-          <td>${a.state === "rejected" ? "—" : mark(a.chair, r.chair_by, r.chair_at)}</td><td>${a.state === "rejected" ? "—" : mark(a.adean, r.adean_by, r.adean_at)}</td>
+          <td>${a.state === "rejected" ? "—" : mark(a.chair, r.chair_by, r.chair_at)}</td><td>${a.state === "rejected" ? "—" : a.adeanNeeded ? mark(a.adean, r.adean_by, r.adean_at) : `<span class="appr muted" title="${esc(f.dept)} holds this course">Not needed</span>`}</td>
           <td><span class="chip ${a.state === "approved" ? "good" : a.state === "rejected" ? "bad" : "warn"}">${a.state === "approved" ? "Approved" : a.state === "rejected" ? "Rejected" : "Waiting"}</span>
             ${a.state === "rejected" ? `<div class="small muted">${esc(r.rejected_by || "")}${r.note ? `: “${esc(r.note)}”` : ""}</div>` : ""}</td>
           <td><div class="actions">${acts.join("")}</div></td></tr>`;

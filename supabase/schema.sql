@@ -12,8 +12,9 @@
 -- Everyone with a role can read the whole timetable, because conflict checks need it.
 --
 -- A GE class taught by a member of a college (not the GE Department) is "pending"
--- until both that teacher's department chair and their college's associate dean
--- approve it. Changing its time or teacher afterwards asks again.
+-- until that teacher's department chair approves it, and also their college's
+-- associate dean unless the teacher belongs to the department that holds the course
+-- (e.g. Psychology holds Understanding the Self). A new time or teacher asks again.
 
 -- ---------- reference data (loaded by seed.sql; read-only to users) ----------
 create table if not exists public.faculty (
@@ -35,8 +36,10 @@ create table if not exists public.classes (
   college      text not null,        -- the section's college
   department   text not null,        -- the section's program department
   is_ge        boolean not null,
-  plan_teacher text references public.faculty(key)
+  plan_teacher text references public.faculty(key),
+  holder_dept  text                  -- GE only: the department that holds the course
 );
+alter table public.classes add column if not exists holder_dept text;
 
 -- ---------- people ----------
 create table if not exists public.staff (
@@ -170,6 +173,14 @@ begin
   return scope = 'all' or f.college <> c.college;
 end $$;
 
+-- Does the associate dean also have to approve? Not when the teacher's department holds the course.
+create or replace function public.needs_adean(cid text) returns boolean
+language sql stable security definer set search_path = public as $$
+  select public.needs_approval(cid) and coalesce(
+    (select f.department <> c.holder_dept or c.holder_dept is null
+       from public.classes c join public.faculty f on f.key = public.class_teacher(cid) where c.id = cid), true)
+$$;
+
 -- Approve or reject a GE class taught by college faculty. decision: 'approve' | 'reject' | 'reopen'.
 create or replace function public.decide_ge(cid text, decision text, note text default null) returns text
 language plpgsql volatile security definer set search_path = public as $$
@@ -186,13 +197,17 @@ begin
   if sched = '' then raise exception 'Book a time for this class first'; end if;
   select * into f from public.faculty where key = t;
   as_chair := me.role in ('registrar', 'dean') or (me.role = 'chair' and me.department = f.department);
-  as_adean := me.role in ('registrar', 'dean') or (me.role = 'associate_dean' and me.college = f.college);
+  as_adean := (me.role in ('registrar', 'dean') or (me.role = 'associate_dean' and me.college = f.college))
+              and public.needs_adean(cid);
   if decision = 'reopen' then
     if not (public.can_edit_class(cid) or as_chair or as_adean) then raise exception 'Not allowed'; end if;
     delete from public.ge_approvals where class_id = cid and teacher = t;
     return 'reopened';
   end if;
-  if not (as_chair or as_adean) then raise exception 'Only % chair or the % associate dean can decide this', f.department, f.college; end if;
+  if not (as_chair or as_adean) then
+    if public.needs_adean(cid) then raise exception 'Only the % chair or the % associate dean can decide this', f.department, f.college; end if;
+    raise exception 'Only the % chair decides this: the department holds this course', f.department;
+  end if;
   insert into public.ge_approvals (class_id, teacher, schedule) values (cid, t, sched)
     on conflict (class_id, teacher) do nothing;
   -- A schedule change since the last decision starts the approval over.
@@ -293,7 +308,7 @@ grant select, insert, update, delete on public.staff, public.bookings, public.te
 grant select, update on public.settings to authenticated;
 -- Every helper the access rules call must be runnable by signed-in users (some projects do not grant this by default).
 grant execute on function public.my_staff(), public.is_admin(), public.has_role(), public.class_teacher(text),
-  public.class_schedule(text), public.can_edit_class(text), public.can_assign(text, text), public.needs_approval(text),
+  public.class_schedule(text), public.can_edit_class(text), public.can_assign(text, text), public.needs_approval(text), public.needs_adean(text),
   public.decide_ge(text, text, text), public.publish_schedule(), public.stamp_row() to authenticated;
 revoke all on all tables in schema public from anon;
 

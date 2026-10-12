@@ -9,6 +9,7 @@ Bookings are kept in the page's shared database, not in this file.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import yaml
@@ -23,6 +24,18 @@ KINDS = ["lecture", "lab_lecture", "lab", "pe", "uni", "nstp", "supervision"]
 COLLEGES = {"CSS": "College of Social Sciences", "CISC": "College of Information Sciences and Computing",
             "CBE": "College of Business and Entrepreneurship", "COE": "College of Education",
             "CCJPS": "College of Criminal Justice and Public Service", "GE": "General Education Department"}
+
+
+def holder_department(housed_by: str | None, program_dept: str) -> str | None:
+    """The department that holds a GE course: "Dept. of Psychology (CSS)" -> "Psychology"."""
+    if not housed_by:
+        return None
+    if housed_by.startswith("Program"):
+        return program_dept
+    if housed_by.startswith("GE Department"):
+        return "General Education"
+    m = re.match(r"Dept\. of (.+?) \(", housed_by)
+    return m.group(1) if m else None
 
 
 def planner_data(uni: University, semester: int) -> dict:
@@ -56,6 +69,7 @@ def planner_data(uni: University, semester: int) -> dict:
                            "labRooms": list(c.lab_rooms), "placement": list(c.placement)}
         classes.append({"id": k.id, "course": c.code, "section": k.section.name,
                         "teacher": k.faculty.key if k.faculty else None,
+                        "holder": holder_department(c.housed_by, uni.programs[k.section.program].department) if c.is_core else None,
                         "lu": c.load_units, "meetings": by_class.get(k.id, [])})
 
     load = faculty_load_summary(uni, semester)
