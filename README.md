@@ -1,5 +1,19 @@
 # University Class Scheduling
 
+## Scheduling desk (what the registrar uses)
+
+`python -m scheduler planner` writes `output/scheduling_system.html`, the
+page published on claude.ai where the registrar schedules every class by
+hand: College > Programs (Sections, Teachers, Courses) or Rooms. For each
+class it lists every time the University Class Time Frame allows and checks,
+as you choose, the section's students (including BSBA major groups and BSP
+tracks), the teacher's other classes and daily hours, room bookings,
+practicum placement days, lab-room blocks, and teaching loads. It shows which
+teachers and rooms are free at that time. Bookings are saved in the page's
+shared database, so everyone with access sees the same timetable.
+
+## Automatic draft (optional)
+
 Builds conflict-free weekly timetables for every student section, faculty
 member, and room, from the university's planning documents:
 

@@ -1,0 +1,702 @@
+<meta charset="utf-8">
+<title>Class Scheduling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: registrar's desk. College > program > section on top; class list and booking form beside the week grid. */
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #18202b; --muted: #5d6877; --line: #dde2e9;
+  --accent: #1f4fd1; --accent-ink: #ffffff; --accent-soft: #e5ecfd; --lunch: #eef0f4;
+  --warn: #9a6400; --warn-soft: #fff3cf; --bad: #b42318; --bad-soft: #fde4e1; --good: #1d7a46; --good-soft: #def4e6;
+  --c-css: #d8e6fb;   --c-css-ink: #1b4a8f;
+  --c-cisc: #d5f0de;  --c-cisc-ink: #17643a;
+  --c-cbe: #fde6c8;   --c-cbe-ink: #8a4c05;
+  --c-coe: #e8dcfa;   --c-coe-ink: #5a2f9a;
+  --c-ccjps: #f9d9d9; --c-ccjps-ink: #8f2424;
+  --c-core: #e7e9ee;  --c-core-ink: #3c4553;
+  --f-display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --row: 24px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151b; --panel: #181e26; --ink: #e6eaf0; --muted: #9aa5b4; --line: #2a323d;
+    --accent: #8fb0ff; --accent-ink: #0d1424; --accent-soft: #1d2a4a; --lunch: #1c222b;
+    --warn: #f2c35b; --warn-soft: #3a2f12; --bad: #ff9b8f; --bad-soft: #3d1a17; --good: #6fd39a; --good-soft: #15301f;
+    --c-css: #1d3352; --c-css-ink: #b9d3ff; --c-cisc: #183a27; --c-cisc-ink: #a9e8c0;
+    --c-cbe: #43301a; --c-cbe-ink: #f8d3a3; --c-coe: #33244d; --c-coe-ink: #d8c4fa;
+    --c-ccjps: #4a2222; --c-ccjps-ink: #f6c0c0; --c-core: #262d37; --c-core-ink: #ccd3dd;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151b; --panel: #181e26; --ink: #e6eaf0; --muted: #9aa5b4; --line: #2a323d;
+  --accent: #8fb0ff; --accent-ink: #0d1424; --accent-soft: #1d2a4a; --lunch: #1c222b;
+  --warn: #f2c35b; --warn-soft: #3a2f12; --bad: #ff9b8f; --bad-soft: #3d1a17; --good: #6fd39a; --good-soft: #15301f;
+  --c-css: #1d3352; --c-css-ink: #b9d3ff; --c-cisc: #183a27; --c-cisc-ink: #a9e8c0;
+  --c-cbe: #43301a; --c-cbe-ink: #f8d3a3; --c-coe: #33244d; --c-coe-ink: #d8c4fa;
+  --c-ccjps: #4a2222; --c-ccjps-ink: #f6c0c0; --c-core: #262d37; --c-core-ink: #ccd3dd;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+.wrap { max-width: 1440px; margin: 0 auto; padding-inline: 16px; padding-block: 18px 40px; display: grid; gap: 14px; }
+header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 10px 24px; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.55rem; margin: 0; letter-spacing: -0.01em; }
+h2 { font-family: var(--f-display); font-weight: 700; font-size: 1.25rem; margin: 0; text-wrap: balance; }
+h3 { font-family: var(--f-display); font-weight: 600; font-size: 1rem; margin: 0; }
+.sub { color: var(--muted); margin: 2px 0 0; font-size: .92rem; }
+.status { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chip { font-size: .78rem; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; display: inline-block; }
+.chip.good { background: var(--good-soft); color: var(--good); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.bad { background: var(--bad-soft); color: var(--bad); }
+.chip.info { background: var(--accent-soft); color: var(--accent); }
+.chip.none { background: var(--lunch); color: var(--muted); }
+.banner { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 8px 12px; font-size: .9rem; }
+.nav { display: grid; gap: 8px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.navlabel { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; min-width: 74px; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--panel); }
+.seg button { font: inherit; font-size: .88rem; border: 0; background: transparent; color: var(--muted); padding: 6px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { font: inherit; font-size: .85rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 4px 10px; border-radius: 999px; cursor: pointer; }
+.pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.pill small { color: inherit; opacity: .75; font-family: var(--f-mono); font-size: .72rem; margin-left: 4px; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 12px; min-width: 0; }
+.desk { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 14px; align-items: start; }
+.facts { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .86rem; color: var(--muted); }
+.facts b { color: var(--ink); font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+.classes { display: grid; gap: 6px; }
+.cls { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; display: grid; gap: 4px; }
+.cls.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.cls .t { display: flex; justify-content: space-between; gap: 8px; }
+.cls .t b { font-family: var(--f-mono); font-size: .84rem; }
+.cls .t span { color: var(--muted); font-size: .82rem; text-align: right; }
+.cls .title { font-size: .86rem; }
+.parts { display: flex; flex-wrap: wrap; gap: 6px; }
+.part { font: inherit; font-size: .8rem; border: 1px dashed var(--muted); background: transparent; color: var(--ink); padding: 3px 8px; border-radius: 6px; cursor: pointer; text-align: left; }
+.part.done { border-style: solid; border-color: var(--good); background: var(--good-soft); color: var(--good); }
+.part.on { box-shadow: 0 0 0 2px var(--accent); }
+.part.fixed { cursor: default; }
+.muted { color: var(--muted); }
+.small { font-size: .82rem; }
+.editor { border: 1px solid var(--accent); border-radius: 10px; padding: 12px; display: grid; gap: 12px; background: var(--panel); }
+.editor label, .fieldlabel { display: grid; gap: 3px; font-size: .8rem; color: var(--muted); font-weight: 600; }
+.editor select { font: inherit; font-size: .9rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; width: 100%; }
+.opts { display: grid; gap: 4px; max-height: 250px; overflow-y: auto; padding-right: 2px; }
+.optgrp { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin-top: 4px; }
+.opt { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; align-items: center; font: inherit; font-size: .84rem; text-align: left; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 6px; padding: 5px 8px; cursor: pointer; }
+.opt b { font-family: var(--f-mono); font-size: .8rem; }
+.opt > span { display: grid; min-width: 0; }
+.opt.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); background: var(--accent-soft); }
+.opt .why { font-size: .78rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.checks { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: .85rem; }
+.checks li { padding: 5px 8px; border-radius: 6px; }
+.checks .bad { background: var(--bad-soft); color: var(--bad); }
+.checks .warn { background: var(--warn-soft); color: var(--warn); }
+.checks .good { background: var(--good-soft); color: var(--good); }
+.checks .info { background: var(--lunch); color: var(--ink); }
+.who-free { display: flex; flex-wrap: wrap; gap: 4px; }
+.who-free span { font-size: .78rem; padding: 2px 8px; border-radius: 999px; background: var(--good-soft); color: var(--good); }
+.who-free span.full { background: var(--warn-soft); color: var(--warn); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn { font: inherit; font-size: .88rem; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.danger { color: var(--bad); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.msg { font-size: .85rem; }
+.msg.bad { color: var(--bad); }
+.msg.good { color: var(--good); }
+.scroll { overflow-x: auto; }
+.week { display: grid; grid-template-columns: 48px repeat(var(--days), minmax(92px, 1fr)); min-width: 620px; padding-bottom: 10px; }
+.dayhead { font-family: var(--f-display); font-weight: 500; font-size: .84rem; text-align: center; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.dayhead.off { color: var(--muted); text-decoration: line-through; }
+.times { position: relative; }
+.times span { position: absolute; right: 6px; transform: translateY(-50%); font-family: var(--f-mono); font-size: .66rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.col { position: relative; border-left: 1px solid var(--line); background-image: linear-gradient(to bottom, var(--line) 1px, transparent 1px); background-size: 100% calc(var(--row) * 2); }
+.col.off { background-color: var(--bg); }
+.lunch { position: absolute; left: 0; right: 0; background: var(--lunch); display: flex; align-items: center; justify-content: center; font-size: .64rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.away { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: .76rem; color: var(--muted); }
+.block { position: absolute; border-radius: 6px; padding: 2px 5px; overflow: hidden; font-size: .72rem; line-height: 1.22; border: 1px solid transparent; text-align: left; font-family: var(--f-body); cursor: pointer; }
+.block strong { display: block; font-family: var(--f-mono); font-size: .72rem; font-weight: 600; }
+.block span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.block.other { opacity: .55; }
+.block.sel { box-shadow: 0 0 0 2px var(--accent); }
+.block.clash { border: 2px solid var(--bad); }
+.block.ghost { z-index: 3; background: var(--panel); color: var(--accent); border: 2px dashed var(--accent); pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+.block.ghost.badghost { color: var(--bad); border-color: var(--bad); }
+.k-CSS { background-color: var(--c-css); color: var(--c-css-ink); }
+.k-CISC { background-color: var(--c-cisc); color: var(--c-cisc-ink); }
+.k-CBE { background-color: var(--c-cbe); color: var(--c-cbe-ink); }
+.k-COE { background-color: var(--c-coe); color: var(--c-coe-ink); }
+.k-CCJPS { background-color: var(--c-ccjps); color: var(--c-ccjps-ink); }
+.k-CORE, .k-GE { background-color: var(--c-core); color: var(--c-core-ink); }
+table { border-collapse: collapse; width: 100%; font-size: .87rem; }
+th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.split { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 14px; align-items: start; }
+.list { display: grid; gap: 2px; max-height: 70vh; overflow-y: auto; }
+.item { display: flex; justify-content: space-between; gap: 8px; width: 100%; text-align: left; font: inherit; font-size: .9rem; border: 0; background: transparent; color: var(--ink); padding: 5px 8px; border-radius: 6px; cursor: pointer; }
+.item:hover { background: var(--bg); }
+.item[aria-current="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.item small { color: var(--muted); font-family: var(--f-mono); font-size: .74rem; }
+dl.about { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 0; font-size: .9rem; }
+dl.about dt { color: var(--muted); }
+dl.about dd { margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .76rem; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+@media (max-width: 980px) { .desk, .split { grid-template-columns: minmax(0, 1fr); } .list { max-height: 260px; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Class Scheduling</h1>
+      <p class="sub" id="sub"></p>
+    </div>
+    <div class="status" id="status"></div>
+  </header>
+  <div class="banner" id="banner" hidden></div>
+  <nav class="nav" id="nav" aria-label="College and program"></nav>
+  <main id="page"></main>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const DAYS = DATA.days;
+const LUNCH = { Mon: [690, 750], Wed: [690, 750], Fri: [690, 750], Tue: [720, 810], Thu: [720, 810] };
+const PART = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Supervision: "Practicum supervision" };
+const COLLEGE_KEYS = ["CSS", "CISC", "CBE", "COE", "CCJPS"];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const hm = (m) => `${Math.floor(m / 60) % 12 || 12}:${String(m % 60).padStart(2, "0")}`;
+const docId = (...p) => p.join("~").replace(/[^A-Za-z0-9_\-.~:@+]/g, "_");
+const CLASS = Object.fromEntries(DATA.classes.map((c) => [c.id, c]));
+const shortName = (k) => { const p = DATA.teachers[k].name.split(" "); return `${p[0]} ${p[p.length - 1]}`; };
+const optionsFor = (kind) => DATA.options[kind] || [];
+const findOpt = (kind, label) => optionsFor(kind).find((o) => o.label === label);
+const overlaps = (a, b) => a.day === b.day && a.start < b.end && b.start < a.end;
+const groupsOf = (section) => DATA.sections[section].groups;
+
+// ---------- state ----------
+const state = { college: "CSS", mode: "programs", program: null, tab: "sections", section: null, teacher: null, room: null,
+                pick: null, draft: null };
+try { Object.assign(state, JSON.parse(localStorage.getItem("cs-nav") || "{}"), { pick: null, draft: null }); } catch (e) {}
+function remember() {
+  try { localStorage.setItem("cs-nav", JSON.stringify({ college: state.college, mode: state.mode, program: state.program,
+    tab: state.tab, section: state.section, teacher: state.teacher, room: state.room })); } catch (e) {}
+}
+
+// ---------- shared store (claude.ai) with an in-memory fallback ----------
+let store = null, user = null, canWrite = true, shared = false;
+let bookings = {}, assigned = {};          // classId|part -> booking; classId -> teacher change
+function memoryStore() {
+  const cols = {};
+  const subs = {};
+  const snap = (n) => ({ docs: Object.entries(cols[n] || {}).map(([id, d]) => ({ id, data: () => d })) });
+  const fire = (n) => (subs[n] || []).forEach((f) => f(snap(n)));
+  return { collection: (n) => ({
+    doc: (id) => ({ set: async (d) => { (cols[n] = cols[n] || {})[id] = d; fire(n); },
+                    delete: async () => { delete (cols[n] || {})[id]; fire(n); } }),
+    onSnapshot: (f) => { (subs[n] = subs[n] || []).push(f); setTimeout(() => f(snap(n))); return () => {}; } }) };
+}
+function listen() {
+  store.collection("bookings").onSnapshot((s) => {
+    bookings = {};
+    s.docs.forEach((d) => { const b = d.data(); if (b && b.sem === DATA.semester && CLASS[b.class]) bookings[`${b.class}|${b.part}`] = { id: d.id, ...b }; });
+    rebuild(); render();
+  }, () => offline());
+  store.collection("teachers").onSnapshot((s) => {
+    assigned = {};
+    s.docs.forEach((d) => { const a = d.data(); if (a && a.sem === DATA.semester && CLASS[a.class]) assigned[a.class] = { id: d.id, ...a }; });
+    rebuild(); render();
+  }, () => offline());
+}
+function offline() { shared = false; canWrite = false; render(); }
+
+// ---------- derived timetable ----------
+let sessions = [];           // every booked session this semester
+let clashes = [];            // pairs that conflict (e.g. two people booking at once)
+function teacherOf(cls) {
+  const a = assigned[cls.id];
+  if (a) return a.teacher ? { key: a.teacher } : a.newTeacher ? { name: a.newTeacher } : null;
+  return cls.teacher ? { key: cls.teacher } : null;
+}
+function teacherName(t) { return !t ? "No teacher yet" : t.key ? DATA.teachers[t.key].name : `${t.name} (new)`; }
+function rebuild() {
+  sessions = [];
+  Object.values(bookings).forEach((b) => {
+    const cls = CLASS[b.class];
+    const m = cls.meetings.find((x) => x.part === b.part);
+    const opt = m && findOpt(m.kind, b.pattern);
+    if (!opt) return;
+    const t = teacherOf(cls);
+    opt.iv.forEach(([day, start, end]) => sessions.push({ cls, part: b.part, kind: m.kind, day, start, end, label: opt.label,
+      room: b.room || null, tkey: t?.key || null, groups: m.kind === "supervision" ? [] : groupsOf(cls.section) }));
+  });
+  clashes = findClashes();
+}
+const totalMeetings = DATA.classes.reduce((a, c) => a + c.meetings.length, 0);
+
+// ---------- the checks ----------
+function luFor(key) {
+  return DATA.classes.reduce((a, c) => { const t = teacherOf(c); return a + (t?.key === key ? c.lu : 0); }, 0);
+}
+function teacherBusy(key, cand, ignoreClass) {
+  return sessions.filter((s) => s.tkey === key && s.kind !== "nstp" && s.cls.id !== ignoreClass && overlaps(s, cand));
+}
+function roomBusy(room, cand, ignore) {
+  return sessions.filter((s) => s.room === room && overlaps(s, cand) && `${s.cls.id}|${s.part}` !== ignore);
+}
+// Evaluate one way of booking a meeting. Returns [[level, text], ...]
+function evaluate(cls, meeting, opt, room, teacherKey) {
+  const out = [];
+  const me = `${cls.id}|${meeting.part}`;
+  const groups = meeting.kind === "supervision" ? [] : groupsOf(cls.section);
+  const sec = DATA.sections[cls.section];
+  const cands = opt.iv.map(([day, start, end]) => ({ day, start, end }));
+  if (opt.ex) out.push(["warn", `Outside the time frame: ${opt.ex}`]);
+  cands.forEach((c) => {
+    if (sec.placement.includes(c.day) && meeting.kind !== "supervision") out.push(["bad", `${cls.section} is at practicum placement on ${c.day}`]);
+    sessions.forEach((s) => {
+      if (`${s.cls.id}|${s.part}` === me || !overlaps(s, c)) return;
+      const shared = groups.filter((g) => s.groups.includes(g));
+      if (shared.length) out.push(["bad", `Students: ${shared.join(", ")} already have ${s.cls.course} ${PART[s.part]} ${s.day} ${hm(s.start)}–${hm(s.end)}`]);
+    });
+    if (teacherKey && meeting.kind !== "nstp") teacherBusy(teacherKey, c, cls.id).forEach((s) =>
+      out.push(["bad", `Teacher: ${DATA.teachers[teacherKey].name} teaches ${s.cls.course} (${s.cls.section}) ${s.day} ${hm(s.start)}–${hm(s.end)}`]));
+    if (room) {
+      const busy = roomBusy(room, c, me);
+      if (busy.length >= DATA.rooms[room].cap)
+        out.push(["bad", `Room: ${room} is booked ${c.day} ${hm(busy[0].start)}–${hm(busy[0].end)} by ${busy.map((s) => `${s.cls.course} (${s.cls.section})`).join(", ")}`]);
+    }
+  });
+  if (meeting.pools.some((p) => p) && !room) out.push(["bad", "Choose a room"]);
+  if (teacherKey && meeting.kind !== "nstp") {
+    const perDay = {};
+    sessions.filter((s) => s.tkey === teacherKey && s.kind !== "nstp" && `${s.cls.id}|${s.part}` !== me)
+      .concat(cands).forEach((s) => perDay[s.day] = (perDay[s.day] || 0) + (s.end - s.start));
+    cands.forEach((c) => {
+      const h = perDay[c.day] / 60;
+      if (h > DATA.facMax) out.push(["bad", `Teacher: ${h.toFixed(1)} teaching hours on ${c.day} (limit ${DATA.facMax})`]);
+      else if (h > DATA.facPref) out.push(["warn", `Teacher: ${h.toFixed(1)} teaching hours on ${c.day} (time frame advises at most ${DATA.facPref})`]);
+    });
+  }
+  if (meeting.kind === "lab" && room && DATA.rooms[room].blocks.length && !DATA.rooms[room].blocks.includes(opt.block))
+    out.push(["warn", `${room} is assigned blocks ${DATA.rooms[room].blocks.join(", ")} in the time frame`]);
+  if (meeting.kind === "lab") {
+    const pref = DATA.labDays.find((p) => p.college === DATA.programs[sec.program].college && p.year === sec.year);
+    if (pref && !(pref.blocks.includes(opt.block) && pref.days.includes(cands[0].day)))
+      out.push(["warn", `CISC guidance: Year ${sec.year} labs on ${pref.days.join("/")} ${pref.blocks.join("/")}`]);
+  }
+  const other = cls.meetings.filter((m) => m.part !== meeting.part).map((m) => bookings[`${cls.id}|${m.part}`]).filter(Boolean);
+  other.forEach((b) => {
+    const o = findOpt(cls.meetings.find((m) => m.part === b.part).kind, b.pattern);
+    if (o && o.iv.some(([d]) => cands.some((c) => c.day === d))) out.push(["info", `${PART[b.part]} of this class is also on ${o.iv.map((i) => i[0]).filter((d) => cands.some((c) => c.day === d)).join(", ")}`]);
+  });
+  const seen = new Set();
+  return out.filter(([, t]) => !seen.has(t) && seen.add(t));
+}
+function roomsFor(meeting) { return Object.entries(DATA.rooms).filter(([, r]) => meeting.pools.includes(r.pool)).map(([n]) => n); }
+function freeRooms(cls, meeting, opt) {
+  const me = `${cls.id}|${meeting.part}`;
+  return roomsFor(meeting).filter((r) => opt.iv.every(([day, start, end]) => roomBusy(r, { day, start, end }, me).length < DATA.rooms[r].cap));
+}
+// Suggested order: the program's own building, then other classrooms, labs, overflow rooms.
+function homeFirst(cls, list) {
+  const home = DATA.programs[DATA.sections[cls.section].program].home;
+  const score = (r) => (home.includes(DATA.rooms[r].building) ? 0 : 1) + (DATA.rooms[r].pool.startsWith("lab:") ? 2 : 0) + (DATA.rooms[r].pool === "shared" ? 4 : 0);
+  return list.slice().sort((a, b) => score(a) - score(b) || a.localeCompare(b, undefined, { numeric: true }));
+}
+function freeTeachers(cls, meeting, opt) {
+  const cands = opt.iv.map(([day, start, end]) => ({ day, start, end }));
+  const out = [];
+  Object.entries(DATA.teachers).forEach(([k, t]) => {
+    if (cands.some((c) => teacherBusy(k, c, cls.id).length)) return;
+    const already = teacherOf(cls)?.key === k;           // this class is already in their load
+    out.push({ key: k, full: luFor(k) + (already ? 0 : cls.lu) > t.max });
+  });
+  return out;
+}
+
+// ---------- navigation ----------
+function programsOf(college) { return Object.entries(DATA.programs).filter(([, p]) => p.college === college).map(([k]) => k); }
+function fixNav() {
+  if (!DATA.colleges[state.college] && state.college !== "SHARED") state.college = "CSS";
+  const progs = programsOf(state.college);
+  if (state.mode === "programs" && !progs.includes(state.program)) state.program = progs[0] || null;
+  if (state.program) {
+    const secs = DATA.programs[state.program].sections;
+    if (!secs.includes(state.section)) state.section = secs[0];
+  }
+}
+function renderNav() {
+  const colleges = COLLEGE_KEYS.map((c) => `<button type="button" class="pill" data-college="${c}" aria-pressed="${state.college === c}">${esc(c)}</button>`).join("")
+    + `<button type="button" class="pill" data-college="SHARED" aria-pressed="${state.college === "SHARED"}">Shared facilities</button>`;
+  let html = `<div class="row"><span class="navlabel">College</span><div class="pills">${colleges}</div></div>`;
+  if (state.college !== "SHARED") {
+    html += `<div class="row"><span class="navlabel"></span><div class="seg">
+      <button type="button" data-mode="programs" aria-pressed="${state.mode === "programs"}">Programs</button>
+      <button type="button" data-mode="rooms" aria-pressed="${state.mode === "rooms"}">Rooms</button></div>
+      <span class="muted small">${esc(DATA.colleges[state.college])}</span></div>`;
+    if (state.mode === "programs") {
+      html += `<div class="row"><span class="navlabel">Program</span><div class="pills">${programsOf(state.college).map((p) =>
+        `<button type="button" class="pill" data-program="${esc(p)}" aria-pressed="${state.program === p}" title="${esc(DATA.programs[p].name)}">${esc(p)}<small>${progress(p)}</small></button>`).join("")}</div></div>`;
+      html += `<div class="row"><span class="navlabel"></span><div class="seg">${[["sections", "Sections"], ["teachers", "Teachers"], ["courses", "Courses"]].map(([k, l]) =>
+        `<button type="button" data-tab="${k}" aria-pressed="${state.tab === k}">${l}</button>`).join("")}</div>
+        <span class="muted small">${esc(DATA.programs[state.program]?.name || "")} · Department of ${esc(DATA.programs[state.program]?.dept || "")}</span></div>`;
+    }
+  }
+  $("nav").innerHTML = html;
+}
+function progress(p) {
+  const secs = DATA.programs[p].sections;
+  const cls = DATA.classes.filter((c) => secs.includes(c.section));
+  const all = cls.reduce((a, c) => a + c.meetings.length, 0);
+  const done = cls.reduce((a, c) => a + c.meetings.filter((m) => bookings[`${c.id}|${m.part}`]).length, 0);
+  return `${done}/${all}`;
+}
+
+function renderTop() {
+  const done = Object.keys(bookings).length;
+  $("sub").textContent = `1st semester · ${done} of ${totalMeetings} class meetings scheduled`;
+  $("status").innerHTML = (clashes.length ? `<span class="chip bad">${clashes.length} conflicts</span>` : `<span class="chip good">No conflicts</span>`)
+    + `<span class="chip ${shared ? "info" : "warn"}">${shared ? (canWrite ? "Saved for everyone" : "View only") : "Not saved"}</span>`;
+  const b = $("banner");
+  b.hidden = shared;
+  b.textContent = "This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.";
+}
+// Conflicts that slipped in (two people booking at once): re-check every pair.
+function findClashes() {
+  const out = [];
+  for (let i = 0; i < sessions.length; i++) for (let j = i + 1; j < sessions.length; j++) {
+    const a = sessions[i], b = sessions[j];
+    if (!overlaps(a, b) || a.cls === b.cls) continue;
+    if (a.groups.some((g) => b.groups.includes(g))) out.push([a, b, "students"]);
+    else if (a.tkey && a.tkey === b.tkey && a.kind !== "nstp" && b.kind !== "nstp") out.push([a, b, "teacher"]);
+    else if (a.room && a.room === b.room && DATA.rooms[a.room].cap < 2) out.push([a, b, "room"]);
+  }
+  return out;
+}
+
+// ---------- week grid ----------
+function grid(list, { offDays = [], dim = () => false, ghost = [], ghostBad = false } = {}) {
+  const rows = (DATA.end - DATA.start) / DATA.slot;
+  const px = (m) => `calc(var(--row) * ${(m - DATA.start) / DATA.slot})`;
+  const clashSet = new Set(clashes.flatMap(([a, b]) => [a, b]));
+  let html = `<div class="week" style="--days:${DAYS.length}"><div></div>`;
+  html += DAYS.map((d) => `<div class="dayhead${offDays.includes(d) ? " off" : ""}">${d}</div>`).join("");
+  html += `<div class="times" style="height:calc(var(--row) * ${rows})">`;
+  for (let m = DATA.start; m <= DATA.end; m += 60) html += `<span style="top:${px(m)}">${hm(m)}</span>`;
+  html += `</div>`;
+  DAYS.forEach((d) => {
+    html += `<div class="col${offDays.includes(d) ? " off" : ""}" style="height:calc(var(--row) * ${rows})">`;
+    if (LUNCH[d]) html += `<div class="lunch" style="top:${px(LUNCH[d][0])};height:calc(var(--row) * ${(LUNCH[d][1] - LUNCH[d][0]) / DATA.slot})">Lunch</div>`;
+    if (offDays.includes(d)) html += `<div class="away">At practicum placement</div>`;
+    const day = list.filter((s) => s.day === d).sort((a, b) => a.start - b.start);
+    const lanes = [];                      // side-by-side columns for overlapping classes
+    day.forEach((s) => { let i = lanes.findIndex((end) => end <= s.start); if (i < 0) { i = lanes.length; lanes.push(0); } lanes[i] = s.end; s._lane = i; });
+    day.forEach((s) => {
+      const n = Math.max(1, day.filter((o) => o.start < s.end && s.start < o.end).reduce((a, o) => Math.max(a, o._lane + 1), 0));
+      const w = 100 / n;
+      const college = DATA.courses[s.cls.course].college;
+      const cls = [`k-${college === "CORE" ? "CORE" : college}`, dim(s) ? "other" : "", clashSet.has(s) ? "clash" : "",
+                   state.pick && state.pick.cls === s.cls.id && state.pick.part === s.part ? "sel" : ""].join(" ");
+      html += `<button type="button" class="block ${cls}" data-class="${s.cls.id}" data-part="${s.part}"
+        style="top:${px(s.start)};height:calc(var(--row) * ${(s.end - s.start) / DATA.slot} - 2px);left:calc(${s._lane * w}% + 2px);width:calc(${w}% - 4px)"
+        title="${esc(`${s.cls.course} ${DATA.courses[s.cls.course].title} · ${s.cls.section}`)}">
+        <strong>${esc(s.cls.course)}${s.part === "Lec" ? "" : " " + esc(s.part)}</strong><span>${esc(s.cls.section)}</span>
+        <span>${esc(s.room || (s.kind === "nstp" ? "Grounds" : ""))}</span><span>${esc(s.tkey ? shortName(s.tkey) : teacherName(teacherOf(s.cls)))}</span></button>`;
+    });
+    ghost.filter((g) => g.day === d).forEach((g) => {
+      html += `<div class="block ghost${ghostBad ? " badghost" : ""}" style="top:${px(g.start)};height:calc(var(--row) * ${(g.end - g.start) / DATA.slot} - 2px);left:2px;width:calc(100% - 4px)"><strong>${esc(g.code)}</strong><span>${ghostBad ? "Conflict" : "New time"}</span></div>`;
+    });
+    html += `</div>`;
+  });
+  return html + `</div>`;
+}
+const legend = () => `<div class="legend">${COLLEGE_KEYS.map((c) => `<span><i class="k-${c}"></i>${c}</span>`).join("")}<span><i class="k-CORE"></i>General education</span></div>`;
+
+// ---------- pages ----------
+function render() {
+  fixNav(); renderTop(); renderNav(); remember();
+  const page = $("page");
+  if (state.college === "SHARED") return renderRooms(page, "SHARED");
+  if (state.mode === "rooms") return renderRooms(page, state.college);
+  if (!state.program) { page.innerHTML = `<div class="card"><p class="muted">This unit has no programs.</p></div>`; return; }
+  if (state.tab === "teachers") return renderTeachers(page);
+  if (state.tab === "courses") return renderCourses(page);
+  renderSection(page);
+}
+
+function sectionClasses(section) {
+  const groups = groupsOf(section);
+  return DATA.classes.filter((c) => c.section === section || DATA.sections[c.section].groups.some((g) => groups.includes(g)));
+}
+
+function renderSection(page) {
+  const prog = DATA.programs[state.program];
+  const sec = DATA.sections[state.section];
+  const classes = sectionClasses(state.section);
+  const own = classes.filter((c) => c.section === state.section);
+  const mine = sessions.filter((s) => classes.includes(s.cls));
+  const hours = mine.filter((s) => s.cls.section === state.section).reduce((a, s) => a + s.end - s.start, 0) / 60;
+  const pickCls = state.pick && CLASS[state.pick.cls];
+  let ghost = [], ghostBad = false;
+  if (pickCls && state.draft?.pattern) {
+    const m = pickCls.meetings.find((x) => x.part === state.pick.part);
+    const opt = findOpt(m.kind, state.draft.pattern);
+    if (opt) {
+      ghost = opt.iv.map(([day, start, end]) => ({ day, start, end, code: pickCls.course }));
+      ghostBad = evaluate(pickCls, m, opt, state.draft.room, state.draft.teacher).some(([l]) => l === "bad");
+    }
+  }
+  const secPills = prog.sections.map((s) => {
+    const cl = DATA.classes.filter((c) => c.section === s);
+    const all = cl.reduce((a, c) => a + c.meetings.length, 0), done = cl.reduce((a, c) => a + c.meetings.filter((m) => bookings[`${c.id}|${m.part}`]).length, 0);
+    return `<button type="button" class="pill" data-section="${esc(s)}" aria-pressed="${s === state.section}">${esc(s)}<small>${done}/${all}</small></button>`;
+  }).join("");
+  page.innerHTML = `<div class="desk">
+    <div class="card">
+      <div><span class="navlabel">Section</span><div class="pills" style="margin-top:6px">${secPills}</div></div>
+      <div><h2>${esc(state.section)}</h2>
+        <div class="facts"><span>Year ${sec.year}${sec.track ? ` · ${esc(sec.track)} major group` : ""}</span><span><b>${hours.toFixed(1)}</b> h a week booked</span>
+        ${sec.placement.length ? `<span>Placement: <b>${sec.placement.join(", ")}</b></span>` : ""}</div></div>
+      <div class="classes">${classes.map((c) => classRow(c, c.section !== state.section)).join("")}</div>
+    </div>
+    <div class="card">
+      ${pickCls ? editor(pickCls, state.pick.part) : `<p class="muted">Choose a part of a class (for example <b>Lecture</b> or <b>Laboratory</b>) on the left to schedule it. Every allowed time is listed with whether the students, the teacher, and a room are free.</p>`}
+      <div class="scroll">${grid(mine, { offDays: sec.placement, dim: (s) => s.cls.section !== state.section, ghost, ghostBad })}</div>
+      ${legend()}
+    </div></div>`;
+}
+
+function classRow(c, other) {
+  const course = DATA.courses[c.course];
+  const t = teacherOf(c);
+  const parts = c.meetings.map((m) => {
+    const b = bookings[`${c.id}|${m.part}`];
+    const on = state.pick && state.pick.cls === c.id && state.pick.part === m.part;
+    const when = b ? ` · ${esc(b.pattern)}${b.room ? " · " + esc(b.room) : ""}` : " · not scheduled";
+    return `<button type="button" class="part${b ? " done" : ""}${on ? " on" : ""}" data-pick="${c.id}" data-part="${m.part}">${esc(PART[m.part])}${when}</button>`;
+  }).join("");
+  const field = course.kind === "field" ? `<span class="muted small">Off campus: placement ${course.placement.join(", ")}${c.meetings.length ? "" : "; no teacher in the plan"}</span>` : "";
+  return `<div class="cls${state.pick?.cls === c.id ? " on" : ""}">
+    <div class="t"><b>${esc(c.course)}${other ? ` · ${esc(c.section)}` : ""}</b><span>${course.credits} cr · ${course.lab ? `Lec ${course.lec} + Lab ${course.lab}` : `${course.lec} h`}</span></div>
+    <div class="title">${esc(course.title)}</div>
+    <div class="muted small">${esc(teacherName(t))}${assigned[c.id] ? " · changed from plan" : ""}</div>
+    ${field}<div class="parts">${parts}</div></div>`;
+}
+
+function editor(cls, part) {
+  const m = cls.meetings.find((x) => x.part === part);
+  const course = DATA.courses[cls.course];
+  const b = bookings[`${cls.id}|${part}`];
+  const d = state.draft;
+  const t = teacherOf(cls);
+  const teacherKey = d.teacher ?? (t?.key || "");
+  const opts = optionsFor(m.kind);
+  // Status of every allowed time, checked against students, teacher, and rooms.
+  const rows = opts.map((o) => {
+    const ev = evaluate(cls, m, o, null, teacherKey || null).filter(([l, txt]) => l !== "info" && txt !== "Choose a room");
+    const rooms = m.pools.some((p) => p) ? freeRooms(cls, m, o).length : -1;
+    const bad = ev.filter(([l]) => l === "bad");
+    let chip, why;
+    if (bad.length) { chip = `<span class="chip bad">Conflict</span>`; why = bad[0][1].split(":")[0] + ": " + bad[0][1].split(":").slice(1).join(":").trim(); }
+    else if (rooms === 0) { chip = `<span class="chip bad">No room</span>`; why = "Every suitable room is booked"; }
+    else if (ev.length) { chip = `<span class="chip warn">Check</span>`; why = ev[0][1]; }
+    else { chip = `<span class="chip good">Free</span>`; why = rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed"; }
+    const when = `${o.iv.map((i) => i[0]).join("/")} ${hm(o.iv[0][1])}–${hm(o.iv[0][2])}`;
+    return { o, html: `<button type="button" class="opt${d.pattern === o.label ? " on" : ""}" data-opt="${esc(o.label)}"><b>${esc(o.label)}</b><span><span class="small">${when}</span><span class="why">${esc(why)}</span></span>${chip}</button>`, group: o.ex ? "Outside the time frame (needs approval)" : o.label.includes("TTh") || ["Tue", "Thu"].includes(o.iv[0][0]) ? "Tuesday / Thursday" : o.iv[0][0] === "Sat" ? "Saturday" : "Monday / Wednesday / Friday" };
+  });
+  const groups = {};
+  rows.forEach((r) => (groups[r.group] = groups[r.group] || []).push(r.html));
+  const optHtml = Object.entries(groups).map(([g, list]) => `<div class="optgrp">${esc(g)}</div>${list.join("")}`).join("");
+  const opt = d.pattern && findOpt(m.kind, d.pattern);
+  let detail = "";
+  if (opt) {
+    const rooms = homeFirst(cls, roomsFor(m));
+    const free = new Set(freeRooms(cls, m, opt));
+    const roomSel = m.pools.some((p) => p) ? `<label for="roomSel">Room
+      <select id="roomSel"><option value="">Choose a room</option>${rooms.map((r) => `<option value="${esc(r)}"${r === d.room ? " selected" : ""}>${esc(r)} · ${free.has(r) ? "free" : "booked"}${DATA.rooms[r].lab ? " · " + DATA.rooms[r].lab.replace(/_/g, " ") : ""}${DATA.rooms[r].pool === "shared" ? " · overflow" : ""}</option>`).join("")}</select></label>`
+      : `<p class="small muted">${m.kind === "nstp" ? "CWTS meets on the campus grounds; no room is booked." : "Practicum supervision: no room is booked."}</p>`;
+    const ft = freeTeachers(cls, m, opt);
+    const dept = t?.key ? DATA.teachers[t.key].dept : "";
+    const usual = (course.usual || "").replace(/^GE Department$/, "General Education");
+    const near = ft.filter((x) => { const td = DATA.teachers[x.key].dept; return td === dept || (usual && usual.includes(td)); });
+    const teacherSel = `<label for="teacherSel">Teacher (from the loading plan${t?.key ? `: ${esc(DATA.teachers[t.key].name)}` : ": none"})
+      <select id="teacherSel"><option value="">No teacher yet</option>
+      <optgroup label="Free at this time">${ft.map((x) => `<option value="${x.key}"${x.key === teacherKey ? " selected" : ""}>${esc(DATA.teachers[x.key].name)} · ${esc(DATA.teachers[x.key].dept)} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}</option>`).join("")}</optgroup>
+      ${teacherKey && !ft.some((x) => x.key === teacherKey) ? `<optgroup label="Busy at this time"><option value="${teacherKey}" selected>${esc(DATA.teachers[teacherKey].name)}</option></optgroup>` : ""}
+      </select></label>`;
+    const checks = evaluate(cls, m, opt, d.room || null, teacherKey || null);
+    if (teacherKey) {
+      const lu = luFor(teacherKey) + (t?.key === teacherKey ? 0 : cls.lu);
+      if (lu > DATA.teachers[teacherKey].max) checks.push(["warn", `Teacher: ${DATA.teachers[teacherKey].name} would carry ${lu} LU (limit ${DATA.teachers[teacherKey].max})`]);
+    } else if (m.kind !== "nstp") checks.push(["warn", "No teacher assigned yet"]);
+    const ok = !checks.some(([l]) => l === "bad");
+    detail = `<div class="fields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${teacherSel}</div>
+      <div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>
+        <div class="who-free" style="margin-top:4px">${(near.length ? near : ft).slice(0, 14).map((x) => `<span class="${x.full ? "full" : ""}">${esc(DATA.teachers[x.key].name)} · ${luFor(x.key)}/${DATA.teachers[x.key].max}</span>`).join("") || `<span class="full">Nobody in this department is free</span>`}
+        ${(near.length ? near : ft).length > 14 ? `<span>+${(near.length ? near : ft).length - 14} more in the list</span>` : ""}</div></div>
+      <ul class="checks">${checks.length ? checks.map(([l, txt]) => `<li class="${l}">${esc(txt)}</li>`).join("") : `<li class="good">No conflicts. Students, teacher, and room are all free.</li>`}</ul>
+      <div class="actions"><button type="button" class="btn primary" data-act="save"${ok && canWrite ? "" : " disabled"}>${b ? "Save changes" : "Book this time"}</button>
+        ${b ? `<button type="button" class="btn danger" data-act="remove"${canWrite ? "" : " disabled"}>Remove booking</button>` : ""}
+        <button type="button" class="btn" data-act="close">Close</button><span class="msg" id="msg"></span></div>`;
+  }
+  return `<div class="editor"><div><h3>${esc(cls.course)} ${esc(PART[part])} · ${esc(cls.section)}</h3>
+    <div class="facts"><span>${esc(course.title)}</span><span><b>${cls.lu}</b> LU</span>${b ? `<span>Booked: <b>${esc(b.pattern)}</b>${b.room ? ` in <b>${esc(b.room)}</b>` : ""}</span>` : ""}</div></div>
+    <div><span class="fieldlabel">Choose a time (allowed by the University Class Time Frame)</span><div class="opts" style="margin-top:4px">${optHtml}</div></div>
+    ${detail}</div>`;
+}
+
+function renderTeachers(page) {
+  const dept = DATA.programs[state.program].dept;
+  const list = Object.entries(DATA.teachers).filter(([, t]) => t.dept === dept).sort((a, b) => a[1].name.localeCompare(b[1].name));
+  if (!list.find(([k]) => k === state.teacher)) state.teacher = list[0]?.[0];
+  const k = state.teacher, t = DATA.teachers[k];
+  const theirs = DATA.classes.filter((c) => teacherOf(c)?.key === k);
+  const mine = sessions.filter((s) => s.tkey === k);
+  const perDay = {};
+  mine.forEach((s) => { if (s.kind !== "nstp") perDay[s.day] = (perDay[s.day] || 0) + (s.end - s.start) / 60; });
+  page.innerHTML = `<div class="split">
+    <div class="card"><h3>Department of ${esc(dept)}</h3><div class="list">${list.map(([key, x]) =>
+      `<button type="button" class="item" data-teacher="${key}" aria-current="${key === k}"><span>${esc(x.name)}</span><small>${luFor(key)}/${x.max} LU</small></button>`).join("")}</div></div>
+    <div class="card">${t ? `<div><h2>${esc(t.name)}</h2></div>
+      <dl class="about"><dt>Rank</dt><dd>${esc(t.rank)}</dd><dt>Designation</dt><dd>${esc(t.role || "Faculty")}</dd>
+        <dt>Department</dt><dd>${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}</dd>
+        <dt>Office</dt><dd>${esc(t.office || "—")}</dd>
+        <dt>Teaching load</dt><dd><b>${luFor(k)}</b> of ${t.max} LU this semester</dd>
+        <dt>Hours by day</dt><dd>${DAYS.filter((d) => perDay[d]).map((d) => `${d} ${perDay[d].toFixed(1)} h`).join(" · ") || "Nothing scheduled yet"}</dd></dl>
+      <div class="scroll"><table><thead><tr><th>Course</th><th>Section</th><th>LU</th><th>Schedule</th></tr></thead><tbody>
+        ${theirs.map((c) => `<tr><td><b>${esc(c.course)}</b> ${esc(DATA.courses[c.course].title)}</td><td>${esc(c.section)}</td><td class="num">${c.lu}</td>
+          <td>${c.meetings.map((m) => { const b = bookings[`${c.id}|${m.part}`]; return b ? `<span class="chip good">${esc(PART[m.part])} ${esc(b.pattern)}${b.room ? " · " + esc(b.room) : ""}</span>` : `<button type="button" class="btn small" data-goto="${c.id}" data-part="${m.part}">Schedule ${esc(PART[m.part]).toLowerCase()}</button>`; }).join(" ")}</td></tr>`).join("")}
+      </tbody></table></div>
+      <div class="scroll">${grid(mine)}</div>${legend()}` : `<p class="muted">No faculty in this department.</p>`}</div></div>`;
+}
+
+function renderCourses(page) {
+  const prog = DATA.programs[state.program];
+  const years = [...new Set(prog.sections.map((s) => DATA.sections[s].year))];
+  page.innerHTML = `<div class="card"><div><h2>${esc(prog.name)}</h2><p class="sub">Courses each year level takes in the 1st semester, with the teacher from the loading plan and what is scheduled.</p></div>
+    ${years.map((y) => {
+      const secs = prog.sections.filter((s) => DATA.sections[s].year === y);
+      const cls = DATA.classes.filter((c) => secs.includes(c.section));
+      const codes = [...new Set(cls.map((c) => c.course))];
+      return `<div><h3>Year ${y}</h3><div class="scroll"><table><thead><tr><th>Course</th><th>Units</th><th>Hours</th><th>Sections</th></tr></thead><tbody>
+        ${codes.map((code) => { const co = DATA.courses[code]; return `<tr><td><b>${esc(code)}</b> ${esc(co.title)}${co.college === "CORE" ? ` <span class="chip none">GE</span>` : ""}</td><td class="num">${co.credits}</td>
+          <td class="num">${co.kind === "field" ? "Placement" : co.lab ? `${co.lec} + ${co.lab}` : co.lec}</td>
+          <td>${cls.filter((c) => c.course === code).map((c) => { const all = c.meetings.length, done = c.meetings.filter((m) => bookings[`${c.id}|${m.part}`]).length;
+            return `<div class="small"><button type="button" class="btn small" data-goto="${c.id}" data-part="${c.meetings[0]?.part || ""}">${esc(c.section)}</button>
+              ${esc(teacherName(teacherOf(c)))} ${all ? `<span class="chip ${done === all ? "good" : done ? "warn" : "none"}">${done}/${all} scheduled</span>` : `<span class="chip none">off campus</span>`}</div>`; }).join("")}</td></tr>`; }).join("")}
+      </tbody></table></div></div>`; }).join("")}</div>`;
+}
+
+function renderRooms(page, college) {
+  const list = Object.entries(DATA.rooms).filter(([, r]) => r.college === college).sort((a, b) => a[1].pool.localeCompare(b[1].pool) || a[0].localeCompare(b[0], undefined, { numeric: true }));
+  if (!list.find(([n]) => n === state.room)) state.room = list[0]?.[0];
+  const r = DATA.rooms[state.room];
+  const mine = sessions.filter((s) => s.room === state.room);
+  const mins = mine.filter((s) => s.day !== "Sat").reduce((a, s) => a + s.end - s.start, 0);
+  const kind = (rr) => rr.pool.startsWith("classrooms") ? "Classroom" : rr.pool.startsWith("seminar") ? "Seminar room" : rr.pool === "shared" ? "Overflow classroom (any college)" : rr.pool === "pe" ? "PE venue" : "Laboratory: " + rr.lab.replace(/_/g, " ");
+  page.innerHTML = `<div class="split">
+    <div class="card"><h3>${college === "SHARED" ? "Shared facilities" : "Rooms of the " + esc(DATA.colleges[college])}</h3><div class="list">${list.map(([n, rr]) => {
+      const h = sessions.filter((s) => s.room === n && s.day !== "Sat").reduce((a, s) => a + s.end - s.start, 0) / 60;
+      return `<button type="button" class="item" data-room="${esc(n)}" aria-current="${n === state.room}"><span>${esc(n)}</span><small>${h.toFixed(0)} h</small></button>`; }).join("")}</div></div>
+    <div class="card">${r ? `<div><h2>${esc(state.room)}</h2><div class="facts"><span>${esc(kind(r))}</span><span>${esc(DATA.buildings[r.building] || r.building)}</span>
+      ${r.cap > 1 ? `<span>Holds <b>${r.cap}</b> classes at once</span>` : ""}${r.blocks.length ? `<span>Lab blocks: <b>${r.blocks.join(", ")}</b></span>` : ""}
+      <span><b>${(mins / 60).toFixed(1)}</b> of ${39 * r.cap} weekly teaching hours booked</span></div></div>
+      <div class="scroll">${grid(mine)}</div>${legend()}` : `<p class="muted">No rooms listed.</p>`}</div></div>`;
+}
+
+// ---------- actions ----------
+function openPick(clsId, part) {
+  const cls = CLASS[clsId];
+  if (!cls) return;
+  const b = bookings[`${clsId}|${part}`];
+  const m = cls.meetings.find((x) => x.part === part);
+  state.pick = { cls: clsId, part };
+  const t = teacherOf(cls);
+  state.draft = { pattern: b?.pattern || (m.kind === "nstp" ? optionsFor("nstp")[0]?.label : null), room: b?.room || "", teacher: t?.key || "" };
+  // Jump to the class's own section page.
+  const sec = DATA.sections[cls.section];
+  state.college = DATA.programs[sec.program].college; state.mode = "programs"; state.program = sec.program; state.tab = "sections"; state.section = cls.section;
+}
+async function save() {
+  const cls = CLASS[state.pick.cls], part = state.pick.part, d = state.draft;
+  const me = user ? await user.id() : null;
+  const msg = $("msg");
+  try {
+    const plan = cls.teacher || "";
+    if ((d.teacher || "") !== (teacherOf(cls)?.key || "")) {
+      if ((d.teacher || "") === plan) await store.collection("teachers").doc(docId(DATA.semester, cls.id)).delete();
+      else await store.collection("teachers").doc(docId(DATA.semester, cls.id)).set({ sem: DATA.semester, class: cls.id, course: cls.course, section: cls.section, teacher: d.teacher || null, by: me, at: new Date().toISOString() });
+    }
+    await store.collection("bookings").doc(docId(DATA.semester, cls.id, part)).set({ sem: DATA.semester, class: cls.id, course: cls.course,
+      section: cls.section, part, pattern: d.pattern, room: d.room || null, by: me, at: new Date().toISOString() });
+    if (msg) { msg.textContent = "Saved."; msg.className = "msg good"; }
+  } catch (err) {
+    if (msg) { msg.textContent = err?.code === "invalid_argument" ? "You have view-only access, so bookings can't be saved." : "Could not save. Try again."; msg.className = "msg bad"; }
+  }
+}
+async function removeBooking() {
+  const cls = CLASS[state.pick.cls];
+  try { await store.collection("bookings").doc(docId(DATA.semester, cls.id, state.pick.part)).delete(); state.draft.pattern = null; }
+  catch (err) { const msg = $("msg"); if (msg) { msg.textContent = "Could not remove. Try again."; msg.className = "msg bad"; } }
+}
+
+document.addEventListener("click", async (ev) => {
+  const t = ev.target.closest("button");
+  if (!t) return;
+  const ds = t.dataset;
+  if (ds.college) { state.college = ds.college; state.program = null; state.pick = null; if (ds.college === "SHARED") state.mode = "rooms"; else if (state.mode === "rooms" && ds.college) state.mode = "programs"; }
+  else if (ds.mode) { state.mode = ds.mode; state.pick = null; }
+  else if (ds.program) { state.program = ds.program; state.section = null; state.pick = null; }
+  else if (ds.tab) { state.tab = ds.tab; state.pick = null; }
+  else if (ds.section) { state.section = ds.section; state.pick = null; }
+  else if (ds.teacher) { state.teacher = ds.teacher; }
+  else if (ds.room) { state.room = ds.room; }
+  else if (ds.pick) { openPick(ds.pick, ds.part); }
+  else if (ds.goto) { if (ds.part) openPick(ds.goto, ds.part); else { const c = CLASS[ds.goto]; state.tab = "sections"; state.section = c.section; } }
+  else if (ds.class && t.classList.contains("block")) { openPick(ds.class, ds.part); }
+  else if (ds.opt) { state.draft.pattern = ds.opt; const cls = CLASS[state.pick.cls]; const m = cls.meetings.find((x) => x.part === state.pick.part);
+    const opt = findOpt(m.kind, ds.opt);
+    if (state.draft.room && !freeRooms(cls, m, opt).includes(state.draft.room)) state.draft.room = "";
+    if (!state.draft.room && m.pools.some((p) => p)) state.draft.room = homeFirst(cls, freeRooms(cls, m, opt))[0] || ""; }
+  else if (ds.act === "close") { state.pick = null; state.draft = null; }
+  else if (ds.act === "save") { t.disabled = true; await save(); return; }
+  else if (ds.act === "remove") { await removeBooking(); return; }
+  else return;
+  render();
+});
+document.addEventListener("change", (ev) => {
+  if (!state.draft) return;
+  if (ev.target.id === "roomSel") { state.draft.room = ev.target.value; render(); }
+  if (ev.target.id === "teacherSel") { state.draft.teacher = ev.target.value; render(); }
+});
+
+// ---------- start ----------
+rebuild(); render();
+(async () => {
+  let db = null;
+  if (window.claude?.use) {
+    try { [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]); } catch (e) { db = null; }
+  }
+  if (db) {
+    store = db; shared = true;
+    const can = user ? await user.can("data.write") : null;
+    canWrite = can !== false;
+  } else {
+    store = memoryStore(); shared = false; canWrite = true;
+  }
+  listen();
+})();
+</script>

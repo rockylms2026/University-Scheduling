@@ -4,6 +4,7 @@
   solve [--semester N]     build timetables (both semesters by default)
   diagnose --semester N    explain why a semester cannot be scheduled
   export                   write the Excel workbook and the HTML viewer
+  planner [--semester N]   write the manual scheduling page (output/scheduling_system.html)
   apply-changes FILE       add changes saved in the online schedule (JSON) to data/overrides.yaml
 """
 
@@ -28,6 +29,8 @@ def main(argv=None) -> int:
     p = sub.add_parser("diagnose")
     p.add_argument("--semester", type=int, choices=[1, 2], required=True)
     sub.add_parser("export")
+    p = sub.add_parser("planner")
+    p.add_argument("--semester", type=int, choices=[1, 2], default=1)
     p = sub.add_parser("apply-changes")
     p.add_argument("file")
     args = parser.parse_args(argv)
@@ -81,6 +84,11 @@ def main(argv=None) -> int:
                 print(f"  PROBLEM: {prob}")
             failed |= bool(problems)
         return 1 if failed else 0
+
+    if args.command == "planner":
+        from .export_planner import write_planner
+        print("Scheduling page:", write_planner(uni, args.semester))
+        return 0
 
     if args.command == "apply-changes":
         from .apply_changes import main as apply_main
