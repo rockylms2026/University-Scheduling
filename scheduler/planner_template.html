@@ -2,13 +2,13 @@
 <title>LAUCV Class Scheduling</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <!--__SUPABASE_JS__-->
 <style>
-/* Layout: registrar's scheduling office. Top bar, side menu, and one working area per menu item.
-   The dashboard shows the whole term; the timetable desk is where classes are booked. */
+/* Layout: white top bar with a centred search, a narrow icon menu whose groups open a small panel,
+   and one working area per page. Home greets the person and lists what waits for them. */
 :root {
   --bg: #f4f5f7; --panel: #ffffff; --ink: #172030; --muted: #5a6575; --line: #dde1e7; --line2: #eceff3;
   --navy: #1b2f55; --navy-2: #24406f; --accent: #1f3f74; --accent-ink: #ffffff; --accent-soft: #e7ecf5; --lunch: #eceef2;
@@ -19,48 +19,77 @@
   --t-pe: #fce8cf;   --t-pe-ink: #7e4505;
   --t-cwts: #e6e8ec; --t-cwts-ink: #3a4352;
   --t-prac: #fae1ec; --t-prac-ink: #842050;
-  --f-display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
-  --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
-  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --f-display: "Roboto", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Roboto", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "Roboto Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --top: 64px;            /* height of the top bar */
+  --rail: 92px;           /* width of the icon menu */
   --row: 30px;            /* half an hour; one hour is 60px */
   color-scheme: light;   /* always light, whatever the device or claude.ai theme */
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { margin: 0; }
-body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.42; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 14px; line-height: 1.45; letter-spacing: .005em; }
 h1, h2, h3 { font-family: var(--f-display); margin: 0; text-wrap: balance; }
-h2 { font-weight: 700; font-size: 1.15rem; }
-h3 { font-weight: 600; font-size: .95rem; }
+h2 { font-weight: 500; font-size: 1.15rem; }
+h3 { font-weight: 500; font-size: .95rem; }
 button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ----- app shell ----- */
-.app { display: grid; grid-template-columns: 208px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; min-height: 100vh; }
-.topbar { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 20px; background: var(--navy); color: #fff; position: sticky; top: 0; z-index: 15; }
-.brand { display: grid; line-height: 1.2; margin-right: 6px; }
-.brand b { font-family: var(--f-display); font-weight: 700; font-size: 1rem; letter-spacing: -.005em; }
-.brand span { font-size: .74rem; opacity: .78; }
+.app { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; min-height: 100vh; }
+.topbar { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(220px, 560px) auto; justify-content: space-between; align-items: center; gap: 10px 20px; min-height: var(--top); padding: 8px 20px; background: var(--panel); color: var(--ink); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 15; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.brand .mark { flex: none; width: 38px; height: 38px; border-radius: 9px; background: var(--navy); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: .82rem; letter-spacing: .04em; }
+.brand div { display: grid; line-height: 1.15; min-width: 0; }
+.brand b { font-weight: 700; font-size: 1.05rem; color: var(--navy); letter-spacing: .02em; }
+.brand span { font-size: .74rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tb-right { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; }
 .tb-field { display: flex; gap: 6px; align-items: center; }
-.topbar select, .topbar input { font: inherit; font-size: .86rem; color: #fff; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.28); border-radius: 6px; padding: 5px 8px; }
-.topbar option, .topbar optgroup { color: var(--ink); background: #fff; }
-.topbar input::placeholder { color: rgba(255,255,255,.7); }
-.search { position: relative; flex: 1 1 180px; max-width: 440px; }
-.search input { width: 100%; }
-.results { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 24px rgba(15,25,45,.18); max-height: 380px; overflow-y: auto; padding: 4px; z-index: 30; }
-.results button { display: grid; grid-template-columns: 64px 1fr; gap: 8px; width: 100%; text-align: left; font: inherit; font-size: .86rem; border: 0; background: transparent; color: var(--ink); padding: 6px 8px; border-radius: 6px; cursor: pointer; }
+.topbar select { font: inherit; font-size: .84rem; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 6px 8px; max-width: 160px; }
+.search { position: relative; width: 100%; }
+.search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.search input { width: 100%; font: inherit; font-size: .95rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 10px 16px 10px 42px; }
+.search input::placeholder { color: var(--muted); }
+.search input:focus { background: var(--panel); border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+.results { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(15,25,45,.16); max-height: 380px; overflow-y: auto; padding: 6px; z-index: 30; }
+.results button { display: grid; grid-template-columns: 64px 1fr; gap: 8px; width: 100%; text-align: left; font: inherit; font-size: .88rem; border: 0; background: transparent; color: var(--ink); padding: 7px 9px; border-radius: 8px; cursor: pointer; }
 .results button:hover, .results button.on { background: var(--accent-soft); }
 .results small { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; padding-top: 2px; }
 .results em { font-style: normal; color: var(--muted); font-size: .8rem; display: block; }
-.publish { margin-left: auto; font: inherit; font-weight: 700; font-size: .88rem; background: #fff; color: var(--navy); border: 0; border-radius: 6px; padding: 7px 14px; cursor: pointer; }
+.iconbtn { position: relative; flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; color: var(--ink); display: grid; place-items: center; cursor: pointer; font: inherit; }
+.iconbtn:hover { background: var(--bg); }
+.iconbtn .sr, .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.iconbtn b { position: absolute; top: 2px; right: 0; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #d92d20; color: #fff; font-size: .68rem; font-weight: 700; display: grid; place-items: center; border: 2px solid var(--panel); }
+.avatar { flex: none; width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--navy); color: #fff; font: inherit; font-weight: 500; font-size: .86rem; letter-spacing: .03em; cursor: pointer; }
+.avatar:hover { box-shadow: 0 0 0 3px var(--accent-soft); }
+.usermenu { position: relative; }
+.usermenu .pop { position: absolute; top: calc(100% + 8px); right: 0; width: 260px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(15,25,45,.16); padding: 8px; display: grid; gap: 2px; z-index: 30; }
+.usermenu .who { padding: 8px 10px 10px; border-bottom: 1px solid var(--line2); margin-bottom: 4px; display: grid; gap: 2px; }
+.usermenu .who b { font-weight: 500; font-size: .95rem; }
+.usermenu .who span { font-size: .8rem; color: var(--muted); }
+.usermenu .pop button { font: inherit; font-size: .9rem; text-align: left; border: 0; background: transparent; color: var(--ink); padding: 9px 10px; border-radius: 8px; cursor: pointer; }
+.usermenu .pop button:hover { background: var(--bg); }
+/* icon menu: one column of icons with their names; groups open a small panel beside it */
+.side { background: var(--panel); border-right: 1px solid var(--line); padding: 12px 6px 56px; position: sticky; top: var(--top); align-self: start; height: calc(100vh - var(--top)); overflow-y: auto; display: flex; flex-direction: column; gap: 4px; z-index: 14; }
+.side .spacer { flex: 1; }
+.rail { position: relative; display: grid; justify-items: center; gap: 5px; width: 100%; font: inherit; font-size: .72rem; font-weight: 500; line-height: 1.2; text-align: center; border: 0; background: transparent; color: var(--ink); padding: 6px 2px; cursor: pointer; }
+.rail .ic { position: relative; width: 46px; height: 40px; border-radius: 10px; display: grid; place-items: center; color: var(--ink); }
+.rail:hover .ic { background: var(--bg); }
+.rail[aria-current="page"] .ic, .rail[aria-expanded="true"] .ic { background: var(--accent-soft); color: var(--accent); }
+.rail[aria-current="page"] { color: var(--accent); }
+.rail .ic b { position: absolute; top: -3px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #d92d20; color: #fff; font-size: .66rem; font-weight: 700; display: grid; place-items: center; border: 2px solid var(--panel); }
+.flyout { position: fixed; z-index: 35; width: 270px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 34px rgba(15,25,45,.18); padding: 14px 8px 8px; display: grid; gap: 2px; }
+.flyout h2 { font-size: 1rem; font-weight: 700; padding: 0 10px 8px; }
+.flyout button { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: inherit; font-size: .92rem; text-align: left; border: 0; background: transparent; color: var(--ink); padding: 10px 10px; border-radius: 8px; cursor: pointer; }
+.flyout button:hover { background: var(--bg); }
+.flyout button[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+.flyout button small { color: var(--muted); font-size: .76rem; display: block; margin-top: 1px; }
+.count { font-family: var(--f-mono); font-size: .7rem; font-weight: 500; padding: 1px 7px; border-radius: 999px; background: var(--lunch); color: var(--muted); }
+.count.bad { background: var(--bad-soft); color: var(--bad); }
+.publish { font: inherit; font-weight: 500; font-size: .86rem; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 999px; padding: 6px 14px; cursor: pointer; }
 .publish:disabled { opacity: .55; cursor: not-allowed; }
-.side { background: var(--panel); border-right: 1px solid var(--line); padding: 14px 10px; position: sticky; top: 58px; align-self: start; max-height: calc(100vh - 58px); overflow-y: auto; display: grid; gap: 2px; }
-.side button { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; font: inherit; font-size: .9rem; text-align: left; border: 0; background: transparent; color: var(--ink); padding: 7px 10px; border-radius: 6px; cursor: pointer; }
-.side button:hover { background: var(--bg); }
-.side button[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; box-shadow: inset 3px 0 0 var(--accent); }
-.side .count { font-family: var(--f-mono); font-size: .7rem; font-weight: 600; padding: 1px 6px; border-radius: 999px; background: var(--lunch); color: var(--muted); }
-.side .count.bad { background: var(--bad-soft); color: var(--bad); }
-.side .sep { height: 1px; background: var(--line); margin: 8px 4px; }
-.main { padding: 16px 20px 24px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.main { --px: 24px; --pt: 18px; padding: var(--pt) var(--px) 28px; display: grid; gap: 14px; align-content: start; min-width: 0; }
 .footer { grid-column: 2; position: sticky; bottom: 0; z-index: 12; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 8px 20px; background: var(--panel); border-top: 1px solid var(--line); font-size: .84rem; color: var(--muted); }
 .footer .grow { flex: 1; }
 .menu { position: relative; }
@@ -70,7 +99,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .menu .pop button { font: inherit; font-size: .88rem; text-align: left; border: 0; background: transparent; color: var(--ink); padding: 7px 10px; border-radius: 6px; cursor: pointer; }
 .menu .pop button:hover { background: var(--accent-soft); }
 .pagehead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 8px 16px; }
-.pagehead h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -.01em; }
+.pagehead h1 { font-size: 1.5rem; font-weight: 500; letter-spacing: -.01em; }
 .sub { color: var(--muted); margin: 2px 0 0; font-size: .88rem; }
 .banner { background: var(--warn-soft); color: var(--warn); border-radius: 8px; padding: 8px 12px; font-size: .88rem; }
 .toast { position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%); background: var(--ink); color: #fff; padding: 8px 14px; border-radius: 8px; font-size: .88rem; z-index: 50; box-shadow: 0 6px 18px rgba(0,0,0,.2); }
@@ -78,31 +107,31 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 /* ----- common pieces ----- */
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 12px; min-width: 0; align-content: start; }
 .cardhead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 12px; }
-.chip { font-size: .74rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; display: inline-block; }
+.chip { font-size: .74rem; font-weight: 500; padding: 2px 8px; border-radius: 999px; white-space: nowrap; display: inline-block; }
 .chip.good { background: var(--good-soft); color: var(--good); }
 .chip.warn { background: var(--warn-soft); color: var(--warn); }
 .chip.bad { background: var(--bad-soft); color: var(--bad); }
 .chip.info { background: var(--accent-soft); color: var(--accent); }
 .chip.none { background: var(--lunch); color: var(--muted); }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.navlabel { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; min-width: 70px; }
+.navlabel { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; min-width: 70px; }
 .seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; background: var(--panel); }
 .seg button { font: inherit; font-size: .84rem; border: 0; background: transparent; color: var(--muted); padding: 5px 11px; cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--line); }
-.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 600; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 500; }
 .pills { display: flex; flex-wrap: wrap; gap: 6px; }
 .pill { font: inherit; font-size: .83rem; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 3px 10px; border-radius: 999px; cursor: pointer; }
-.pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.pill[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 500; }
 .pill small { color: inherit; opacity: .75; font-family: var(--f-mono); font-size: .7rem; margin-left: 4px; }
 .facts { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .84rem; color: var(--muted); }
-.facts b { color: var(--ink); font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; }
+.facts b { color: var(--ink); font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
 .muted { color: var(--muted); }
 .small { font-size: .8rem; }
 .btn { font: inherit; font-size: .85rem; padding: 5px 11px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; white-space: nowrap; }
 .btn:hover { border-color: var(--accent); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 500; }
 .btn.danger { color: var(--bad); }
-.btn.link { border: 0; background: none; color: var(--accent); padding: 0; font-weight: 600; }
+.btn.link { border: 0; background: none; color: var(--accent); padding: 0; font-weight: 500; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .msg { font-size: .84rem; }
 .msg.bad { color: var(--bad); }
@@ -111,7 +140,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 select.inp, input.inp { font: inherit; font-size: .86rem; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; max-width: 100%; }
 table { border-collapse: collapse; width: 100%; font-size: .85rem; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line2); vertical-align: top; }
-th { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; border-bottom-color: var(--line); position: sticky; top: 0; background: var(--panel); z-index: 1; }
+th { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 500; border-bottom-color: var(--line); position: sticky; top: 0; background: var(--panel); z-index: 1; }
 td.num, th.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; text-align: right; }
 tr.clickable { cursor: pointer; }
 tr.clickable:hover td { background: var(--bg); }
@@ -126,10 +155,10 @@ tr.clickable:hover td { background: var(--bg); }
 .legend i.lunchk { background: var(--lunch); }
 .split { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 14px; align-items: start; }
 .list { display: grid; gap: 1px; max-height: 70vh; overflow-y: auto; }
-.listgrp { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; padding: 8px 8px 2px; }
+.listgrp { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; padding: 8px 8px 2px; }
 .item { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; text-align: left; font: inherit; font-size: .88rem; border: 0; background: transparent; color: var(--ink); padding: 5px 8px; border-radius: 6px; cursor: pointer; }
 .item:hover { background: var(--bg); }
-.item[aria-current="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.item[aria-current="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
 .item small { color: var(--muted); font-family: var(--f-mono); font-size: .72rem; }
 dl.about { display: grid; grid-template-columns: max-content 1fr; gap: 3px 14px; margin: 0; font-size: .88rem; }
 dl.about dt { color: var(--muted); }
@@ -140,7 +169,7 @@ dl.about dd { margin: 0; }
 .kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
 .kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; display: grid; gap: 3px; text-align: left; font: inherit; color: inherit; cursor: pointer; }
 .kpi:hover { border-color: var(--accent); }
-.kpi .l { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.kpi .l { font-size: .7rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 500; }
 .kpi .v { font-family: var(--f-display); font-weight: 700; font-size: 1.55rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .kpi .v small { font-size: .85rem; color: var(--muted); font-weight: 500; margin-left: 4px; }
 .kpi .s { font-size: .78rem; color: var(--muted); }
@@ -149,7 +178,7 @@ dl.about dd { margin: 0; }
 .bottom { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr) minmax(0, 1fr); gap: 14px; align-items: start; }
 .tablebox { max-height: 330px; overflow: auto; }
 .queue { max-height: 720px; overflow-y: auto; display: grid; gap: 8px; align-content: start; }
-.queue details > summary { cursor: pointer; font-family: var(--f-display); font-weight: 600; font-size: .86rem; padding: 4px 0; display: flex; justify-content: space-between; }
+.queue details > summary { cursor: pointer; font-family: var(--f-display); font-weight: 500; font-size: .86rem; padding: 4px 0; display: flex; justify-content: space-between; }
 .qlist { display: grid; gap: 4px; margin-top: 4px; }
 .qi { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; gap: 8px; align-items: center; width: 100%; text-align: left; font: inherit; font-size: .8rem; background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; cursor: grab; color: var(--ink); }
 .qi:hover { border-color: var(--accent); }
@@ -158,7 +187,7 @@ dl.about dd { margin: 0; }
 .qi b { font-family: var(--f-mono); font-size: .76rem; }
 .qi .m { display: block; color: var(--muted); font-size: .76rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qi .h { font-family: var(--f-mono); font-size: .72rem; color: var(--muted); text-align: right; }
-.pat { font-size: .68rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: var(--lunch); color: var(--ink); margin-left: 4px; }
+.pat { font-size: .68rem; font-weight: 500; padding: 1px 6px; border-radius: 4px; background: var(--lunch); color: var(--ink); margin-left: 4px; }
 .loads td { padding: 5px 6px; }
 .loads td:first-child { min-width: 150px; }
 .heat td, .heat th { padding: 3px 4px; text-align: center; }
@@ -173,7 +202,7 @@ dl.about dd { margin: 0; }
 
 /* ----- week grid ----- */
 .week { display: grid; grid-template-columns: 46px repeat(var(--days), minmax(96px, 1fr)); min-width: 660px; padding-bottom: 8px; }
-.dayhead { font-family: var(--f-display); font-weight: 600; font-size: .82rem; text-align: center; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.dayhead { font-family: var(--f-display); font-weight: 500; font-size: .82rem; text-align: center; padding: 5px 0; border-bottom: 1px solid var(--line); }
 .dayhead.off { color: var(--t-prac-ink); }
 .times { position: relative; }
 .times span { position: absolute; right: 6px; transform: translateY(-50%); font-family: var(--f-mono); font-size: .64rem; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -181,14 +210,14 @@ dl.about dd { margin: 0; }
 .col.off { background-color: transparent; background-image: repeating-linear-gradient(135deg, var(--t-prac) 0 6px, transparent 6px 14px); }
 .col.drop { background-color: var(--accent-soft); }
 .lunch { position: absolute; left: 0; right: 0; background: repeating-linear-gradient(135deg, var(--lunch) 0 6px, #e4e7ec 6px 8px); display: flex; align-items: center; justify-content: center; gap: 4px; font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 1; }
-.away { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: .74rem; color: var(--t-prac-ink); font-weight: 600; }
+.away { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: .74rem; color: var(--t-prac-ink); font-weight: 500; }
 .block { position: absolute; z-index: 2; border-radius: 5px; padding: 4px 6px; overflow: hidden; font-size: .72rem; line-height: 1.25; border: 1px solid rgba(0,0,0,.06); text-align: left; font-family: var(--f-body); cursor: pointer; }
-.block strong { display: flex; gap: 3px; align-items: center; font-family: var(--f-mono); font-size: .7rem; font-weight: 600; }
+.block strong { display: flex; gap: 3px; align-items: center; font-family: var(--f-mono); font-size: .7rem; font-weight: 500; }
 .block span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .block .ttl { opacity: .85; }
 .block strong { white-space: nowrap; }
 .block strong .code { flex: none; }
-.block strong .sec { font-family: var(--f-body); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.block strong .sec { font-family: var(--f-body); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .block.other { opacity: .5; }
 .block.sel { box-shadow: 0 0 0 2px var(--accent); }
 .block.clash { border: 2px solid var(--bad); }
@@ -216,10 +245,10 @@ dl.about dd { margin: 0; }
 .part.done { border-style: solid; border-color: var(--good); background: var(--good-soft); color: var(--good); }
 .part.on { box-shadow: 0 0 0 2px var(--accent); }
 .editor { border: 1px solid var(--accent); border-radius: 10px; padding: 12px; display: grid; gap: 12px; background: var(--panel); }
-.editor label, .fieldlabel { display: grid; gap: 3px; font-size: .78rem; color: var(--muted); font-weight: 600; }
+.editor label, .fieldlabel { display: grid; gap: 3px; font-size: .78rem; color: var(--muted); font-weight: 500; }
 .editor select, .editor input[type=search] { font: inherit; font-size: .88rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; width: 100%; }
 .opts { display: grid; gap: 4px; max-height: 250px; overflow-y: auto; padding-right: 2px; }
-.optgrp { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; margin-top: 4px; }
+.optgrp { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; margin-top: 4px; }
 .opt { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; align-items: center; font: inherit; font-size: .82rem; text-align: left; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 6px; padding: 5px 8px; cursor: pointer; }
 .opt b { font-family: var(--f-mono); font-size: .78rem; }
 .opt > span { display: grid; min-width: 0; }
@@ -246,20 +275,12 @@ dl.about dd { margin: 0; }
 .form label, label.form { min-width: 0; }
 .form select, label.form select { width: 100%; min-width: 0; }
 .form input, .form select { font: inherit; font-size: .92rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; }
-.userchip { display: flex; align-items: center; gap: 8px; font-size: .78rem; line-height: 1.2; max-width: 240px; }
-.userchip > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.userchip b { display: block; font-size: .84rem; }
-.userchip span { opacity: .8; }
-.userchip button { white-space: nowrap; font: inherit; font-size: .78rem; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.35); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
 .readonly { background: var(--lunch); color: var(--ink); border-radius: 6px; padding: 7px 10px; font-size: .84rem; }
 .block.pending, .block.rejected { border: 1px dashed #b07800; }
 .block.rejected { border-color: var(--bad); }
 .block .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #c48a00; }
 .block.rejected .dot { background: var(--bad); }
 .legend i.pend { background: #fff; border: 1px dashed #b07800; position: relative; }
-.bell { position: relative; font: inherit; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.35); border-radius: 6px; padding: 4px 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
-.bell .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-.bell b { font-family: var(--f-mono); font-size: .72rem; background: #e5484d; color: #fff; border-radius: 999px; padding: 0 6px; }
 .misslist { max-height: 46vh; overflow-y: auto; display: grid; gap: 8px; }
 .misslist h3 { font-size: .85rem; margin: 4px 0 2px; }
 .misslist li { font-size: .84rem; }
@@ -279,47 +300,99 @@ dl.about dd { margin: 0; }
 /* ----- dialogs ----- */
 .overlay { position: fixed; inset: 0; background: rgba(10, 16, 28, .45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 40; }
 .dialog { background: var(--panel); color: var(--ink); border-radius: 12px; border: 1px solid var(--line); padding: 18px; width: min(560px, 100%); max-height: 90vh; overflow-y: auto; display: grid; gap: 12px; }
-.dialog label, .form label { display: grid; gap: 3px; font-size: .8rem; color: var(--muted); font-weight: 600; }
+.dialog label, .form label { display: grid; gap: 3px; font-size: .8rem; color: var(--muted); font-weight: 500; }
 .dialog input, .form input { font: inherit; font-size: .9rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
 .dialog .choice { display: flex; gap: 8px; align-items: center; font-weight: 400; color: var(--ink); font-size: .9rem; }
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
 .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; align-items: start; }
 
 /* ----- quiet motion: short, subtle feedback on hover and click ----- */
-.side button, .results button, .menu .pop button, .seg button, .pill, .btn, .kpi, .publish, .bell, .userchip button, .topbar select, .topbar input {
+.rail .ic, .rail, .flyout button, .usermenu .pop button, .iconbtn, .avatar, .results button, .menu .pop button, .seg button, .pill, .btn, .kpi, .publish, .quick, .sugg, .topbar select, .search input {
   transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .12s ease; }
-.side button:hover:not([aria-current="page"]) { background: var(--bg); box-shadow: inset 3px 0 0 var(--line); }
-.side button:active, .seg button:active, .pill:active, .btn:active:not(:disabled), .publish:active:not(:disabled), .bell:active, .userchip button:active { transform: scale(.97); }
-.side button:focus-visible, .seg button:focus-visible, .pill:focus-visible, .btn:focus-visible, .kpi:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.rail:active .ic, .flyout button:active, .seg button:active, .pill:active, .btn:active:not(:disabled), .publish:active:not(:disabled), .iconbtn:active, .avatar:active, .quick:active { transform: scale(.97); }
+.rail:focus-visible, .flyout button:focus-visible, .seg button:focus-visible, .pill:focus-visible, .btn:focus-visible, .kpi:focus-visible, .quick:focus-visible, .iconbtn:focus-visible, .avatar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .seg button:hover:not([aria-pressed="true"]) { background: var(--accent-soft); color: var(--accent); }
 .pill:hover:not([aria-pressed="true"]) { border-color: var(--accent); color: var(--accent); }
 .btn.primary:hover:not(:disabled) { box-shadow: 0 2px 6px rgba(31,63,116,.25); }
 .kpi:hover { box-shadow: 0 3px 10px rgba(15,25,45,.08); transform: translateY(-1px); }
 .kpi:active { transform: translateY(0); }
-.publish:hover:not(:disabled) { box-shadow: 0 2px 8px rgba(0,0,0,.25); }
-.bell:hover, .userchip button:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.6); }
+.publish:hover:not(:disabled) { box-shadow: 0 2px 6px rgba(31,63,116,.25); }
+.flyout { animation: fly-in .14s ease-out; }
+@keyframes fly-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
 .main.enter > * { animation: page-in .22s ease-out both; }
 @keyframes page-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* ----- home ----- */
+.home { display: grid; gap: 22px; }
+.hero { position: relative; height: 150px; margin: calc(-1 * var(--pt)) calc(-1 * var(--px)) 0; background: #e8ecf3; overflow: hidden; border-bottom: 1px solid var(--line); }
+.hero .art { position: absolute; inset: 0 0 0 30%; display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: 22px repeat(6, 1fr); gap: 6px; padding: 10px 24px 12px; -webkit-mask-image: linear-gradient(90deg, transparent, #000 40%); mask-image: linear-gradient(90deg, transparent, #000 40%);
+  background-image: linear-gradient(rgba(27,47,85,.07) 1px, transparent 1px), linear-gradient(90deg, rgba(27,47,85,.07) 1px, transparent 1px); background-size: 100% 20px, calc((100% - 48px) / 6) 100%; background-position: 0 12px, 24px 0; }
+.hero .art span { font-family: var(--f-mono); font-size: .62rem; letter-spacing: .12em; color: rgba(27,47,85,.38); align-self: center; padding-left: 4px; }
+.hero .art i { border-radius: 6px; opacity: .85; }
+.homehead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 20px; max-width: 1240px; width: 100%; margin: 0 auto; }
+.homehead h1 { font-family: var(--f-display); font-size: 2rem; font-weight: 500; letter-spacing: -.01em; color: var(--ink); }
+.homehead p { margin: 0; font-size: 1.15rem; color: var(--muted); }
+.homebody { display: grid; gap: 22px; max-width: 1240px; width: 100%; margin: 0 auto; }
+.quicks { display: flex; flex-wrap: wrap; gap: 10px; }
+.quick { font: inherit; font-size: .9rem; font-weight: 500; color: var(--ink); background: var(--panel); border: 1px solid #b9c0cb; border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+.quick:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+.homecols { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.homecol { display: grid; gap: 22px; min-width: 0; }
+.hcard { background: var(--panel); border-radius: 16px; padding: 22px 24px; display: grid; gap: 14px; box-shadow: 0 1px 2px rgba(15,25,45,.06), 0 2px 10px rgba(15,25,45,.04); min-width: 0; }
+.hcard > h2 { font-size: 1.3rem; font-weight: 500; }
+.hcard .caught { text-align: center; color: var(--muted); font-size: 1rem; padding: 10px 0 4px; margin: 0; }
+.sugg { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 18px; border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; }
+.sugg:hover { border-color: #c4cbd6; box-shadow: 0 2px 10px rgba(15,25,45,.06); }
+.sugg .si { width: 48px; height: 48px; color: var(--accent); display: grid; place-items: center; }
+.sugg.bad .si { color: var(--bad); }
+.sugg.warn .si { color: var(--warn); }
+.sugg b { display: block; font-weight: 500; font-size: 1.02rem; margin-bottom: 4px; }
+.sugg p { margin: 0; color: var(--muted); font-size: .92rem; }
+.sugg .go { font: inherit; font-weight: 500; font-size: .95rem; color: #1a66d6; background: none; border: 0; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; white-space: nowrap; }
+.sugg .go:hover { color: var(--accent); }
+.glance { display: grid; gap: 12px; }
+.glance .big { display: flex; align-items: baseline; gap: 8px; }
+.glance .big b { font-size: 2rem; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--navy); }
+.glance .bar { height: 8px; border-radius: 4px; }
+.glance dl { display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; margin: 0; font-size: .92rem; }
+.glance dt { color: var(--muted); }
+.glance dd { margin: 0; font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+.glance dd.bad { color: var(--bad); }
+.news { display: grid; gap: 0; }
+.news div { display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 12px; padding: 11px 0; border-top: 1px solid var(--line2); }
+.news div:first-child { border-top: 0; padding-top: 2px; }
+.news i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 7px; }
+.news i.good { background: var(--good); } .news i.warn { background: #c48a00; }
+.news b { font-weight: 500; display: block; }
+.news span { color: var(--muted); font-size: .84rem; }
 
 /* ----- responsive: desktop first (1440), usable on tablets ----- */
 @media (max-width: 1360px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bottom { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bottom > :first-child { grid-column: 1 / -1; } }
 @media (max-width: 1100px) {
   .app { grid-template-columns: minmax(0, 1fr); }
-  .topbar { position: static; }
-  .side { position: static; max-height: none; display: flex; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 6px 10px; gap: 4px; }
-  .side button { width: auto; white-space: nowrap; }
-  .side button[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--accent); }
-  .side .sep { display: none; }
+  .topbar { position: static; grid-template-columns: minmax(0, 1fr) auto; }
+  .topbar .search { grid-column: 1 / -1; grid-row: 2; }
+  .side { position: static; height: auto; flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 6px 10px; }
+  .side .spacer { display: none; }
+  .rail { width: auto; min-width: 72px; }
   .footer { grid-column: 1; }
+  .homecols { grid-template-columns: minmax(0, 1fr); }
   .dash, .desk, .split { grid-template-columns: minmax(0, 1fr); }
   .queue { max-height: 420px; }
   .list { max-height: 260px; }
   .publish { margin-left: 0; }
 }
 @media (max-width: 760px) {
-  .main { padding: 12px 16px 20px; }
+  .main { --px: 16px; --pt: 12px; }
   .topbar { padding: 10px 16px; }
+  .brand span { display: none; }
+  .tb-field { display: none; }
+  .homehead h1 { font-size: 1.5rem; }
+  .homehead p { font-size: 1rem; }
+  .sugg { grid-template-columns: 40px minmax(0, 1fr); padding: 16px; gap: 12px; }
+  .sugg .go { grid-column: 2; justify-self: start; }
+  .hcard { padding: 18px 16px; }
   .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .bottom { grid-template-columns: minmax(0, 1fr); }
 }
@@ -328,18 +401,20 @@ dl.about dd { margin: 0; }
 <div class="login" id="login" hidden></div>
 <div class="app" id="app">
   <header class="topbar">
-    <div class="brand"><b>Liberal Arts University of Cagayan Valley</b><span>Office of the University Registrar · Class Scheduling</span></div>
-    <div class="tb-field">
-      <select id="semSel" aria-label="Semester"><option value="1" selected>1st Semester</option><option value="2" disabled title="Not set up yet">2nd Semester</option></select>
-      <select id="aySel" aria-label="School year"></select>
+    <div class="brand"><span class="mark" aria-hidden="true">LAU</span><div><b>LAUCV</b><span>Class Scheduling · Registrar</span></div></div>
+    <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="search" type="search" placeholder="Search" aria-label="Search sections, faculty, rooms, courses" autocomplete="off"><div class="results" id="results" hidden></div></div>
+    <div class="tb-right">
+      <div class="tb-field">
+        <select id="semSel" aria-label="Semester"><option value="1" selected>1st Semester</option><option value="2" disabled title="Not set up yet">2nd Semester</option></select>
+        <select id="aySel" aria-label="School year"></select>
+        <select id="scopeSel" aria-label="College filter"></select>
+      </div>
+      <button type="button" class="iconbtn" id="bellBtn" data-view="submissions" hidden title="Submitted schedules"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0v4l2 3H4l2-3z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="sr">Submissions</span><b id="bellCount" hidden></b></button>
+      <div class="usermenu" id="userchip" hidden></div>
     </div>
-    <div class="tb-field"><select id="scopeSel" aria-label="College filter"></select></div>
-    <div class="search"><input id="search" type="search" placeholder="Search sections, faculty, rooms, courses" aria-label="Search" autocomplete="off"><div class="results" id="results" hidden></div></div>
-    <button type="button" class="publish" id="publishBtn">Publish schedule</button>
-    <button type="button" class="bell" id="bellBtn" data-view="submissions" hidden title="Submitted schedules"><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5v2.6L2 11v1h12v-1l-1.5-2.4V6A4.5 4.5 0 0 0 8 1.5Zm-1.8 11.5a1.8 1.8 0 0 0 3.6 0Z"/></svg><span class="sr">Submissions</span><b id="bellCount" hidden></b></button>
-    <div class="userchip" id="userchip" hidden></div>
   </header>
   <nav class="side" id="side" aria-label="Main menu"></nav>
+  <div class="flyout" id="flyout" hidden></div>
   <main class="main" id="page"></main>
   <footer class="footer" id="footer"></footer>
 </div>
@@ -359,7 +434,7 @@ const DAY_MAX = { Mon: 8, Tue: 7.5, Wed: 8, Thu: 7.5, Fri: 8, Sat: 3 };     // t
 const PART = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Supervision: "Practicum supervision" };
 const COLLEGE_KEYS = ["CSS", "CISC", "CBE", "COE", "CCJPS"];
 const SCOPES = [["ALL", "All colleges"], ["CSS", "CSS"], ["CISC", "CISC"], ["CBE", "CBE"], ["COE", "COE"], ["CCJPS", "CCJPS"], ["GE", "GE Department"]];
-const VIEWS = [["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["rooms", "Rooms"], ["sections", "Sections"],
+const VIEWS = [["home", "Home"], ["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["rooms", "Rooms"], ["sections", "Sections"],
                ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["availability", "GE Availability"], ["submissions", "Submissions"], ["reports", "Reports"], ["settings", "Settings"]];
 const ROLE_NAME = { registrar: "Registrar", dean: "Dean", associate_dean: "Associate Dean", chair: "Department Chair", ge_coordinator: "GE Coordinator" };
 const TYPE_LABEL = { lec: "Lecture (major)", lab: "Laboratory block (3 h)", ge: "General education", pe: "PE", cwts: "CWTS (Saturday)", prac: "Practicum supervision" };
@@ -383,7 +458,7 @@ const roomKind = (r) => r.pool.startsWith("classrooms") ? "Classroom" : r.pool.s
 const WARN_ICON = `<svg class="warnico" viewBox="0 0 16 16" aria-label="Conflict" role="img"><path fill="currentColor" d="M8 1 15.5 14.5H.5L8 1Zm-.9 5v4.2h1.8V6H7.1Zm0 5.4v1.7h1.8v-1.7H7.1Z"/></svg>`;
 
 // ---------- state ----------
-const state = { view: "dashboard", scope: "ALL", college: "CSS", program: null, section: null, teacher: null, room: null,
+const state = { view: "home", scope: "ALL", college: "CSS", program: null, section: null, teacher: null, room: null,
                 gridMode: "section", gridKey: {}, queueQuery: "", conflictType: "", pick: null, draft: null };
 try { Object.assign(state, JSON.parse(localStorage.getItem("cs-nav2") || "{}"), { pick: null, draft: null }); } catch (e) {}
 function remember() {
@@ -616,7 +691,7 @@ async function enter(session) {
   const r = rows[0];
   me = { email, name: r.full_name || email, role: r.role, college: r.college, department: r.department };
   shared = true; canWrite = true;
-  if (window._lastUser !== email) { state.view = "dashboard"; state.pick = null; state.draft = null; state.staffEdit = null; window._lastUser = email; }
+  if (window._lastUser !== email) { state.view = "home"; state.pick = null; state.draft = null; state.staffEdit = null; window._lastUser = email; }
   if (!allowedScopes().includes(state.scope)) state.scope = allowedScopes()[0];
   $("login").hidden = true; $("app").hidden = false;
   try { await Promise.all(Object.values(sbLoad).map((f) => f())); } catch (e) { toast("Could not load the schedule: " + e.message); }
@@ -959,6 +1034,61 @@ const legend = () => `<div class="legend">${Object.entries(TYPE_LABEL).map(([k, 
   <span><i class="offday"></i>Practicum day</span><span><i class="lunchk"></i>Lunch (locked)</span><span><i class="conf"></i>Conflict</span>${BACKEND ? `<span><i class="pend"></i>GE awaiting approval</span>` : ""}</div>`;
 
 // ---------- shell ----------
+const svg = (d, size = 24) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICON = {
+  home: svg('<path d="M3.5 10.5 12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z"/>'),
+  dashboard: svg('<rect x="3.5" y="3.5" width="7" height="9" rx="1.2"/><rect x="13.5" y="3.5" width="7" height="5" rx="1.2"/><rect x="13.5" y="11.5" width="7" height="9" rx="1.2"/><rect x="3.5" y="15.5" width="7" height="5" rx="1.2"/>'),
+  schedule: svg('<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M7.5 13.5h3M13.5 13.5h3M7.5 17h3"/>'),
+  faculty: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-6 6.5-6s5.9 2.4 6.5 6M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.3c2 .8 3.2 2.8 3.5 5.7"/>'),
+  rooms: svg('<path d="M4 21V5.5L12 3v18M12 7l8 2v12M2.5 21h19M7 8h2M7 12h2M7 16h2M15 12h2M15 16h2"/>'),
+  review: svg('<path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1z"/><path d="M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2"/><path d="m9 13.5 2 2 4-4.5"/>'),
+  reports: svg('<path d="M4 20.5h16M7 16.5v-5M12 16.5V6.5M17 16.5v-8"/>'),
+  settings: svg('<path d="M4 6.5h9M17 6.5h3M4 12h3M11 12h9M4 17.5h11M19 17.5h1"/><circle cx="15" cy="6.5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17.5" r="2"/>'),
+  clock: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/><path d="M3 5.5 5.5 3M21 5.5 18.5 3"/>', 44),
+  send: svg('<path d="M20.5 3.5 10 14M20.5 3.5l-6.5 17-4-6.5-6.5-4z"/>', 44),
+  alert: svg('<path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.2v.3"/>', 44),
+  megaphone: svg('<path d="M3.5 10.5v3a1 1 0 0 0 1 1h2.5l7 4.5v-14l-7 4.5H4.5a1 1 0 0 0-1 1zM17.5 9a4 4 0 0 1 0 6M7 14.5l1.5 5"/>', 44),
+  people: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-6 6.5-6s5.9 2.4 6.5 6M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.3c2 .8 3.2 2.8 3.5 5.7"/>', 44),
+  inbox: svg('<path d="M3.5 13.5 6 5h12l2.5 8.5V19a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 19z"/><path d="M3.5 13.5H8l1.5 2.5h5l1.5-2.5h4.5"/>', 44),
+  check: svg('<circle cx="12" cy="12" r="8.5"/><path d="m8 12.3 2.7 2.7L16 9.5"/>', 44),
+};
+// The menu: single pages open at once, groups open a small panel beside the menu.
+function navGroups() {
+  const has = (k) => (k !== "approvals" && k !== "submissions") || BACKEND;
+  const name = Object.fromEntries(VIEWS);
+  const g = (key, label, icon, keys, bottom) => ({ key, label, icon, bottom, views: keys.filter(has).map((k) => [k, name[k]]) });
+  return [g("home", "Home", "home", ["home"]), g("dashboard", "Dashboard", "dashboard", ["dashboard"]),
+    g("schedule", "Scheduling", "schedule", ["timetable", "sections", "courses"]), g("faculty", "Faculty", "faculty", ["faculty", "availability"]),
+    g("rooms", "Rooms", "rooms", ["rooms"]), g("review", "Review", "review", ["conflicts", "approvals", "submissions"]),
+    g("reports", "Reports", "reports", ["reports"]), g("settings", "Settings", "settings", ["settings"], true)].filter((x) => x.views.length);
+}
+const VIEW_NOTE = { timetable: "Book times, rooms and teachers", sections: "Each section's week", courses: "Every class of a course",
+  faculty: "Teaching load of each instructor", availability: "Free instructors for borrowed GE", conflicts: "Clashes and broken rules",
+  approvals: "Borrowed GE bookings", submissions: "Which departments are done" };
+let flyKey = null, userMenuOpen = false;
+function renderFlyout(counts) {
+  const el = $("flyout"), g = navGroups().find((x) => x.key === flyKey);
+  const anchor = g && document.querySelector(`[data-flyout="${g.key}"]`);
+  if (!g || !anchor) { el.hidden = true; return; }
+  el.innerHTML = `<h2>${esc(g.label)}</h2>${g.views.map(([k, l]) => {
+    const c = counts[k];
+    return `<button type="button" data-view="${k}" aria-current="${state.view === k ? "page" : "false"}"><span>${esc(l)}<small>${esc(VIEW_NOTE[k] || "")}</small></span>${c && (c[0] || k === "conflicts") ? `<span class="count${c[1] ? " bad" : ""}">${c[0]}</span>` : ""}</button>`;
+  }).join("")}`;
+  el.hidden = false;
+  const r = anchor.getBoundingClientRect(), narrow = innerWidth <= 1100;
+  el.style.left = `${narrow ? Math.max(8, Math.min(r.left, innerWidth - 278)) : r.right + 6}px`;
+  el.style.top = `${narrow ? r.bottom + 6 : Math.max(8, Math.min(r.top - 6, innerHeight - el.offsetHeight - 8))}px`;
+}
+// "Rocky Spencer A. Ricardo" -> "Rocky Ricardo"; "Ernesto D. Dela Cruz" -> "Ernesto Dela Cruz"; "Ma. Luisa T. Pangilinan" -> "Ma. Luisa Pangilinan".
+function greetName(n) {
+  const w = String(n || "").replace(/\b(Dr|Prof|Engr|Atty|Mr|Mrs|Ms)\.?\s/gi, "").trim().split(/\s+/).filter(Boolean);
+  if (w.length < 2) return w[0] || "";
+  const first = /^Ma\.?$/i.test(w[0]) && w[1] ? `${w[0]} ${w[1]}` : w[0];
+  const ini = w.map((x) => /^[A-Z]\.?$/.test(x)).lastIndexOf(true);
+  const last = ini > 0 && ini < w.length - 1 ? w.slice(ini + 1).join(" ") : w[w.length - 1];
+  return first.split(" ").length > 1 && first.endsWith(last) ? first : `${first} ${last}`;
+}
+const initials = (n) => { const w = greetName(String(n).replace(/@.*/, "")).split(" ").filter((x) => !/^Ma\.?$/i.test(x)); return ((w[0]?.[0] || "") + (w.length > 1 ? w[w.length - 1][0] : "")).toUpperCase() || "?"; };
 function renderShell() {
   const ay = $("aySel");
   const years = ["2025–2026", "2026–2027", "2027–2028"];
@@ -967,29 +1097,34 @@ function renderShell() {
   const scopes = allowedScopes();
   $("scopeSel").innerHTML = SCOPES.filter(([k]) => scopes.includes(k)).map(([k, l]) => `<option value="${k}"${state.scope === k ? " selected" : ""}>${esc(chairDept() ? `${l} · ${chairDept()}` : l)}</option>`).join("");
   $("scopeSel").disabled = scopes.length < 2;
-  $("publishBtn").hidden = !!BACKEND && !isAdmin();
-  $("publishBtn").disabled = !canWrite || !shared;
-  $("publishBtn").title = !shared ? "Open the page on claude.ai to publish" : !canWrite ? "View-only access" : "";
   const nConf = conflictsInScope().filter((c) => c.sev === "bad").length;
   const unsched = DATA.classes.filter(classInScope).reduce((a, c) => a + c.meetings.filter((m) => !bookings[`${c.id}|${m.part}`]).length, 0);
   const nMine = BACKEND ? DATA.classes.filter((c) => { const a = approvalOf(c); return a && needsMe(c, a); }).length : 0;
   const unseen = unseenSubmissions().length;
   $("bellBtn").hidden = !BACKEND || !me.email;
   $("bellCount").hidden = !unseen; $("bellCount").textContent = unseen;
-  $("side").innerHTML = VIEWS.filter(([k]) => (k !== "approvals" && k !== "submissions") || BACKEND).map(([k, l]) => {
-    const count = k === "conflicts" ? `<span class="count${nConf ? " bad" : ""}">${nConf}</span>` : k === "timetable" ? `<span class="count">${unsched}</span>`
-      : k === "approvals" && nMine ? `<span class="count bad">${nMine}</span>` : k === "submissions" && unseen ? `<span class="count bad">${unseen}</span>` : "";
-    return `${k === "reports" ? `<div class="sep"></div>` : ""}<button type="button" data-view="${k}" aria-current="${state.view === k ? "page" : "false"}">${l}${count}</button>`;
+  const counts = { timetable: [unsched, false], conflicts: [nConf, nConf > 0], approvals: [nMine, nMine > 0], submissions: [unseen, unseen > 0] };
+  $("side").innerHTML = navGroups().map((g, i, all) => {
+    const views = g.views, one = views.length === 1;
+    const on = views.some(([k]) => k === state.view);
+    const alert = views.reduce((a, [k]) => a + (counts[k]?.[1] ? counts[k][0] : 0), 0);
+    return `${g.bottom && !all[i - 1]?.bottom ? `<div class="spacer"></div>` : ""}<button type="button" class="rail" ${one ? `data-view="${views[0][0]}"` : `data-flyout="${g.key}" aria-haspopup="true" aria-expanded="${flyKey === g.key}"`} aria-current="${on ? "page" : "false"}">
+      <span class="ic">${ICON[g.icon]}${alert ? `<b>${alert}</b>` : ""}</span>${esc(g.label)}</button>`;
   }).join("");
+  renderFlyout(counts);
   const pub = pubState();
   const chip = $("userchip");
   chip.hidden = !BACKEND || !me.email;
-  if (BACKEND && me.email) chip.innerHTML = `<span><b>${esc(me.name)}</b><span>${esc(ROLE_NAME[me.role] || "")}${me.department ? ` · ${esc(me.department)}` : me.college ? ` · ${esc(me.college)}` : ""}</span></span><button type="button" data-auth="signout">Sign out</button>`;
+  if (BACKEND && me.email) chip.innerHTML = `<button type="button" class="avatar" data-usermenu="1" aria-haspopup="true" aria-expanded="${userMenuOpen}" title="${esc(me.name)}">${esc(initials(me.name || me.email))}</button>
+    <div class="pop" ${userMenuOpen ? "" : "hidden"}><div class="who"><b>${esc(me.name || me.email)}</b><span>${esc(ROLE_NAME[me.role] || "")}${me.department ? ` · ${esc(me.department)}` : me.college ? ` · ${esc(me.college)}` : ""}</span><span>${esc(me.email)}</span></div>
+      <button type="button" data-view="settings">Settings and password</button><button type="button" data-auth="signout">Sign out</button></div>`;
+  const pubOk = !BACKEND || isAdmin();
   const when = (iso) => iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
   $("footer").innerHTML = `<span>Last saved: <b>${esc(when(lastSaved))}</b></span>
     <span class="chip ${pub.cls}">${esc(pub.label)}</span>
     <span>${shared ? (canWrite ? "Changes are saved for everyone" : "View-only access") : "Not connected: changes here are not saved"}</span>
     <span class="grow"></span>${BUILD ? `<span class="small">Version ${esc(BUILD)}</span>` : ""}
+    ${pubOk ? `<button type="button" class="publish" id="publishBtn"${!canWrite || !shared ? " disabled" : ""} title="${!shared ? "Open the page on claude.ai to publish" : !canWrite ? "View-only access" : ""}">Publish schedule</button>` : ""}
     <details class="menu" id="exportMenu"><summary class="btn">Export ▾</summary><div class="pop">
       <button type="button" data-export="pdf">PDF schedules (section, faculty, room)…</button>
       <button type="button" data-export="xlsx">Excel workbook (.xlsx)</button></div></details>`;
@@ -1009,14 +1144,101 @@ function render() {
   renderShell(); remember();
   const page = $("page");
   if (render.view !== state.view) { render.view = state.view; page.classList.remove("enter"); void page.offsetWidth; page.classList.add("enter"); clearTimeout(render.t); render.t = setTimeout(() => page.classList.remove("enter"), 300); }
-  const fn = { dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, rooms: renderRooms, sections: renderSections,
-               courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, settings: renderSettings }[state.view] || renderDashboard;
+  const fn = { home: renderHome, dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, rooms: renderRooms, sections: renderSections,
+               courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, settings: renderSettings }[state.view] || renderHome;
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
   fn(page);
-  if (banner) page.insertAdjacentHTML("afterbegin", banner);
+  if (banner) (page.querySelector(".hero") || page).insertAdjacentHTML(page.querySelector(".hero") ? "afterend" : "afterbegin", banner);
 }
 function head(title, sub, right = "") {
   return `<div class="pagehead"><div><h1>${esc(title)}</h1><p class="sub">${sub}</p></div>${right}</div>`;
+}
+
+// ===== Home =====
+// A greeting, quick links, what waits for this person, and a short view of the term.
+function heroArt() {
+  const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const blocks = [[1, 2, 2, "lec"], [1, 5, 2, "ge"], [2, 1, 3, "lab"], [2, 5, 1, "prac"], [3, 2, 2, "lec"], [3, 5, 2, "ge"], [4, 1, 3, "lab"], [4, 4, 2, "lec"],
+                  [5, 2, 2, "ge"], [5, 5, 2, "lec"], [6, 1, 2, "cwts"], [6, 3, 2, "pe"]];
+  return `<div class="hero" aria-hidden="true"><div class="art">${days.map((d) => `<span>${d}</span>`).join("")}${blocks.map(([c, r, h, t]) =>
+    `<i style="grid-column:${c};grid-row:${r + 1} / span ${h};background:var(--t-${t})"></i>`).join("")}</div></div>`;
+}
+function homeItems() {
+  const act = [], sug = [];
+  const go = (label, attrs) => `<button type="button" class="go" ${attrs}>${esc(label)}</button>`;
+  const nConf = conflictsInScope().filter((c) => c.sev === "bad").length;
+  const meet = DATA.classes.filter(classInScope).reduce((a, c) => { a.all += c.meetings.length; a.done += c.meetings.filter((m) => bookings[`${c.id}|${m.part}`]).length; return a; }, { all: 0, done: 0 });
+  if (BACKEND) {
+    const mine = DATA.classes.filter((c) => { const a = approvalOf(c); return a && needsMe(c, a); }).length;
+    if (mine) act.push({ icon: "inbox", cls: "warn", title: `${mine} GE booking${mine > 1 ? "s wait" : " waits"} for your answer`, text: "Approve, choose another of your instructors, or reject with a reason.", link: go("Approvals", 'data-view="approvals"') });
+    const reqs = Object.values(instrRequests).filter((r) => CLASS[r.class_id] && (isAdmin() || r.department === me.department || (me.role === "associate_dean" && r.college === me.college)));
+    if (reqs.length) act.push({ icon: "people", cls: "warn", title: `${reqs.length} request${reqs.length > 1 ? "s" : ""} for an instructor`, text: "A section found no free instructor at any time and asked for one.", link: go("See requests", 'data-view="approvals"') });
+    const d = myDept();
+    if (d) {
+      const miss = missingFor(d).length, sub = submissions?.[d];
+      if (!sub && miss) act.push({ icon: "clock", title: `${miss} class${miss > 1 ? "es" : ""} of ${d} still incomplete`, text: "Give each major and own GE class a time, a room where needed, and a teacher, then submit.", link: go("My timetable", 'data-view="timetable"') });
+      else if (!sub) act.push({ icon: "send", title: "Your department's part is complete", text: "Submit it so other departments can see your free instructors for GE classes.", link: go("Submit schedule", `data-submit="${esc(d)}"`) });
+      else if (changedSince(d)) act.push({ icon: "send", cls: "warn", title: "You changed classes after submitting", text: "Submit again so the other departments see the latest schedule.", link: go("Submit again", `data-submit="${esc(d)}"`) });
+      const rej = waitingFor(d).filter((x) => x.a.state === "rejected").length;
+      if (rej) act.push({ icon: "alert", cls: "bad", title: `${rej} borrowed GE class${rej > 1 ? "es were" : " was"} not approved`, text: "Book another time with a free instructor.", link: go("Approvals", 'data-view="approvals"') });
+    }
+    if (me.role === "ge_coordinator" && settings.geOpen && meet.done < meet.all) act.push({ icon: "clock", title: "GE Department scheduling is open", text: `${meet.all - meet.done} class meetings of the GE Department courses still need a time.`, link: go("Open timetable", 'data-view="timetable"') });
+  }
+  if (nConf) act.push({ icon: "alert", cls: "bad", title: `${nConf} conflict${nConf > 1 ? "s" : ""} to fix`, text: "Two bookings share a teacher, a room or a section at the same time, or a load rule is broken.", link: go("Conflicts", 'data-view="conflicts"') });
+
+  if (meet.done < meet.all) sug.push({ icon: "clock", title: `${meet.all - meet.done} class meetings are not booked yet`, text: `${meet.done} of ${meet.all} booked in ${scopeName()}.`, link: go("Book classes", 'data-view="dashboard"') });
+  const unseen = unseenSubmissions().length;
+  if (unseen) sug.push({ icon: "send", title: `${unseen} department${unseen > 1 ? "s have" : " has"} submitted`, text: "Their free instructors now show for borrowed GE classes.", link: go("Submissions", 'data-view="submissions"') });
+  const over = Object.keys(DATA.teachers).filter(teacherInScope).filter((k) => loads[k].status === "over").length;
+  if (over) sug.push({ icon: "people", cls: "warn", title: `${over} instructor${over > 1 ? "s are" : " is"} over the load limit`, text: "24 LU, or 15 LU for chairs.", link: go("Faculty loads", 'data-view="faculty"') });
+  if ((!BACKEND || isAdmin()) && pubState().cls === "warn") sug.push({ icon: "megaphone", title: pubStatus?.at ? "The schedule changed since it was published" : "The schedule is not published yet", text: "Publish when the departments are done so everyone sees the final schedule.", link: go("Publish", 'data-openpublish="1"') });
+  if (!sug.length) sug.push({ icon: "check", title: "Everything is on track", text: "Every class meeting in this view is booked.", link: go("Dashboard", 'data-view="dashboard"') });
+  return { act, sug, meet, nConf, over };
+}
+function renderHome(page) {
+  const hour = new Date().getHours();
+  const hello = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
+  const nm = BACKEND && !String(me.name).includes("@") ? greetName(me.name) : "";
+  const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  const { act, sug, meet, nConf, over } = homeItems();
+  const d = myDept();
+  const quick = [["Book Classes", 'data-view="timetable"'], ["Faculty Loads", 'data-view="faculty"'], ["Rooms", 'data-view="rooms"'],
+    BACKEND && ["GE Availability", 'data-view="availability"'], d && ["Submit Schedule", `data-submit="${esc(d)}"`],
+    BACKEND && (isAdmin() || me.role === "chair" || me.role === "associate_dean") && ["Approvals", 'data-view="approvals"'],
+    ["Print Schedules", 'data-export="pdf"'], (!BACKEND || isAdmin()) && ["Publish Schedule", 'data-openpublish="1"']].filter(Boolean);
+  const card = (x) => `<div class="sugg ${x.cls || ""}"><span class="si">${ICON[x.icon]}</span><div><b>${esc(x.title)}</b><p>${esc(x.text)}</p></div>${x.link}</div>`;
+  const secs = sectionsInScope();
+  const fullSecs = secs.filter((s) => DATA.classes.filter((c) => c.section === s).every((c) => c.meetings.every((m) => bookings[`${c.id}|${m.part}`]))).length;
+  const pct = meet.all ? Math.round((100 * meet.done) / meet.all) : 0;
+  const when = (iso) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const pub = pubState();
+  const news = [];
+  if (BACKEND && submissions) Object.values(submissions).sort((a, b) => Date.parse(b.submitted_at) - Date.parse(a.submitted_at)).slice(0, 5)
+    .forEach((r) => news.push(`<div><i class="good"></i><p style="margin:0"><b>Department of ${esc(r.department)} submitted</b><span>${esc(when(r.submitted_at))} · ${esc((r.submitted_by || "").split("@")[0])}</span></p></div>`));
+  news.push(`<div><i class="${pub.cls}"></i><p style="margin:0"><b>${esc(pub.label)}</b><span>${lastSaved ? `Last change ${esc(when(lastSaved))}` : "No changes yet"}</span></p></div>`);
+  if (BACKEND) news.push(`<div><i class="${settings.geOpen ? "good" : "warn"}"></i><p style="margin:0"><b>GE Department scheduling is ${settings.geOpen ? "open" : "not open yet"}</b><span>${settings.geOpen ? "The GE Coordinator can book PE, CWTS and the other GE Department courses." : "The GE Coordinator books last, after the departments."}</span></p></div>`);
+  page.innerHTML = `<div class="home">${heroArt()}
+    <div class="homehead"><h1>${hello}${nm ? `, ${esc(nm)}` : ""}</h1><p>It's ${esc(today)}</p></div>
+    <div class="homebody">
+      <div class="quicks">${quick.map(([l, a]) => `<button type="button" class="quick" ${a}>${esc(l)}</button>`).join("")}</div>
+      <div class="homecols">
+        <div class="homecol">
+          <section class="hcard"><h2>Awaiting Your Action</h2>${act.length ? act.map(card).join("") : `<p class="caught">You're all caught up on your tasks.</p>`}</section>
+          <section class="hcard"><h2>Timely Suggestions</h2>${sug.map(card).join("")}</section>
+        </div>
+        <div class="homecol">
+          <section class="hcard glance"><h2>This Term</h2>
+            <p class="small muted" style="margin:0">1st Semester, SY ${esc(printCfg.ay)} · ${esc(scopeName())}</p>
+            <div class="big"><b>${pct}%</b><span class="muted">of class meetings booked</span></div>
+            <div class="bar"><i style="width:${pct}%"></i></div>
+            <dl><dt>Class meetings booked</dt><dd>${meet.done} / ${meet.all}</dd><dt>Sections complete</dt><dd>${fullSecs} / ${secs.length}</dd>
+              <dt>Conflicts</dt><dd class="${nConf ? "bad" : ""}">${nConf}</dd><dt>Faculty over the limit</dt><dd class="${over ? "bad" : ""}">${over}</dd>
+              ${BACKEND && submissions ? `<dt>Departments submitted</dt><dd>${Object.keys(submissions).length} / ${new Set(Object.values(DATA.programs).map((p) => p.dept)).size}</dd>` : ""}</dl>
+          </section>
+          <section class="hcard"><h2>Announcements</h2><div class="news">${news.join("")}</div></section>
+        </div>
+      </div>
+    </div></div>`;
 }
 
 // ===== Dashboard =====
@@ -2001,8 +2223,14 @@ document.addEventListener("click", async (ev) => {
   const t = ev.target.closest("button, tr[data-goteacher], tr[data-goroom]");
   if (!ev.target.closest(".search")) $("results").hidden = true;
   if (!ev.target.closest("#exportMenu")) $("exportMenu")?.removeAttribute("open");
+  if (flyKey && !ev.target.closest("#flyout, [data-flyout]")) { flyKey = null; $("flyout").hidden = true; document.querySelectorAll("[data-flyout]").forEach((b) => b.setAttribute("aria-expanded", "false")); }
+  if (userMenuOpen && !ev.target.closest("#userchip")) { userMenuOpen = false; renderShell(); }
   if (!t) return;
   const ds = t.dataset;
+  if (ds.flyout) { flyKey = flyKey === ds.flyout ? null : ds.flyout; renderShell(); return; }
+  if (ds.usermenu) { userMenuOpen = !userMenuOpen; renderShell(); return; }
+  if (ds.openpublish) { openPublish(); return; }
+  if (ds.view) { flyKey = null; userMenuOpen = false; }
   if (ds.hit) { goHit(+ds.hit); return; }
   if (ds.auth) { if (ds.auth === "signout") { await sb.auth.signOut(); return; } showLogin(ds.auth); return; }
   if (ds.decide) {
@@ -2077,6 +2305,8 @@ document.addEventListener("click", async (ev) => {
   render();
   if (goingUp && !ds.opt) window.scrollTo(0, 0);
 });
+// The panel of a menu group sits beside its icon; close it when the page moves.
+["resize", "scroll"].forEach((t) => window.addEventListener(t, () => { if (flyKey) { flyKey = null; $("flyout").hidden = true; document.querySelectorAll("[data-flyout]").forEach((b) => b.setAttribute("aria-expanded", "false")); } }, { passive: true }));
 document.addEventListener("input", (ev) => {
   const id = ev.target.id;
   if (id === "teacherSearch") { teacherQuery = ev.target.value; const sel = $("teacherSel"); if (sel) sel.innerHTML = teacherOptions(); }   // keeps focus while typing
@@ -2090,6 +2320,7 @@ document.addEventListener("keydown", (ev) => {
     else if (ev.key === "Enter") { ev.preventDefault(); goHit(searchOn); }
     else if (ev.key === "Escape") $("results").hidden = true;
   }
+  if (ev.key === "Escape" && (flyKey || userMenuOpen)) { const k = flyKey; flyKey = null; userMenuOpen = false; renderShell(); document.querySelector(k ? `[data-flyout="${k}"]` : ".avatar")?.focus(); }
   if (ev.key === "Escape") { if (printJob) { printJob = null; renderPrintPanel(); } $("publishPanel").hidden = true; $("submitPanel").hidden = true; }
 });
 document.addEventListener("change", async (ev) => {
