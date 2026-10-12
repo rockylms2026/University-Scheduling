@@ -4,12 +4,12 @@ The scheduling page in `web/index.html` signs people in with Supabase and limits
 
 | Role | Can schedule | Approves |
 |---|---|---|
-| Registrar, Dean | everything; manage people; open GE scheduling; publish | anything |
-| Associate Dean | their college's classes, and GE classes in their college's sections (once GE is open) | GE classes taught by their college's faculty |
-| Department Chair | their department's major classes, with their own department's faculty; never GE | GE classes taught by their department's faculty |
-| GE Coordinator | every GE class (once GE is open) | none |
+| Registrar, Dean | everything; manage people; open GE Department scheduling; publish | anything |
+| Department Chair | their department's major classes, with their own faculty; GE courses their department holds, for their own sections; GE courses another department holds, for their own sections (time and room only) | borrowed GE classes from their department, when the borrowing department is in the same college (and they pick the teacher) |
+| Associate Dean | the classes of their college's sections | borrowed GE classes from their college, when the borrowing department is in another college (and they pick the teacher) |
+| GE Coordinator | GE Department courses (PE, CWTS, PHIL 190, PHIL 220, ARTS 101, ENGL 302), last, once opened | none |
 
-A GE class taught by a member of a college (not the GE Department) stays *Waiting* until that teacher's chair and their college's associate dean approve it. No approval is needed when the teacher's department holds the course: for example, Psychology faculty teaching Understanding the Self. A new time or a new teacher asks again. In Settings, the Registrar can limit this to teachers serving another college.
+Which department holds each GE course comes from `housed_by` in `data/institutional_core.yaml` (UNI 103 is held by each program's own department). A GE class a department books from another department stays *Waiting* until the holding department approves it and picks the teacher. A new time asks again.
 
 ## One-time setup
 

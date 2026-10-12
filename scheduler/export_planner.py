@@ -62,6 +62,7 @@ def planner_data(uni: University, semester: int) -> dict:
     for m in meetings:
         pools = [p for p, _ in room_pools(uni, m) if p is None or uni.campus.pool(p)]
         by_class.setdefault(m.klass.id, []).append({"part": m.part, "kind": m.kind, "pools": pools})
+    dept_college = {f.department: f.college for f in uni.faculty.values()}
     for k in uni.classes_for(semester):
         c = k.course
         courses[c.code] = {"title": c.title, "credits": c.credits, "lec": c.lec, "lab": c.lab,
@@ -70,6 +71,7 @@ def planner_data(uni: University, semester: int) -> dict:
         classes.append({"id": k.id, "course": c.code, "section": k.section.name,
                         "teacher": k.faculty.key if k.faculty else None,
                         "holder": holder_department(c.housed_by, uni.programs[k.section.program].department) if c.is_core else None,
+                        "holderCollege": dept_college.get(holder_department(c.housed_by, uni.programs[k.section.program].department)) if c.is_core else None,
                         "lu": c.load_units, "meetings": by_class.get(k.id, [])})
 
     load = faculty_load_summary(uni, semester)

@@ -1,20 +1,20 @@
 -- Class Scheduling: database schema, roles, and access rules for Supabase.
 --
 -- Who can do what (enforced here, in the database, not only in the page):
---   registrar, dean      everything, manage staff, publish, open GE scheduling
---   associate_dean       the classes of the sections of their own college, and GE classes in
---                        those sections (once GE scheduling is open),
---                        approves GE classes taught by faculty of their college
---   chair                the major classes of their own department, with faculty of
---                        their own department, never GE classes, approves GE classes
---                        taught by faculty of their department
---   ge_coordinator       every GE class (once GE scheduling is open)
+--   registrar, dean    everything, manage staff, publish, open GE Department scheduling
+--   chair              major classes of their own department, with their own faculty.
+--                      GE courses their department holds, for their own sections, with no approval.
+--                      GE courses another department holds, for their own sections: they book the time,
+--                      and the class waits for approval. The holding department picks the teacher.
+--   associate_dean     the classes of the sections of their own college (as a chair would),
+--                      and approves GE classes that other colleges borrow from their college
+--   ge_coordinator     courses of the GE Department, once the Registrar or Dean opens them, with no approval
 -- Everyone with a role can read the whole timetable, because conflict checks need it.
 --
--- A GE class taught by a member of a college (not the GE Department) is "pending"
--- until the chair of the teacher department and the associate dean of their college
--- approve it. No approval is needed when the teacher belongs to the department that holds the course
--- (e.g. Psychology holds Understanding the Self). A new time or teacher asks again.
+-- Approval of a borrowed GE class (a GE course held by another department):
+--   holding department in the same college    the chair of the holding department approves
+--   holding department in another college     the associate dean of that college approves
+-- The approver also picks the teacher from the holding department. A new time or teacher asks again.
 
 -- ---------- reference data (loaded by seed.sql, read-only to users) ----------
 create table if not exists public.faculty (
@@ -37,9 +37,11 @@ create table if not exists public.classes (
   department   text not null,        -- department of the section program
   is_ge        boolean not null,
   plan_teacher text references public.faculty(key),
-  holder_dept  text                  -- GE only: the department that holds the course
+  holder_dept  text,                 -- GE only: the department that holds the course
+  holder_college text                -- and its college (GE for the GE Department)
 );
 alter table public.classes add column if not exists holder_dept text;
+alter table public.classes add column if not exists holder_college text;
 
 -- ---------- people ----------
 create table if not exists public.staff (
@@ -74,19 +76,17 @@ create table if not exists public.teacher_changes (
   updated_at timestamptz not null default now()
 );
 
--- Approvals of a GE class taught by college faculty, for one teacher and one schedule.
-create table if not exists public.ge_approvals (
-  class_id    text not null references public.classes(id) on delete cascade,
-  teacher     text not null references public.faculty(key),
-  schedule    text not null default '',  -- the bookings approved, e.g. "Lec:M1 MWF"
-  chair_by    text,
-  chair_at    timestamptz,
-  adean_by    text,
-  adean_at    timestamptz,
+-- The decision on a borrowed GE class, for one schedule and one teacher.
+drop table if exists public.ge_approvals cascade;          -- replaced by ge_decisions
+create table if not exists public.ge_decisions (
+  class_id    text primary key references public.classes(id) on delete cascade,
+  schedule    text not null default '',  -- the bookings decided on, e.g. "Lec:M1 MWF"
+  teacher     text references public.faculty(key),
+  approved_by text,
+  approved_at timestamptz,
   rejected_by text,
   rejected_at timestamptz,
-  note        text,
-  primary key (class_id, teacher)
+  note        text
 );
 
 create table if not exists public.settings (
@@ -127,105 +127,135 @@ language sql stable security definer set search_path = public as $$
   select coalesce(string_agg(part || ':' || pattern, ' ' order by part), '') from public.bookings where class_id = cid
 $$;
 
--- May the signed-in person book this class (time, room, teacher)?
+-- What kind of class is this? major, gedept (a GE Department course), own (a GE course the
+-- department of the section holds), or borrowed (a GE course another department holds).
+create or replace function public.class_kind(cid text) returns text
+language sql stable security definer set search_path = public as $$
+  select case when not c.is_ge then 'major'
+              when c.holder_dept is null or c.holder_dept = 'General Education' then 'gedept'
+              when c.holder_dept = c.department then 'own'
+              else 'borrowed' end
+  from public.classes c where c.id = cid
+$$;
+
+-- May the signed-in person book the time and room of this class?
 create or replace function public.can_edit_class(cid text) returns boolean
 language plpgsql stable security definer set search_path = public as $$
 declare
   me public.staff := public.my_staff();
   c  public.classes;
+  kind text := public.class_kind(cid);
   ge_is_open boolean;
 begin
-  if me.email is null then return false; end if;
+  if me.email is null or kind is null then return false; end if;
   if me.role in ('registrar', 'dean') then return true; end if;
   select * into c from public.classes where id = cid;
-  if not found then return false; end if;
-  if c.is_ge then
+  if kind = 'gedept' then
     select ge_open into ge_is_open from public.settings where id = 1;
-    if not coalesce(ge_is_open, false) then return false; end if;
-    return me.role = 'ge_coordinator' or (me.role = 'associate_dean' and c.college = me.college);
+    return me.role = 'ge_coordinator' and coalesce(ge_is_open, false);
   end if;
   if me.role = 'associate_dean' then return c.college = me.college; end if;
   if me.role = 'chair' then return c.department = me.department; end if;
   return false;
 end $$;
 
--- May the signed-in person give this class to this teacher? Chairs use their own faculty.
+-- May the signed-in person give this class to teacher t (t null means no teacher yet)?
+-- Borrowed GE classes get their teacher from the holding department.
 create or replace function public.can_assign(cid text, t text) returns boolean
 language plpgsql stable security definer set search_path = public as $$
-declare me public.staff := public.my_staff();
+declare
+  me public.staff := public.my_staff();
+  c  public.classes;
+  kind text := public.class_kind(cid);
+  f  public.faculty;
 begin
+  if me.email is null or kind is null then return false; end if;
+  if me.role in ('registrar', 'dean') then return true; end if;
+  select * into c from public.classes where id = cid;
+  select * into f from public.faculty where key = t;
+  if kind = 'borrowed' then
+    if t is not null and f.department <> c.holder_dept then return false; end if;
+    return (me.role = 'chair' and me.department = c.holder_dept)
+        or (me.role = 'associate_dean' and me.college = c.holder_college);
+  end if;
   if not public.can_edit_class(cid) then return false; end if;
   if t is null or me.role <> 'chair' then return true; end if;
-  return exists (select 1 from public.faculty f where f.key = t and f.department = me.department);
+  return f.department = me.department;
 end $$;
 
--- Does this GE class need approval by the chair and the associate dean?
+-- Does this class wait for approval? Only borrowed GE classes do.
 create or replace function public.needs_approval(cid text) returns boolean
-language plpgsql stable security definer set search_path = public as $$
-declare
-  c public.classes; f public.faculty; scope text; t text := public.class_teacher(cid);
-begin
-  select * into c from public.classes where id = cid;
-  if not found or not c.is_ge or t is null then return false; end if;
-  select * into f from public.faculty where key = t;
-  if f.college = 'GE' then return false; end if;
-  if f.department = c.holder_dept then return false; end if;   -- the department teaching its own GE course
-  select approval_scope into scope from public.settings where id = 1;
-  return scope = 'all' or f.college <> c.college;
-end $$;
-
--- Does the associate dean also have to approve? Not when the department of the teacher holds the course.
-create or replace function public.needs_adean(cid text) returns boolean
 language sql stable security definer set search_path = public as $$
-  select public.needs_approval(cid) and coalesce(
-    (select f.department <> c.holder_dept or c.holder_dept is null
-       from public.classes c join public.faculty f on f.key = public.class_teacher(cid) where c.id = cid), true)
+  select coalesce(public.class_kind(cid) = 'borrowed', false)
 $$;
 
--- Approve or reject a GE class taught by college faculty. decision is approve, reject, or reopen.
-create or replace function public.decide_ge(cid text, decision text, note text default null) returns text
+-- May the signed-in person approve or reject this borrowed GE class?
+create or replace function public.can_decide(cid text) returns boolean
+language plpgsql stable security definer set search_path = public as $$
+declare
+  me public.staff := public.my_staff();
+  c  public.classes;
+begin
+  if me.email is null or not public.needs_approval(cid) then return false; end if;
+  if me.role in ('registrar', 'dean') then return true; end if;
+  select * into c from public.classes where id = cid;
+  if c.holder_college = c.college then
+    return me.role = 'chair' and me.department = c.holder_dept;
+  end if;
+  return me.role = 'associate_dean' and me.college = c.holder_college;
+end $$;
+
+-- Approve, reject, or reopen a borrowed GE class. On approval the approver may name the teacher.
+drop function if exists public.decide_ge(text, text, text);
+drop function if exists public.needs_adean(text);
+create or replace function public.decide_ge(cid text, decision text, note text default null, teacher text default null)
+returns text
 language plpgsql volatile security definer set search_path = public as $$
 declare
   me public.staff := public.my_staff();
-  t text := public.class_teacher(cid);
-  f public.faculty;
+  c  public.classes;
   sched text := public.class_schedule(cid);
-  as_chair boolean; as_adean boolean;
-  who text := me.email;
+  t text;
 begin
   if me.email is null then raise exception 'Your account has no role yet'; end if;
   if not public.needs_approval(cid) then raise exception 'This class does not need approval'; end if;
-  if sched = '' then raise exception 'Book a time for this class first'; end if;
-  select * into f from public.faculty where key = t;
-  as_chair := me.role in ('registrar', 'dean') or (me.role = 'chair' and me.department = f.department);
-  as_adean := (me.role in ('registrar', 'dean') or (me.role = 'associate_dean' and me.college = f.college))
-              and public.needs_adean(cid);
+  select * into c from public.classes where id = cid;
   if decision = 'reopen' then
-    if not (public.can_edit_class(cid) or as_chair or as_adean) then raise exception 'Not allowed'; end if;
-    delete from public.ge_approvals where class_id = cid and teacher = t;
+    if not (public.can_edit_class(cid) or public.can_decide(cid)) then raise exception 'Not allowed'; end if;
+    delete from public.ge_decisions where class_id = cid;
     return 'reopened';
   end if;
-  if not (as_chair or as_adean) then
-    if public.needs_adean(cid) then raise exception 'Only the % chair or the % associate dean can decide this', f.department, f.college; end if;
-    raise exception 'Only the % chair decides this: the department holds this course', f.department;
+  if not public.can_decide(cid) then
+    if c.holder_college = c.college then raise exception 'Only the % chair can decide this', c.holder_dept; end if;
+    raise exception 'Only the % associate dean can decide this', c.holder_college;
   end if;
-  insert into public.ge_approvals (class_id, teacher, schedule) values (cid, t, sched)
-    on conflict (class_id, teacher) do nothing;
-  -- A schedule change since the last decision starts the approval over.
-  update public.ge_approvals set schedule = sched, chair_by = null, chair_at = null, adean_by = null, adean_at = null,
-         rejected_by = null, rejected_at = null, note = null
-   where class_id = cid and teacher = t and schedule <> sched;
+  if sched = '' then raise exception 'The class has no booked time yet'; end if;
   if decision = 'approve' then
-    update public.ge_approvals set
-      chair_by = case when as_chair then who else chair_by end, chair_at = case when as_chair then now() else chair_at end,
-      adean_by = case when as_adean then who else adean_by end, adean_at = case when as_adean then now() else adean_at end,
-      rejected_by = null, rejected_at = null, note = coalesce(decide_ge.note, ge_approvals.note)
-     where class_id = cid and teacher = t;
+    if decide_ge.teacher is not null then
+      if not exists (select 1 from public.faculty f where f.key = decide_ge.teacher and f.department = c.holder_dept) and not public.is_admin() then
+        raise exception 'Choose a teacher from the % department', c.holder_dept;
+      end if;
+      if decide_ge.teacher is distinct from c.plan_teacher then
+        insert into public.teacher_changes (class_id, sem, teacher) values (cid, c.sem, decide_ge.teacher)
+          on conflict (class_id) do update set teacher = excluded.teacher;
+      else
+        delete from public.teacher_changes where class_id = cid;
+      end if;
+    end if;
+    t := public.class_teacher(cid);
+    if t is null then raise exception 'Choose the teacher before approving'; end if;
+    insert into public.ge_decisions (class_id, schedule, teacher, approved_by, approved_at, note)
+      values (cid, sched, t, me.email, now(), decide_ge.note)
+      on conflict (class_id) do update set schedule = excluded.schedule, teacher = excluded.teacher,
+        approved_by = excluded.approved_by, approved_at = excluded.approved_at,
+        rejected_by = null, rejected_at = null, note = excluded.note;
     return 'approved';
   elsif decision = 'reject' then
-    update public.ge_approvals set rejected_by = who, rejected_at = now(), note = decide_ge.note,
-           chair_by = null, chair_at = null, adean_by = null, adean_at = null
-     where class_id = cid and teacher = t;
+    insert into public.ge_decisions (class_id, schedule, teacher, rejected_by, rejected_at, note)
+      values (cid, sched, public.class_teacher(cid), me.email, now(), decide_ge.note)
+      on conflict (class_id) do update set schedule = excluded.schedule, teacher = excluded.teacher,
+        rejected_by = excluded.rejected_by, rejected_at = excluded.rejected_at,
+        approved_by = null, approved_at = null, note = excluded.note;
     return 'rejected';
   end if;
   raise exception 'Unknown decision %', decision;
@@ -260,7 +290,7 @@ alter table public.classes         enable row level security;
 alter table public.staff           enable row level security;
 alter table public.bookings        enable row level security;
 alter table public.teacher_changes enable row level security;
-alter table public.ge_approvals    enable row level security;
+alter table public.ge_decisions    enable row level security;
 alter table public.settings        enable row level security;
 
 drop policy if exists read_faculty on public.faculty;
@@ -290,13 +320,13 @@ drop policy if exists add_teacher_changes on public.teacher_changes;
 create policy add_teacher_changes on public.teacher_changes for insert to authenticated with check (public.can_assign(class_id, teacher));
 drop policy if exists change_teacher_changes on public.teacher_changes;
 create policy change_teacher_changes on public.teacher_changes for update to authenticated
-  using (public.can_edit_class(class_id)) with check (public.can_assign(class_id, teacher));
+  using (public.can_assign(class_id, null)) with check (public.can_assign(class_id, teacher));
 drop policy if exists remove_teacher_changes on public.teacher_changes;
-create policy remove_teacher_changes on public.teacher_changes for delete to authenticated using (public.can_edit_class(class_id));
+create policy remove_teacher_changes on public.teacher_changes for delete to authenticated using (public.can_assign(class_id, null));
 
--- Approvals are written only through decide_ge().
-drop policy if exists read_ge_approvals on public.ge_approvals;
-create policy read_ge_approvals on public.ge_approvals for select to authenticated using (public.has_role());
+-- Decisions are written only through decide_ge().
+drop policy if exists read_ge_decisions on public.ge_decisions;
+create policy read_ge_decisions on public.ge_decisions for select to authenticated using (public.has_role());
 
 drop policy if exists read_settings on public.settings;
 create policy read_settings on public.settings for select to authenticated using (public.has_role());
@@ -304,23 +334,24 @@ drop policy if exists admin_settings on public.settings;
 create policy admin_settings on public.settings for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 grant usage on schema public to authenticated;
-grant select on public.faculty, public.classes, public.ge_approvals to authenticated;
+grant select on public.faculty, public.classes, public.ge_decisions to authenticated;
 grant select, insert, update, delete on public.staff, public.bookings, public.teacher_changes to authenticated;
 grant select, update on public.settings to authenticated;
 -- Every helper the access rules call must be runnable by signed-in users (some projects do not grant this by default).
 grant execute on function public.my_staff(), public.is_admin(), public.has_role(), public.class_teacher(text),
-  public.class_schedule(text), public.can_edit_class(text), public.can_assign(text, text), public.needs_approval(text), public.needs_adean(text),
-  public.decide_ge(text, text, text), public.publish_schedule(), public.stamp_row() to authenticated;
+  public.class_schedule(text), public.class_kind(text), public.can_edit_class(text), public.can_assign(text, text),
+  public.needs_approval(text), public.can_decide(text), public.decide_ge(text, text, text, text),
+  public.publish_schedule(), public.stamp_row() to authenticated;
 revoke all on all tables in schema public from anon;
 
 -- ---------- live updates ----------
 alter table public.bookings replica identity full;
 alter table public.teacher_changes replica identity full;
-alter table public.ge_approvals replica identity full;
+alter table public.ge_decisions replica identity full;
 do $$ begin
   begin alter publication supabase_realtime add table public.bookings; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.teacher_changes; exception when duplicate_object then null; end;
-  begin alter publication supabase_realtime add table public.ge_approvals; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.ge_decisions; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.settings; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.staff; exception when duplicate_object then null; end;
 end $$;

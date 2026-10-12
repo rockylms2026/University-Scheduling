@@ -1,6 +1,7 @@
 """Checks the Supabase access rules against a local Postgres loaded with supabase/setup.sql.
 
-Run: python tests/rls_check.py  (needs a local database "sched" loaded with tests/supabase_stub.sql, then supabase/setup.sql)
+Run: python tests/rls_check.py  (needs a local database "sched" loaded with tests/supabase_stub.sql,
+then supabase/setup.sql)
 """
 import json
 import subprocess
@@ -29,84 +30,121 @@ def expect(label, ok_wanted, sql, who=None, contains=None):
 
 
 def one(sql):
-    return psql(sql)[1].splitlines()[-1] if psql(sql)[1] else ""
+    out = psql(sql)[1]
+    return out.splitlines()[-1] if out else ""
 
 
-# Pick real classes from the seed.
-psy_major = one("select id from classes where department='Psychology' and not is_ge limit 1")
-eco_major = one("select id from classes where department='Economics' and not is_ge limit 1")
-cisc_major = one("select id from classes where college='CISC' and not is_ge limit 1")
-ge_css = one("select id from classes where is_ge and college='CSS' and id not in (select class_id from bookings) limit 1")
-ge_cisc = one("select id from classes where is_ge and college='CISC' limit 1")
-psy_teacher = one("select key from faculty where department='Psychology' limit 1")
-eco_teacher = one("select key from faculty where department='Economics' limit 1")
-# Cross-department GE: HIST 201 (held by Secondary Education) moved to CCJPS-D2 in the claude.ai version.
-X = "S1-0666"
-t2_dept, t2_college = one("select department||'|'||college from faculty where key='CCJPS-D2'").split("|")
-# Own-department GE: a booked PSYC 160 (held by Psychology) taught by Psychology faculty.
-OWN = one("select c.id from classes c join faculty f on f.key=c.plan_teacher join bookings b on b.class_id=c.id "
-          "where c.course='PSYC 160' and f.department='Psychology' limit 1")
+def cls(where):
+    return one(f"select id from classes where {where} order by id limit 1")
+
+
+BSP = "program = 'BSP'"
+psy_major = cls(f"{BSP} and not is_ge")
+eco_major = cls("department = 'Economics' and not is_ge")
+cisc_major = cls("college = 'CISC' and not is_ge")
+own_ge = cls(f"{BSP} and course = 'PSYC 160'")                       # Psychology holds it
+same_college = cls(f"{BSP} and course = 'SOCS 195'")                 # Economics (CSS) holds it
+other_college = cls(f"{BSP} and course = 'STS 180'")                 # Information Technology (CISC) holds it
+gedept = cls(f"{BSP} and course = 'PE 101'")                         # GE Department
+ge_elsewhere = cls("department = 'Communication' and course = 'PSYC 160'")
+psy_teacher = one("select key from faculty where department = 'Psychology' order by key limit 1")
+eco_teacher = one("select key from faculty where department = 'Economics' order by key limit 1")
+it_teacher = one("select key from faculty where department = 'Information Technology' order by key limit 1")
 
 ADMIN = "agbayanispencer@gmail.com"
-psql(f"""insert into staff (email, full_name, role, college, department) values
+psql("""insert into staff (email, full_name, role, college, department) values
   ('chair.psy@u.edu','Chair Psychology','chair','CSS','Psychology'),
-  ('chair.t2@u.edu','Chair of CISC-T2','chair','{t2_college}','{t2_dept}'),
+  ('chair.eco@u.edu','Chair Economics','chair','CSS','Economics'),
+  ('chair.it@u.edu','Chair IT','chair','CISC','Information Technology'),
   ('adean.css@u.edu','Assoc Dean CSS','associate_dean','CSS',null),
-  ('adean.t2@u.edu','Assoc Dean of CISC-T2','associate_dean','{t2_college}',null),
+  ('adean.cisc@u.edu','Assoc Dean CISC','associate_dean','CISC',null),
   ('ge@u.edu','GE Coordinator','ge_coordinator',null,null),
   ('dean@u.edu','Dean','dean',null,null) on conflict do nothing;
-  update settings set ge_open=false where id=1""")
+  update settings set ge_open=false where id=1;
+  delete from bookings where class_id in (select id from classes where program = 'BSP');
+  delete from teacher_changes where class_id in (select id from classes where program = 'BSP');""")
 
-bk = lambda cid, pat="M3 MWF": f"insert into bookings (class_id, part, sem, pattern, room) values ('{cid}', (select 'Lec'), 1, '{pat}', 'DIW 301') on conflict (class_id, part) do update set pattern=excluded.pattern"
+
+def bk(cid, pat="M3 MWF"):
+    return (f"insert into bookings (class_id, part, sem, pattern, room) values ('{cid}', 'Lec', 1, '{pat}', 'DIW 301') "
+            "on conflict (class_id, part) do update set pattern = excluded.pattern")
+
+
+def tc(cid, t):
+    return (f"insert into teacher_changes (class_id, sem, teacher) values ('{cid}', 1, '{t}') "
+            "on conflict (class_id) do update set teacher = excluded.teacher")
+
 
 expect("anon cannot read", False, "set role anon; select count(*) from bookings")
 expect("unknown account sees nothing", True, "select count(*) from bookings", "stranger@x.com", contains="0")
 expect("unknown account cannot book", False, bk(psy_major), "stranger@x.com")
-expect("staff can read all bookings", True, "select count(*) from bookings", "chair.psy@u.edu", contains="49")
+expect("cannot read reference data without a role", True, "select count(*) from faculty", "stranger@x.com", contains="0")
 
-expect("chair books own department class", True, bk(psy_major), "chair.psy@u.edu")
+# Kinds of classes
+expect("kinds are right", True,
+       f"select class_kind('{psy_major}')||' '||class_kind('{own_ge}')||' '||class_kind('{same_college}')||' '||class_kind('{other_college}')||' '||class_kind('{gedept}')",
+       ADMIN, contains="major own borrowed borrowed gedept")
+
+# Chairs: majors
+expect("chair books own department major", True, bk(psy_major), "chair.psy@u.edu")
 expect("chair cannot book another department", False, bk(eco_major), "chair.psy@u.edu")
-expect("chair cannot book GE", False, bk(ge_css), "chair.psy@u.edu")
-expect("chair assigns own faculty", True, f"insert into teacher_changes (class_id, sem, teacher) values ('{psy_major}',1,'{psy_teacher}')", "chair.psy@u.edu")
-expect("chair cannot assign other department's faculty", False,
-       f"update teacher_changes set teacher='{eco_teacher}' where class_id='{psy_major}'", "chair.psy@u.edu")
+expect("chair assigns own faculty to a major", True, tc(psy_major, psy_teacher), "chair.psy@u.edu")
+expect("chair cannot assign other department faculty", False, tc(psy_major, eco_teacher), "chair.psy@u.edu")
 expect("stamp records who booked", True, f"select updated_by from bookings where class_id='{psy_major}'", "chair.psy@u.edu", contains="chair.psy@u.edu")
 
-expect("GE coordinator blocked while GE is closed", False, bk(ge_css), "ge@u.edu")
-expect("chair cannot open GE", True, "update settings set ge_open=true where id=1; select ge_open from settings", "chair.psy@u.edu", contains="f")
-expect("registrar opens GE", True, "update settings set ge_open=true where id=1", ADMIN)
-expect("GE coordinator books GE once open", True, bk(ge_css), "ge@u.edu")
-expect("GE coordinator cannot book majors", False, bk(psy_major, "M4 MWF"), "ge@u.edu")
+# Chairs: their own GE
+expect("chair books the GE their department holds", True, bk(own_ge, "M2 MWF"), "chair.psy@u.edu")
+expect("own GE needs no approval", True, f"select needs_approval('{own_ge}')", "chair.psy@u.edu", contains="f")
+expect("chair assigns own faculty to own GE", True, tc(own_ge, psy_teacher), "chair.psy@u.edu")
+expect("chair cannot book GE for another department sections", False, bk(ge_elsewhere), "chair.psy@u.edu")
+
+# Chairs: borrowed GE, same college (SOCS 195 from Economics)
+expect("chair books a borrowed GE time", True, bk(same_college, "M5 MWF"), "chair.psy@u.edu")
+expect("borrowed GE needs approval", True, f"select needs_approval('{same_college}')", "chair.psy@u.edu", contains="t")
+expect("requesting chair cannot pick its teacher", False, tc(same_college, psy_teacher), "chair.psy@u.edu")
+expect("requesting chair cannot approve", False, f"select decide_ge('{same_college}','approve')", "chair.psy@u.edu")
+expect("same-college associate dean is not the approver", False, f"select decide_ge('{same_college}','approve')", "adean.css@u.edu")
+expect("holding chair must pick a teacher of the holding department", False,
+       f"select decide_ge('{same_college}','approve',null,'{psy_teacher}')", "chair.eco@u.edu")
+expect("holding chair approves with a teacher", True,
+       f"select decide_ge('{same_college}','approve',null,'{eco_teacher}'); select teacher||' '||approved_by from ge_decisions where class_id='{same_college}'",
+       "chair.eco@u.edu", contains=f"{eco_teacher} chair.eco@u.edu")
+expect("approval set the teacher", True, f"select class_teacher('{same_college}')", ADMIN, contains=eco_teacher)
+expect("holding chair cannot book the time", False, bk(same_college, "M6 MWF"), "chair.eco@u.edu")
+expect("approvals cannot be written directly", False, "update ge_decisions set approved_by='me'", "chair.eco@u.edu")
+
+# Chairs: borrowed GE, another college (STS 180 from IT, CISC)
+expect("chair books a GE from another college", True, bk(other_college, "M4 MWF"), "chair.psy@u.edu")
+expect("holding chair of another college is not the approver", False, f"select decide_ge('{other_college}','approve')", "chair.it@u.edu")
+expect("holding chair may still pick the teacher", True, tc(other_college, it_teacher), "chair.it@u.edu")
+expect("associate dean of the holding college approves", True, f"select decide_ge('{other_college}','approve')", "adean.cisc@u.edu", contains="approved")
+expect("associate dean rejects with a reason", True,
+       f"select decide_ge('{other_college}','reject','Teacher has a thesis class then'); select rejected_by from ge_decisions where class_id='{other_college}'",
+       "adean.cisc@u.edu", contains="adean.cisc@u.edu")
+expect("requesting chair can ask again", True, f"select decide_ge('{other_college}','reopen')", "chair.psy@u.edu", contains="reopened")
+
+# Associate deans book their own college
 expect("associate dean books own college major", True, bk(eco_major), "adean.css@u.edu")
 expect("associate dean cannot book other college", False, bk(cisc_major), "adean.css@u.edu")
-expect("associate dean books GE in own college sections", True, bk(ge_css, "M5 MWF"), "adean.css@u.edu")
-expect("associate dean cannot book GE in other colleges", False, bk(ge_cisc), "adean.css@u.edu")
+
+# GE Coordinator: GE Department courses, last
+expect("GE Coordinator blocked until opened", False, bk(gedept), "ge@u.edu")
+expect("chair cannot open GE", True, "update settings set ge_open=true where id=1; select ge_open from settings", "chair.psy@u.edu", contains="f")
+expect("chair cannot book a GE Department course", False, bk(gedept), "chair.psy@u.edu")
+expect("registrar opens GE Department scheduling", True, "update settings set ge_open=true where id=1", ADMIN)
+expect("GE Coordinator books GE Department course", True, bk(gedept, "M7 MWF"), "ge@u.edu")
+expect("GE Department course needs no approval", True, f"select needs_approval('{gedept}')", "ge@u.edu", contains="f")
+expect("GE Coordinator cannot book department-held GE", False, bk(own_ge), "ge@u.edu")
+expect("GE Coordinator cannot book majors", False, bk(psy_major, "M4 MWF"), "ge@u.edu")
 expect("dean books anything", True, bk(cisc_major), "dean@u.edu")
 
-expect("cross-college GE needs approval", True, f"select needs_approval('{X}')", "ge@u.edu", contains="t")
-expect("GE Department teacher needs none", True,
-       "select needs_approval((select c.id from classes c join faculty f on f.key=c.plan_teacher where c.is_ge and f.college='GE' limit 1))", "ge@u.edu", contains="f")
-expect("other chair cannot approve", False, f"select decide_ge('{X}','approve')", "chair.psy@u.edu")
-expect("GE coordinator cannot approve", False, f"select decide_ge('{X}','approve')", "ge@u.edu")
-expect("teacher's chair approves", True, f"select decide_ge('{X}','approve')", "chair.t2@u.edu")
-expect("still pending without associate dean", True, f"select adean_at is null from ge_approvals where class_id='{X}'", "chair.t2@u.edu", contains="t")
-expect("teacher's associate dean approves", True, f"select decide_ge('{X}','approve')", "adean.t2@u.edu")
-expect("both approvals recorded", True, f"select chair_by||' '||adean_by from ge_approvals where class_id='{X}'", ADMIN, contains="chair.t2@u.edu adean.t2@u.edu")
-expect("approvals cannot be written directly", False, "update ge_approvals set chair_by='me'", "chair.t2@u.edu")
-psql(f"update bookings set pattern='T2 TTh' where class_id='{X}'")
-expect("a new time starts approval over", True, f"select decide_ge('{X}','approve'); select coalesce(adean_by,'none') from ge_approvals where class_id='{X}'", "chair.t2@u.edu", contains="none")
-expect("associate dean rejects", True, f"select decide_ge('{X}','reject','Teaching a thesis class then')", "adean.t2@u.edu")
-expect("rejection recorded", True, f"select rejected_by from ge_approvals where class_id='{X}'", ADMIN, contains="adean.t2@u.edu")
-
-expect("own-department GE needs no approval at all", True, f"select needs_approval('{OWN}')", "ge@u.edu", contains="f")
-expect("cross-department GE needs the associate dean", True, f"select needs_adean('{X}')", "ge@u.edu", contains="t")
-expect("nothing to approve for an own-department GE", False, f"select decide_ge('{OWN}','approve')", "chair.psy@u.edu", contains="does not need approval")
+# Admin
 expect("chair cannot publish", False, "select publish_schedule()", "chair.psy@u.edu")
 expect("registrar publishes", True, "select publish_schedule()", ADMIN)
 expect("chair cannot add staff", False, "insert into staff (email, role) values ('x@u.edu','dean')", "chair.psy@u.edu")
-expect("chair cannot raise own role", True, "update staff set role='dean' where email='chair.psy@u.edu'; select role from staff where email='chair.psy@u.edu'", "chair.psy@u.edu", contains="chair")
-expect("registrar adds staff", True, "insert into staff (email, full_name, role) values ('new@u.edu','New','dean')", ADMIN)
-expect("cannot read reference data without a role", True, "select count(*) from faculty", "stranger@x.com", contains="0")
+expect("chair cannot raise own role", True, "update staff set role='dean' where email='chair.psy@u.edu'; select role from staff where email='chair.psy@u.edu'",
+       "chair.psy@u.edu", contains="chair")
+expect("registrar adds staff", True, "insert into staff (email, full_name, role) values ('new@u.edu','New','dean') on conflict do nothing", ADMIN)
 
 print(f"\n{len(failures)} failed" if failures else "\nAll access rules behave as intended.")
 sys.exit(1 if failures else 0)
