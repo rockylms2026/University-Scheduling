@@ -16,7 +16,7 @@ A GE class taught by a member of a college (not the GE Department) stays *Waitin
 1. **Database.** In Supabase, open **SQL Editor → New query**, paste all of `supabase/setup.sql`, and click **Run**. This creates the tables and rules, loads the faculty and classes, gives the Registrar's email full access, and copies the 49 bookings and 3 teacher changes made in the claude.ai version. It is safe to run again.
 2. **Your login.** Open **Authentication → Users → Add user → Create new user**. Enter the Registrar's email and a password, and tick **Auto Confirm User**.
 3. **Close public sign-up** (recommended). Open **Authentication → Sign In / Providers** and turn off **Allow new users to sign up**. Accounts are then created only by you. An account with no role can sign in but sees nothing either way.
-4. **Host the page.** On [Vercel](https://vercel.com), choose **Add New → Project**, import `rockylms2026/university-scheduling`, set **Root Directory** to `web`, leave the framework as **Other**, and click **Deploy**. Vercel builds from the repository's default branch, so merge this work into `main` first.
+4. **Host the page.** On [Vercel](https://vercel.com), choose **Add New → Project**, import `rockylms2026/university-scheduling`, and click **Deploy**. Leave **Root Directory** empty and the framework as **Other**: `vercel.json` tells Vercel to serve the `web` folder as it is, with nothing to install or build.
 5. **Tell Supabase the address.** In **Authentication → URL Configuration**, set **Site URL** to the Vercel address (for example `https://university-scheduling.vercel.app`) and add the same address under **Redirect URLs**. Password-reset emails link there.
 
 ## Adding people
