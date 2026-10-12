@@ -22,7 +22,7 @@
   --f-display: "Schibsted Grotesk", "Segoe UI", system-ui, sans-serif;
   --f-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
-  --row: 22px;
+  --row: 30px;            /* half an hour; one hour is 60px */
   color-scheme: light;   /* always light, whatever the device or claude.ai theme */
 }
 * { box-sizing: border-box; }
@@ -182,7 +182,7 @@ dl.about dd { margin: 0; }
 .col.drop { background-color: var(--accent-soft); }
 .lunch { position: absolute; left: 0; right: 0; background: repeating-linear-gradient(135deg, var(--lunch) 0 6px, #e4e7ec 6px 8px); display: flex; align-items: center; justify-content: center; gap: 4px; font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); z-index: 1; }
 .away { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8px; font-size: .74rem; color: var(--t-prac-ink); font-weight: 600; }
-.block { position: absolute; z-index: 2; border-radius: 5px; padding: 2px 5px; overflow: hidden; font-size: .7rem; line-height: 1.2; border: 1px solid rgba(0,0,0,.06); text-align: left; font-family: var(--f-body); cursor: pointer; }
+.block { position: absolute; z-index: 2; border-radius: 5px; padding: 4px 6px; overflow: hidden; font-size: .72rem; line-height: 1.25; border: 1px solid rgba(0,0,0,.06); text-align: left; font-family: var(--f-body); cursor: pointer; }
 .block strong { display: flex; gap: 3px; align-items: center; font-family: var(--f-mono); font-size: .7rem; font-weight: 600; }
 .block span { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .block .ttl { opacity: .85; }
@@ -252,9 +252,12 @@ dl.about dd { margin: 0; }
 .userchip span { opacity: .8; }
 .userchip button { white-space: nowrap; font: inherit; font-size: .78rem; color: #fff; background: transparent; border: 1px solid rgba(255,255,255,.35); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
 .readonly { background: var(--lunch); color: var(--ink); border-radius: 6px; padding: 7px 10px; font-size: .84rem; }
-.block.pending { border: 2px dashed #b07800; }
-.block.rejected { border: 2px dashed var(--bad); }
-.legend i.pend { background: #fff; border: 2px dashed #b07800; }
+.block.pending, .block.rejected { border: 1px dashed #b07800; }
+.block.rejected { border-color: var(--bad); }
+.block .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #c48a00; }
+.block.rejected .dot { background: var(--bad); }
+.legend i.pend { background: #fff; border: 1px dashed #b07800; position: relative; }
+.legend i.pend::after { content: ""; position: absolute; left: 2px; top: 2px; width: 6px; height: 6px; border-radius: 50%; background: #c48a00; }
 .appr { display: inline-flex; gap: 4px; align-items: center; font-size: .78rem; white-space: nowrap; }
 .appr.ok { color: var(--good); }
 .appr.wait { color: var(--warn); }
@@ -792,7 +795,8 @@ function conflictsInScope() {
 }
 
 // ---------- week grid ----------
-function grid(list, { offDays = [], dim = () => false, ghost = [], ghostBad = false, drop = false } = {}) {
+// focus: what the grid is already showing ({ section | teacher | room }); cards leave that out.
+function grid(list, { offDays = [], dim = () => false, ghost = [], ghostBad = false, drop = false, focus = {} } = {}) {
   const rows = (DATA.end - DATA.start) / DATA.slot;
   const px = (m) => `calc(var(--row) * ${(m - DATA.start) / DATA.slot})`;
   let html = `<div class="week" style="--days:${DAYS.length}"><div></div>`;
@@ -816,10 +820,11 @@ function grid(list, { offDays = [], dim = () => false, ghost = [], ghostBad = fa
                    state.pick && state.pick.cls === s.cls.id && state.pick.part === s.part ? "sel" : ""].join(" ");
       const who = s.tkey ? surname(s.tkey) : teacherOf(s.cls)?.name || "TBA";
       html += `<button type="button" class="block ${cls}" data-class="${s.cls.id}" data-part="${s.part}"
-        style="top:${px(s.start)};height:calc(var(--row) * ${(s.end - s.start) / DATA.slot} - 2px);left:calc(${s._lane * w}% + 2px);width:calc(${w}% - 4px)"
+        style="top:calc(${px(s.start)} + 1px);height:calc(var(--row) * ${(s.end - s.start) / DATA.slot} - 3px);left:calc(${s._lane * w}% + 3px);width:calc(${w}% - 6px)"
         title="${esc(`${s.cls.course} ${DATA.courses[s.cls.course].title} · ${s.cls.section} · ${s.tkey ? DATA.teachers[s.tkey].name : "TBA"} · ${s.room || (s.kind === "nstp" ? "Grounds" : "no room")}${bad ? " · CONFLICT" : ""}${ap === "pending" ? " · AWAITING APPROVAL" : ap === "rejected" ? " · APPROVAL REJECTED" : ""}`)}">
-        <strong>${bad ? WARN_ICON : ""}<span class="code">${esc(s.cls.course)}${s.part === "Lab" ? " Lab" : ""}</span><span class="sec">· ${esc(s.cls.section)}</span></strong><span class="ttl">${esc(DATA.courses[s.cls.course].title)}</span>
-        <span>${esc(who)} · ${esc(s.room || (s.kind === "nstp" ? "Grounds" : "—"))}</span></button>`;
+        <strong>${bad ? WARN_ICON : ap === "pending" || ap === "rejected" ? `<i class="dot"></i>` : ""}<span class="code">${esc(s.cls.course)}${s.part === "Lab" ? " Lab" : ""}</span></strong><span class="ttl">${esc(DATA.courses[s.cls.course].title)}</span>
+        <span>${esc([focus.section !== s.cls.section && s.cls.section, !(focus.teacher && focus.teacher === s.tkey) && who,
+                     focus.room !== s.room && (s.room || (s.kind === "nstp" ? "Grounds" : "—"))].filter(Boolean).join(" · "))}</span></button>`;
     });
     ghost.filter((g) => g.day === d).forEach((g) => {
       html += `<div class="block ghost${ghostBad ? " badghost" : ""}" style="top:${px(g.start)};height:calc(var(--row) * ${(g.end - g.start) / DATA.slot} - 2px);left:2px;width:calc(100% - 4px)"><strong>${esc(g.code)}</strong><span>${ghostBad ? "Conflict" : "New time"}</span></div>`;
@@ -1029,7 +1034,7 @@ function renderDashboard(page) {
           <div class="row"><div class="seg" role="group" aria-label="View">${[["section", "By Section"], ["faculty", "By Faculty"], ["room", "By Room"]].map(([k, l]) =>
             `<button type="button" data-gridmode="${k}" aria-pressed="${state.gridMode === k}">${l}</button>`).join("")}</div>${picker}
             ${state.gridMode === "section" && key ? `<button type="button" class="btn" data-opensection="${esc(key)}">Open in timetable</button>` : ""}</div></div>
-        <div class="scroll">${grid(g.list, { offDays: g.off, dim: g.dim, drop: true })}</div>
+        <div class="scroll">${grid(g.list, { offDays: g.off, dim: g.dim, drop: true, focus: { [state.gridMode === "faculty" ? "teacher" : state.gridMode]: key } })}</div>
         ${legend()}
       </div>
       <div class="card">
@@ -1114,7 +1119,7 @@ function sectionDesk() {
     </div>
     <div class="card">
       ${pickCls ? editor(pickCls, state.pick.part) : `<p class="muted" style="margin:0">Choose a part of a class (for example <b>Lecture</b> or <b>Laboratory</b>) on the left to schedule it. Every allowed time is listed with whether the students, the teacher, and a room are free.</p>`}
-      <div class="scroll">${grid(mine, { offDays: sec.placement, dim: (s) => s.cls.section !== state.section, ghost, ghostBad })}</div>
+      <div class="scroll">${grid(mine, { offDays: sec.placement, dim: (s) => s.cls.section !== state.section, ghost, ghostBad, focus: { section: state.section } })}</div>
       ${legend()}
     </div></div>`;
 }
@@ -1266,7 +1271,7 @@ function renderFaculty(page) {
           ${L.classes.map((c) => `<tr><td><b>${esc(c.course)}</b> ${esc(DATA.courses[c.course].title)}</td><td>${esc(c.section)}</td><td class="num">${c.lu}</td>
             <td>${c.meetings.map((m) => { const b = bookings[`${c.id}|${m.part}`]; return b ? `<span class="chip good">${esc(PART[m.part])} ${esc(b.pattern)}${b.room ? " · " + esc(b.room) : ""}</span>` : `<button type="button" class="btn" data-pick="${c.id}" data-part="${m.part}">Schedule ${esc(PART[m.part]).toLowerCase()}</button>`; }).join(" ")}</td></tr>`).join("")}
         </tbody></table></div>
-        <div class="scroll">${grid(mine)}</div>${legend()}` : `<p class="muted">No faculty here.</p>`}</div></div>
+        <div class="scroll">${grid(mine, { focus: { teacher: k } })}</div>${legend()}` : `<p class="muted">No faculty here.</p>`}</div></div>
     <div class="card"><div class="cardhead"><h2>All loads</h2><span class="small muted">Click a row to open</span></div><div class="tablebox" style="max-height:480px">${loadTable(keys)}</div></div>`;
 }
 
@@ -1287,7 +1292,7 @@ function renderRooms(page) {
       <span>${r.college === "SHARED" ? "Shared facility" : esc(DATA.colleges[r.college])}</span>
       ${r.cap > 1 ? `<span>Holds <b>${r.cap}</b> classes at once</span>` : ""}${r.blocks.length ? `<span>Lab blocks: <b>${r.blocks.join(", ")}</b></span>` : ""}
       <span><b>${(mins / 60).toFixed(1)}</b> of ${39 * r.cap} weekly teaching hours booked</span></div></div>
-      <div class="scroll">${grid(mine)}</div>${legend()}` : `<p class="muted">No rooms listed.</p>`}</div></div>
+      <div class="scroll">${grid(mine, { focus: { room: state.room } })}</div>${legend()}` : `<p class="muted">No rooms listed.</p>`}</div></div>
     <div class="card"><div class="cardhead"><h2>Room use by day</h2><span class="small muted">Booked teaching hours; darker is fuller</span></div><div class="tablebox" style="max-height:480px">${heatmap(list)}</div></div>`;
 }
 
