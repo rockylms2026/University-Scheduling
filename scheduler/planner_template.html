@@ -493,7 +493,8 @@ async function startHosted() {
 async function enter(session) {
   const email = (session.user.email || "").toLowerCase();
   const { data: rows, error } = await sb.from("staff").select("*").eq("email", email);
-  if (error || !rows?.length) return showLogin("norole", email);
+  if (error) { loginMsg = `The server refused to read the staff list: ${error.message}${error.code ? ` (${error.code})` : ""}`; return showLogin("norole", email); }
+  if (!rows?.length) return showLogin("norole", email);
   const r = rows[0];
   me = { email, name: r.full_name || email, role: r.role, college: r.college, department: r.department };
   shared = true; canWrite = true;
@@ -526,7 +527,7 @@ function showLogin(mode, email = "") {
     <button class="btn primary" type="submit">Save password</button></form>${msg}`;
   else if (mode === "norole") body = `<h1>Your account isn't set up yet</h1>
     <p style="margin:0">You're signed in as <b>${esc(email)}</b>, but this email has no role in the scheduling system. Ask the Registrar or the Dean to add it on the Settings page.</p>
-    <button type="button" class="btn" data-auth="signout">Sign out</button>`;
+    ${msg}<button type="button" class="btn" data-auth="signout">Sign out</button>`;
   else body = `<h1>Sign in</h1>
     <form class="form" id="signinForm" style="display:grid;gap:12px"><label>Email<input id="lEmail" type="email" autocomplete="username" required value="${esc(email)}"></label>
     <label>Password<input id="lPass" type="password" autocomplete="current-password" required></label>
