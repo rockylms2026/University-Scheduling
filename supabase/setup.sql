@@ -2,22 +2,22 @@
 -- Class Scheduling: database schema, roles, and access rules for Supabase.
 --
 -- Who can do what (enforced here, in the database, not only in the page):
---   registrar, dean      everything; manage staff; publish; open GE scheduling
---   associate_dean       the classes of their own college's sections; GE classes in
---                        their college's sections (once GE scheduling is open);
---                        approves GE classes taught by their college's faculty
---   chair                the major classes of their own department, with their own
---                        department's faculty; never GE classes; approves GE classes
---                        taught by their department's faculty
+--   registrar, dean      everything, manage staff, publish, open GE scheduling
+--   associate_dean       the classes of the sections of their own college, and GE classes in
+--                        those sections (once GE scheduling is open),
+--                        approves GE classes taught by faculty of their college
+--   chair                the major classes of their own department, with faculty of
+--                        their own department, never GE classes, approves GE classes
+--                        taught by faculty of their department
 --   ge_coordinator       every GE class (once GE scheduling is open)
 -- Everyone with a role can read the whole timetable, because conflict checks need it.
 --
 -- A GE class taught by a member of a college (not the GE Department) is "pending"
--- until that teacher's department chair approves it, and also their college's
--- associate dean unless the teacher belongs to the department that holds the course
+-- until the chair of the teacher department approves it, and also the associate
+-- dean of their college unless the teacher belongs to the department that holds the course
 -- (e.g. Psychology holds Understanding the Self). A new time or teacher asks again.
 
--- ---------- reference data (loaded by seed.sql; read-only to users) ----------
+-- ---------- reference data (loaded by seed.sql, read-only to users) ----------
 create table if not exists public.faculty (
   key        text primary key,
   name       text not null,
@@ -34,8 +34,8 @@ create table if not exists public.classes (
   course       text not null,
   section      text not null,
   program      text not null,
-  college      text not null,        -- the section's college
-  department   text not null,        -- the section's program department
+  college      text not null,        -- college of the section
+  department   text not null,        -- department of the section program
   is_ge        boolean not null,
   plan_teacher text references public.faculty(key),
   holder_dept  text                  -- GE only: the department that holds the course
@@ -92,7 +92,7 @@ create table if not exists public.ge_approvals (
 
 create table if not exists public.settings (
   id             int primary key default 1 check (id = 1),
-  ge_open        boolean not null default false,   -- chairs schedule first; then GE opens
+  ge_open        boolean not null default false,   -- chairs schedule first, then GE opens
   approval_scope text not null default 'all' check (approval_scope in ('all', 'cross')),
   published_at   timestamptz,
   published_by   text,
@@ -160,7 +160,7 @@ begin
   return exists (select 1 from public.faculty f where f.key = t and f.department = me.department);
 end $$;
 
--- Does this GE class need the chair's and associate dean's approval?
+-- Does this GE class need approval by the chair and the associate dean?
 create or replace function public.needs_approval(cid text) returns boolean
 language plpgsql stable security definer set search_path = public as $$
 declare
@@ -174,7 +174,7 @@ begin
   return scope = 'all' or f.college <> c.college;
 end $$;
 
--- Does the associate dean also have to approve? Not when the teacher's department holds the course.
+-- Does the associate dean also have to approve? Not when the department of the teacher holds the course.
 create or replace function public.needs_adean(cid text) returns boolean
 language sql stable security definer set search_path = public as $$
   select public.needs_approval(cid) and coalesce(
@@ -182,7 +182,7 @@ language sql stable security definer set search_path = public as $$
        from public.classes c join public.faculty f on f.key = public.class_teacher(cid) where c.id = cid), true)
 $$;
 
--- Approve or reject a GE class taught by college faculty. decision: 'approve' | 'reject' | 'reopen'.
+-- Approve or reject a GE class taught by college faculty. decision is approve, reject, or reopen.
 create or replace function public.decide_ge(cid text, decision text, note text default null) returns text
 language plpgsql volatile security definer set search_path = public as $$
 declare
