@@ -514,8 +514,7 @@ function assignEditor(s) {
   const e = state.edit;
   const ss = sessionsOf(s.key);
   const all = sessionsOf(s.key).concat(effective().filter((x) => x.code === s.code && x.section === s.section && x.key !== s.key));
-  const teachers = Object.entries(DATA.teachers).sort((a, b) =>
-    (COLLEGE_ORDER.indexOf(a[1].college) - COLLEGE_ORDER.indexOf(b[1].college)) || a[1].name.localeCompare(b[1].name));
+  const avail = availableTeachers(s, all);
   let checks = [];
   if (e.teacher && e.teacher !== "__new") {
     const cands = all.map((x) => ({ ...x, tkey: e.teacher }));
@@ -527,15 +526,16 @@ function assignEditor(s) {
   if (e.teacher === "__new" && !(e.newTeacher || "").trim()) checks.push(["bad", "Type the new teacher's name"]);
   if (!e.teacher) checks.push(["bad", "Choose a teacher"]);
   const ok = !checks.some(([lvl]) => lvl === "bad");
-  let lastCollege = null;
-  const opts = teachers.map(([k, t]) => {
-    let g = "";
-    if (t.college !== lastCollege) { g = (lastCollege ? "</optgroup>" : "") + `<optgroup label="${esc(DATA.colleges[t.college] || t.college)}">`; lastCollege = t.college; }
-    return g + `<option value="${esc(k)}"${k === e.teacher ? " selected" : ""}>${esc(t.name)} · ${t.lu[state.sem] ?? 0}/${t.max} LU</option>`;
-  }).join("") + "</optgroup>";
+  const option = ([k, t]) => `<option value="${esc(k)}"${k === e.teacher ? " selected" : ""}>${esc(t.name)} · ${esc(t.dept)} · ${t.lu[state.sem] ?? 0}/${t.max} LU</option>`;
+  const group = (label, list) => list.length ? `<optgroup label="${esc(label)}">${list.map(option).join("")}</optgroup>` : "";
+  // Keep a teacher who is already chosen in the list even if now busy.
+  const chosenBusy = e.teacher && e.teacher !== "__new" && !avail.all.includes(e.teacher) && DATA.teachers[e.teacher]
+    ? group("Chosen (not free at this time)", [[e.teacher, DATA.teachers[e.teacher]]]) : "";
+  const opts = chosenBusy + group(`Free · ${avail.homeLabel}`, avail.home) + group("Free · other departments", avail.other)
+    + group("Free · already at their load limit", avail.full);
   return `<div class="editor"><strong>Teacher for ${esc(s.code)} ${esc(s.section)}</strong>
     <div class="fields">
-      <label for="assignTeacher">Teacher
+      <label for="assignTeacher">Teacher (${avail.all.length} free at ${esc(ss.map((x) => x.day).join("/"))} ${hm(s.start)}–${hm(s.end)}${avail.busy ? `; ${avail.busy} busy not shown` : ""})
         <select id="assignTeacher"><option value="">Choose a teacher</option>${opts}<option value="__new"${e.teacher === "__new" ? " selected" : ""}>New part-time teacher…</option></select></label>
       ${e.teacher === "__new" ? `<label for="newTeacher">Name of the new teacher<input id="newTeacher" value="${esc(e.newTeacher || "")}" placeholder="e.g. Ms. Ana Cruz"></label>` : ""}
       <label for="assignNote">Note (optional)<input id="assignNote" value="${esc(e.note || "")}"></label>
@@ -543,6 +543,36 @@ function assignEditor(s) {
     <ul class="checks">${checks.length ? checks.map(([l, t]) => `<li class="${l}">${esc(t)}</li>`).join("") : `<li class="good">This teacher is free at every meeting of this class.</li>`}</ul>
     <div class="actions"><button type="button" class="btn primary" data-act="saveAssign"${ok ? "" : " disabled"}>Save change</button>
       <button type="button" class="btn" data-act="cancel">Cancel</button><span class="msg" id="editMsg"></span></div></div>`;
+}
+
+// Teachers free at every meeting of a class, grouped for the dropdown.
+function availableTeachers(s, meetings) {
+  const own = `${s.code}|${s.section}`;
+  const byTeacher = {};
+  effective().forEach((o) => {
+    if (o.tkey && o.part !== "NSTP" && `${o.code}|${o.section}` !== own) (byTeacher[o.tkey] = byTeacher[o.tkey] || []).push(o);
+  });
+  const addLU = DATA.courses[s.code] && meetings.some((m) => m.part === "Lab") ? 5 : 3;
+  // The unit that usually teaches the course, e.g. "Dept. of Secondary Education (COE)".
+  const usual = s.tba ? s.tba.replace(/^TBA \(|\)$/g, "").replace(/^GE Department$/, "General Education")
+    : s.tkey ? DATA.teachers[s.tkey].dept : "";
+  const home = [], other = [], full = [], all = [];
+  let busy = 0;
+  Object.entries(DATA.teachers).forEach(([k, t]) => {
+    const mine = byTeacher[k] || [];
+    if (meetings.some((m) => mine.some((o) => overlaps(m, o)))) { busy++; return; }
+    const perDay = {};
+    mine.concat(meetings).forEach((o) => perDay[o.day] = (perDay[o.day] || 0) + (o.end - o.start));
+    if (meetings.some((m) => perDay[m.day] > DATA.maxTeachHours * 60)) { busy++; return; }
+    all.push(k);
+    const entry = [k, t];
+    if ((t.lu[state.sem] ?? 0) + addLU > t.max) full.push(entry);
+    else if (usual && usual.includes(t.dept)) home.push(entry);
+    else other.push(entry);
+  });
+  const byLoad = (a, b) => ((a[1].lu[state.sem] ?? 0) - (b[1].lu[state.sem] ?? 0)) || a[1].name.localeCompare(b[1].name);
+  [home, other, full].forEach((l) => l.sort(byLoad));
+  return { home, other, full, all, busy, homeLabel: usual ? `usually taught by ${usual}` : "same department" };
 }
 
 async function writeChange(id, body) {
