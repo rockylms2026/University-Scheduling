@@ -402,48 +402,71 @@ function offline() { shared = false; canWrite = false; render(); }
 let me = { email: null, name: "", role: "registrar", college: null, department: null };
 let settings = { geOpen: true };
 let approvals = {};          // class id -> decision on a borrowed GE class
-let handovers = {};          // class id -> hand-over to the house department
-// The department holding a GE class now: the one the loading plan gives it to, or its house
-// department after a hand-over. Mirrors holder_dept_of() in supabase/schema.sql.
-const holderOf = (cls) => { const h = handovers[cls.id]; return h ? { dept: h.holder_dept, college: h.holder_college, handed: h } : { dept: cls.holder, college: cls.holderCollege }; };
-// May this person hand the class to its house department (or take it back)? Mirrors hand_to_house().
-const canHand = (cls) => !!BACKEND && isGE(cls.course) && !!cls.house && cls.house !== cls.holder
-  && (isAdmin() || (me.role === "chair" && me.department === cls.holder) || (me.role === "associate_dean" && me.college === cls.holderCollege));
+let requests = {};           // class id -> { department, college }: the department a section asked
+let geLists = {};            // GE course -> departments that may teach it (hosted: from the database)
+let geRows = [];             // the ge_teachers rows, for the Settings page
+Object.entries(DATA.geTeachers || {}).forEach(([code, depts]) => (geLists[code] = depts.slice()));
 let staffList = [];
 const isAdmin = () => me.role === "registrar" || me.role === "dean";
 const progDept = (section) => DATA.programs[DATA.sections[section].program].dept;
 const chairDept = () => (BACKEND && me.role === "chair" ? me.department : null);
+const mayTeach = (code, dept) => (geLists[code] || []).includes(dept);
+const isBooked = (cls) => cls.meetings.every((m) => bookings[`${cls.id}|${m.part}`]);
 // What kind of class: major, gedept (a GE Department course), own (a GE course the department of the
-// section holds), or borrowed (a GE course another department holds). Mirrors class_kind() in supabase/schema.sql.
+// section may teach), or borrowed (a GE course the section asks another department for). Mirrors class_kind().
 function classKind(cls) {
   if (!isGE(cls.course)) return "major";
-  if (!holderOf(cls).dept || holderOf(cls).dept === "General Education") return "gedept";
-  return holderOf(cls).dept === progDept(cls.section) ? "own" : "borrowed";
+  if (!cls.house || cls.house === "General Education") return "gedept";
+  return mayTeach(cls.course, progDept(cls.section)) ? "own" : "borrowed";
 }
+// GE classes of the sections of a department that it may teach and has not booked. Mirrors own_ge_left().
+const ownGeLeft = (dept) => DATA.classes.filter((c) => progDept(c.section) === dept && classKind(c) === "own" && !isBooked(c)).length;
+const requestOf = (cls) => requests[cls.id] || null;
 // Why this person may not book a class ("" when they may). Mirrors can_edit_class().
 function editRight(cls) {
   if (!BACKEND || isAdmin()) return "";
-  const col = progCollege(cls.section), dept = progDept(cls.section);
-  if (classKind(cls) === "gedept") {
+  const col = progCollege(cls.section), dept = progDept(cls.section), kind = classKind(cls);
+  if (kind === "gedept") {
     if (me.role !== "ge_coordinator") return "View only: GE Department courses are scheduled by the GE Coordinator, after the departments.";
     return settings.geOpen ? "" : "View only: the GE Coordinator schedules last. The Dean or the Registrar opens GE Department scheduling when the departments are done.";
   }
-  if (me.role === "associate_dean") return col === me.college ? "" : `View only: this class belongs to the ${DATA.colleges[col]}.`;
-  if (me.role === "chair") return dept === me.department ? "" : `View only: this class belongs to the Department of ${dept}.`;
-  return "View only: the GE Coordinator schedules GE Department courses only.";
+  if (me.role === "associate_dean" && col !== me.college) return `View only: this class belongs to the ${DATA.colleges[col]}.`;
+  if (me.role === "chair" && dept !== me.department) return `View only: this class belongs to the Department of ${dept}.`;
+  if (me.role !== "associate_dean" && me.role !== "chair") return "View only: the GE Coordinator schedules GE Department courses only.";
+  if (kind === "borrowed") {
+    const left = ownGeLeft(dept);
+    if (left) return `Not yet: book the ${left} GE class${left > 1 ? "es" : ""} the Department of ${dept} teaches for its own sections first. Then you can ask another department for ${cls.course}.`;
+  }
+  return "";
+}
+// Who answers a request, if one was made.
+function approverOf(cls) {
+  const r = requestOf(cls);
+  if (!r) return "no department yet";
+  return r.college === progCollege(cls.section) ? `the ${r.department} chair` : `the ${r.college} associate dean`;
+}
+// May this person answer the request for this class? Mirrors can_decide().
+function canDecide(cls) {
+  const r = requestOf(cls);
+  if (!BACKEND || !r || classKind(cls) !== "borrowed") return false;
+  if (isAdmin()) return true;
+  if (ownGeLeft(r.department)) return false;
+  if (r.college === progCollege(cls.section)) return me.role === "chair" && me.department === r.department;
+  return me.role === "associate_dean" && me.college === r.college;
 }
 // Why this person may not choose the teacher ("" when they may). Mirrors can_assign().
 function teacherRight(cls) {
   if (!BACKEND || isAdmin()) return "";
   if (classKind(cls) === "borrowed") {
-    const ok = (me.role === "chair" && me.department === holderOf(cls).dept) || (me.role === "associate_dean" && me.college === holderOf(cls).college);
-    return ok ? "" : `The ${holderOf(cls).dept} department picks the teacher when the class is approved.`;
+    const r = requestOf(cls);
+    if (canDecide(cls)) return "";
+    return r ? `The ${r.department} department picks the teacher when it answers.` : "The department you ask picks the teacher.";
   }
   return editRight(cls);
 }
 function teacherAllowed(cls, key) {
   if (!key || !BACKEND || isAdmin()) return true;
-  if (classKind(cls) === "borrowed") return DATA.teachers[key].dept === holderOf(cls).dept;
+  if (classKind(cls) === "borrowed") return DATA.teachers[key].dept === requestOf(cls)?.department;
   return !chairDept() || DATA.teachers[key].dept === chairDept();
 }
 function allowedScopes() {
@@ -451,35 +474,31 @@ function allowedScopes() {
   if (me.role === "chair" || me.role === "associate_dean") return [me.college];
   return ["GE", "ALL"];
 }
-// A borrowed GE class waits for the holding department: its chair (same college) or its
-// college's associate dean (another college). Mirrors can_decide() in supabase/schema.sql.
 function scheduleSig(cls) {
   return cls.meetings.map((m) => bookings[`${cls.id}|${m.part}`]).filter(Boolean).map((b) => `${b.part}:${b.pattern}`).sort().join(" ");
 }
-function approverOf(cls) {
-  return holderOf(cls).college === progCollege(cls.section) ? `the ${holderOf(cls).dept} chair` : `the ${holderOf(cls).college} associate dean`;
-}
+// The state of a borrowed GE class: unscheduled, unasked, pending, approved, or rejected.
 function approvalOf(cls) {
   if (!BACKEND || classKind(cls) !== "borrowed") return null;
-  const t = teacherOf(cls)?.key || null, sig = scheduleSig(cls);
-  const base = { teacher: t, approver: approverOf(cls) };
+  const t = teacherOf(cls)?.key || null, sig = scheduleSig(cls), r = requestOf(cls);
+  const base = { teacher: t, approver: approverOf(cls), dept: r?.department || null };
   if (!sig) return { state: "unscheduled", ...base };
+  if (!r) return { state: "unasked", ...base };
   const a = approvals[cls.id];
-  if (!a || a.schedule !== sig || (a.teacher || null) !== t) return { state: "pending", ...base };
+  if (!a || a.department !== r.department || a.schedule !== sig || (a.teacher || null) !== t) return { state: "pending", ...base };
   if (a.rejected_at) return { state: "rejected", ...base, row: a };
   return { state: a.approved_at ? "approved" : "pending", ...base, row: a };
 }
-function canDecide(cls) {
-  if (!BACKEND || classKind(cls) !== "borrowed") return false;
-  if (isAdmin()) return true;
-  if (holderOf(cls).college === progCollege(cls.section)) return me.role === "chair" && me.department === holderOf(cls).dept;
-  return me.role === "associate_dean" && me.college === holderOf(cls).college;
-}
 const needsMe = (c, a) => a.state === "pending" && canDecide(c);
-// Teachers of the holding department free at every meeting of a time option.
-function holderFree(cls, opt) {
-  return Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === holderOf(cls).dept
+// Teachers of a department free at every meeting of a time option.
+function deptFree(dept, cls, opt) {
+  return Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === dept
     && opt.iv.every(([day, start, end]) => !teacherBusy(k, { day, start, end }, cls.id).length));
+}
+// The departments a section may ask for a GE course, with their free teachers at a time option.
+function askable(cls, opt) {
+  const own = progDept(cls.section);
+  return (geLists[cls.course] || []).filter((d) => d !== own).map((d) => ({ dept: d, college: DATA.deptCollege[d], free: opt ? deptFree(d, cls, opt) : [], left: ownGeLeft(d) }));
 }
 
 // ---------- hosted version: Supabase ----------
@@ -498,10 +517,16 @@ const sbLoad = {
     rows.forEach((r) => { if (CLASS[r.class_id]) assigned[r.class_id] = { class: r.class_id, teacher: r.teacher, at: r.updated_at }; });
     savedAt.teachers = latest(Object.values(assigned));
   },
-  ge_holders: async () => {
-    const rows = await sbAll(sb.from("ge_holders").select("*").range(0, 9999));
-    handovers = {};
-    rows.forEach((r) => (handovers[r.class_id] = r));
+  ge_requests: async () => {
+    const rows = await sbAll(sb.from("ge_requests").select("*").range(0, 9999));
+    requests = {};
+    rows.forEach((r) => (requests[r.class_id] = r));
+  },
+  ge_teachers: async () => {
+    const rows = await sbAll(sb.from("ge_teachers").select("*").range(0, 9999));
+    geLists = {};
+    geRows = rows;
+    rows.forEach((r) => { if (r.allowed) (geLists[r.course] = geLists[r.course] || []).push(r.department); });
   },
   ge_decisions: async () => {
     const rows = await sbAll(sb.from("ge_decisions").select("*").range(0, 9999));
@@ -548,7 +573,7 @@ async function enter(session) {
   rebuild(); render();
   if (!window._sbChannel) {
     window._sbChannel = sb.channel("schedule");
-    ["bookings", "teacher_changes", "ge_decisions", "ge_holders", "settings", "staff"].forEach((t) =>
+    ["bookings", "teacher_changes", "ge_requests", "ge_decisions", "ge_teachers", "settings", "staff"].forEach((t) =>
       window._sbChannel.on("postgres_changes", { event: "*", schema: "public", table: t }, () => sbRefresh(t)));
     window._sbChannel.subscribe();
   }
@@ -582,6 +607,13 @@ function showLogin(mode, email = "") {
 }
 document.addEventListener("submit", async (ev) => {
   const id = ev.target.id;
+  if (id === "geAddForm") {
+    ev.preventDefault();
+    const course = $("geCourse").value, department = $("geDept").value;
+    const { error } = await sb.from("ge_teachers").upsert({ course, department, college: DATA.deptCollege[department], allowed: true });
+    if (error) { toast(sbMessage(error)); return; }
+    await sbLoad.ge_teachers(); rebuild(); render(); toast(`${department} may now teach ${course}.`); return;
+  }
   if (id === "staffForm") {
     ev.preventDefault();
     const role = $("stRole").value, msg = $("stmsg");
@@ -1197,14 +1229,15 @@ function editor(cls, part) {
   const rows = opts.map((o) => {
     const ev = evaluate(cls, m, o, null, checkTeacher).filter(([l, txt]) => l !== "info" && txt !== "Choose a room");
     const rooms = m.pools.some((p) => p) ? freeRooms(cls, m, o).length : -1;
-    const hf = borrowed ? holderFree(cls, o).length : -1;
+    const ask = borrowed ? askable(cls, o).filter((x) => !x.left && x.free.length) : null;
+    const hf = borrowed ? ask.length : -1;
     const bad = ev.filter(([l]) => l === "bad");
     let chip, why;
     if (bad.length) { chip = `<span class="chip bad">Conflict</span>`; why = bad[0][1]; }
     else if (rooms === 0) { chip = `<span class="chip bad">No room</span>`; why = "Every suitable room is booked"; }
-    else if (hf === 0) { chip = `<span class="chip bad">No teacher</span>`; why = `No ${holderOf(cls).dept} teacher is free`; }
+    else if (hf === 0) { chip = `<span class="chip bad">No teacher</span>`; why = `No department that teaches ${cls.course} has a teacher free`; }
     else if (ev.length) { chip = `<span class="chip warn">Check</span>`; why = ev[0][1]; }
-    else { chip = `<span class="chip good">Free</span>`; why = [rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed", hf > 0 && `${hf} ${holderOf(cls).dept} teacher${hf > 1 ? "s" : ""} free`].filter(Boolean).join(" · "); }
+    else { chip = `<span class="chip good">Free</span>`; why = [rooms > 0 ? `${rooms} room${rooms > 1 ? "s" : ""} free` : "No room needed", hf > 0 && ask.map((x) => `${x.dept} ${x.free.length}`).join(", ") + " free"].filter(Boolean).join(" · "); }
     const when = `${o.iv.map((i) => i[0]).join("/")} ${hm(o.iv[0][1])}–${hm(o.iv[0][2])}`;
     return { o, html: `<button type="button" class="opt${d.pattern === o.label ? " on" : ""}" data-opt="${esc(o.label)}"><b>${esc(o.label)}</b><span><span class="small">${when}</span><span class="why">${esc(why)}</span></span>${chip}</button>`, group: o.ex ? "Outside the time frame (needs approval)" : o.label.includes("TTh") || ["Tue", "Thu"].includes(o.iv[0][0]) ? "Tuesday / Thursday" : o.iv[0][0] === "Sat" ? "Saturday" : "Monday / Wednesday / Friday" };
   });
@@ -1226,19 +1259,24 @@ function editor(cls, part) {
     teacherChoices = { free: ft.map((x) => ({ key: x.key, text: `${DATA.teachers[x.key].name} · ${DATA.teachers[x.key].dept} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}` })),
                        busy: teacherKey && !ft.some((x) => x.key === teacherKey) ? teacherKey : null, selected: teacherKey };
     const teacherSel = tRight ? `<div style="display:grid;gap:4px"><span class="fieldlabel">Teacher</span>
-      <div class="readonly">${esc(teacherKey ? DATA.teachers[teacherKey].name : "Not yet chosen")}${teacherKey && t?.key === cls.teacher ? " (loading plan)" : ""}${tRight !== right ? `<br><span class="small muted">${esc(tRight.replace(/^View only: /, ""))}</span>` : ""}</div></div>`
+      <div class="readonly">${esc(borrowed && (!teacherKey || DATA.teachers[teacherKey].dept !== d.askDept) ? "Not yet chosen" : teacherKey ? DATA.teachers[teacherKey].name : "Not yet chosen")}${!borrowed && teacherKey && t?.key === cls.teacher ? " (loading plan)" : ""}${tRight !== right ? `<br><span class="small muted">${esc(tRight.replace(/^View only: /, ""))}</span>` : ""}</div></div>`
       : `<div style="display:grid;gap:4px"><label for="teacherSel">Teacher (from the loading plan${t?.key ? `: ${esc(DATA.teachers[t.key].name)}` : ": none"})</label>
       <input id="teacherSearch" type="search" placeholder="Search teachers by name or department" value="${esc(teacherQuery)}" aria-label="Search teachers">
       <select id="teacherSel">${teacherOptions()}</select>
       <span class="small muted" id="teacherCount"></span></div>`;
     const checks = evaluate(cls, m, opt, d.room || null, checkTeacher);
+    let askSel = "";
     if (borrowed) {
-      const hf = holderFree(cls, opt);
-      checks.push(hf.length ? ["good", `${hf.length} ${holderOf(cls).dept} teacher${hf.length > 1 ? "s are" : " is"} free at ${opt.label}: ${hf.slice(0, 6).map(surname).join(", ")}${hf.length > 6 ? ", …" : ""}`]
-                            : ["bad", `No ${holderOf(cls).dept} teacher is free at ${opt.label}`]);
-      const left = DATA.classes.filter((x) => progDept(x.section) === holderOf(cls).dept && classKind(x) !== "borrowed")
-        .reduce((n, x) => n + x.meetings.filter((mm) => !bookings[`${x.id}|${mm.part}`]).length, 0);
-      if (left) checks.push(["warn", `${holderOf(cls).dept} still has ${left} of its own class meetings to book, so its teachers' free times may change.`]);
+      const list = askable(cls, opt);
+      const pick = list.find((x) => x.dept === d.askDept);
+      askSel = `<label for="askSel">Ask a department to teach it
+        <select id="askSel"${right ? " disabled" : ""}><option value="">Choose a department</option>${list.map((x) =>
+          `<option value="${esc(x.dept)}"${x.dept === d.askDept ? " selected" : ""}${x.left || !x.free.length ? " disabled" : ""}>${esc(x.dept)} (${esc(x.college)}) · ${
+            x.left ? `still booking its own GE classes (${x.left} left)` : x.free.length ? `${x.free.length} teacher${x.free.length > 1 ? "s" : ""} free` : "no teacher free"}</option>`).join("")}</select></label>`;
+      if (!pick) checks.push(["bad", `Choose the department to ask for ${cls.course}`]);
+      else if (pick.left) checks.push(["bad", `${pick.dept} has not finished booking its own GE classes (${pick.left} left), so it cannot take requests yet`]);
+      else if (!pick.free.length) checks.push(["bad", `No ${pick.dept} teacher is free at ${opt.label}`]);
+      else checks.push(["good", `${pick.free.length} ${pick.dept} teacher${pick.free.length > 1 ? "s are" : " is"} free at ${opt.label}: ${pick.free.slice(0, 6).map(surname).join(", ")}${pick.free.length > 6 ? ", …" : ""}`]);
     }
     if (teacherKey) {
       const lu = luFor(teacherKey) + (t?.key === teacherKey ? 0 : cls.lu);
@@ -1251,22 +1289,21 @@ function editor(cls, part) {
       }
     } else if (m.kind !== "nstp" && !tRight) checks.push(["warn", "No teacher assigned yet"]);
     const ok = !checks.some(([l]) => l === "bad") && !right;
-    if (canHand(cls)) checks.push(["info", holderOf(cls).handed
-      ? `Handed over: ${cls.holder} gave this class to ${cls.house}, its house department. Use “Take back” on the Approvals page to return it.`
-      : `Hand-over: if ${cls.holder} has no instructor for this class, hand it to ${cls.house}, the house department, which will pick a teacher.`]);
     if (BACKEND && borrowed) {
-      const cur = approvalOf(cls);
-      checks.push(["info", `Approval: ${cls.course} is held by the ${holderOf(cls).dept} department${holderOf(cls).college !== progCollege(cls.section) ? ` (${holderOf(cls).college})` : ""}, so this booking waits for ${cur.approver}, who also picks the teacher.`
-        + (cur.state === "approved" ? " Now: approved." : cur.state === "rejected" ? ` Now: not approved${cur.row.note ? ` (“${cur.row.note}”)` : ""}.` : cur.state === "pending" ? " Now: waiting." : " Booking it sends the request.")]);
+      const cur = approvalOf(cls), r = requestOf(cls);
+      const askDept = d.askDept || r?.department;
+      const who = askDept ? (DATA.deptCollege[askDept] === progCollege(cls.section) ? `the ${askDept} chair` : `the ${DATA.deptCollege[askDept]} associate dean`) : "the department you ask";
+      checks.push(["info", `Request: the Department of ${progDept(cls.section)} does not teach ${cls.course}, so it asks a department that does. ${who[0].toUpperCase() + who.slice(1)} answers and picks the teacher.`
+        + (r && r.department === d.askDept ? (cur.state === "approved" ? " Now: approved." : cur.state === "rejected" ? ` Now: not approved${cur.row.note ? ` (“${cur.row.note}”)` : ""}. Ask another department or change the time.` : cur.state === "pending" ? " Now: waiting for an answer." : "")
+           : r ? ` Saving asks ${d.askDept || "the chosen department"} instead of ${r.department}.` : " Saving sends the request.")]);
     }
-    detail = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${teacherSel}</div>
-      <div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>
+    detail = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${askSel}${teacherSel}</div>
+      ${borrowed && tRight ? "" : `<div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>
         <div class="who-free" style="margin-top:4px">${(near.length ? near : ft).slice(0, 14).map((x) => `<span class="${x.full ? "full" : ""}">${esc(DATA.teachers[x.key].name)} · ${luFor(x.key)}/${DATA.teachers[x.key].max}</span>`).join("") || `<span class="full">Nobody in this department is free</span>`}
-        ${(near.length ? near : ft).length > 14 ? `<span>+${(near.length ? near : ft).length - 14} more in the list</span>` : ""}</div></div>
+        ${(near.length ? near : ft).length > 14 ? `<span>+${(near.length ? near : ft).length - 14} more in the list</span>` : ""}</div></div>`}
       <ul class="checks">${checks.length ? checks.map(([l, txt]) => `<li class="${l}">${esc(txt)}</li>`).join("") : `<li class="good">No conflicts. Students, teacher, and room are all free.</li>`}</ul>
       <div class="actions"><button type="button" class="btn primary" data-act="save"${ok && canWrite ? "" : " disabled"}>${b ? "Save changes" : "Book this time"}</button>
         ${b ? `<button type="button" class="btn danger" data-act="remove"${canWrite && !right ? "" : " disabled"}>Remove booking</button>` : ""}
-        ${canHand(cls) ? `<button type="button" class="btn" data-hand="${holderOf(cls).handed ? "back" : "house"}" data-cid="${cls.id}">${holderOf(cls).handed ? `Take back for ${esc(cls.holder)}` : `Hand to ${esc(cls.house)}`}</button>` : ""}
         <button type="button" class="btn" data-act="close">Close</button><span class="msg" id="msg"></span></div>`;
   }
   return `<div class="editor"><div><h3>${esc(cls.course)} ${esc(PART[part])} · ${esc(cls.section)}</h3>
@@ -1424,47 +1461,47 @@ function approvalList() {
   return DATA.classes.map((c) => ({ c, a: approvalOf(c) })).filter(({ c, a }) => {
     if (!a || a.state === "unscheduled") return false;
     if (isAdmin() || me.role === "ge_coordinator") return true;
-    if (me.role === "chair") return progDept(c.section) === me.department || holderOf(c).dept === me.department || c.holder === me.department;
-    return progCollege(c.section) === me.college || holderOf(c).college === me.college || c.holderCollege === me.college;
+    if (me.role === "chair") return progDept(c.section) === me.department || a.dept === me.department;
+    return progCollege(c.section) === me.college || (a.dept && DATA.deptCollege[a.dept] === me.college);
   });
 }
-// The teacher picker an approver uses: teachers of the holding department, free ones first.
+// The teacher picker an approver uses: teachers of the asked department, free ones first.
 function approverTeacherSelect(c, a) {
   const sessionsOf = sessions.filter((x) => x.cls === c);
   const free = (k) => sessionsOf.every((x) => !teacherBusy(k, x, c.id).length);
-  const list = Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === holderOf(c).dept)
+  const list = Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === a.dept)
     .sort((x, y) => free(y) - free(x) || DATA.teachers[x].name.localeCompare(DATA.teachers[y].name));
   return `<select class="inp" id="apT-${c.id}" aria-label="Teacher for ${esc(c.course)} ${esc(c.section)}">
     <option value="">Choose a teacher</option>${list.map((k) => `<option value="${k}"${k === a.teacher ? " selected" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${free(k) ? "" : " · busy then"}</option>`).join("")}</select>`;
 }
 function renderApprovals(page) {
   const all = approvalList();
-  const filters = [["mine", "Needs my approval", (x) => needsMe(x.c, x.a)], ["pending", "Waiting", (x) => x.a.state === "pending"],
+  const filters = [["mine", "Needs my answer", (x) => needsMe(x.c, x.a)], ["pending", "Waiting", (x) => x.a.state === "pending"],
+                   ["unasked", "Not asked yet", (x) => x.a.state === "unasked"],
                    ["approved", "Approved", (x) => x.a.state === "approved"], ["rejected", "Not approved", (x) => x.a.state === "rejected"], ["all", "All", () => true]];
   if (!filters.some(([k]) => k === state.apprFilter)) state.apprFilter = all.some((x) => needsMe(x.c, x.a)) ? "mine" : "pending";
   const shown = all.filter(filters.find(([k]) => k === state.apprFilter)[2]).sort((x, y) => numSort(x.c.section, y.c.section) || x.c.course.localeCompare(y.c.course));
   const mineNow = shown.filter((x) => needsMe(x.c, x.a));
-  page.innerHTML = `${head("Approvals", "A department may book a GE course that another department holds for its own sections. The holding department is the one the loading plan gives the class to (or the house department in housed_by when the plan names no teacher). The booking waits for its chair when both are in the same college, or the associate dean of its college otherwise, who also picks the teacher. A holding department without an available instructor can hand the class to the house department.")}
+  page.innerHTML = `${head("Approvals", "A department that does not teach a GE course books the time for its section and asks a department that does. The asked department answers through its chair when both are in the same college, or through the associate dean of its college otherwise, and picks the teacher. If it says no, ask another department. Departments ask and answer only after booking the GE classes they teach for their own sections.")}
     <div class="card" style="gap:8px"><div class="row" style="justify-content:space-between"><div class="pills">${filters.map(([k, l, f]) =>
       `<button type="button" class="pill" data-apprfilter="${k}" aria-pressed="${state.apprFilter === k}">${l}<small>${all.filter(f).length}</small></button>`).join("")}</div>
       ${mineNow.length > 1 ? `<button type="button" class="btn primary" data-decideall="approve">Approve all ${mineNow.length} shown</button>` : ""}</div></div>
-    <div class="card">${shown.length ? `<div class="scroll"><table><thead><tr><th>Class</th><th>Schedule</th><th>Held by</th><th>Teacher</th><th>Approver</th><th>Status</th><th></th></tr></thead><tbody>
+    <div class="card">${shown.length ? `<div class="scroll"><table><thead><tr><th>Class</th><th>Schedule</th><th>Asked</th><th>Teacher</th><th>Answers</th><th>Status</th><th></th></tr></thead><tbody>
       ${shown.map(({ c, a }) => {
         const mine = canDecide(c), r = a.row || {};
         const acts = [];
         if (mine && a.state !== "approved") acts.push(`<button type="button" class="btn primary" data-decide="approve" data-cid="${c.id}">Approve</button>`);
         if (mine && a.state === "pending") acts.push(`<button type="button" class="btn danger" data-decide="reject" data-cid="${c.id}">Reject</button>`);
         if (a.state === "rejected" && !mine && !editRight(c)) acts.push(`<button type="button" class="btn" data-decide="reopen" data-cid="${c.id}">Ask again</button>`);
-        if (canHand(c)) acts.push(holderOf(c).handed ? `<button type="button" class="btn" data-hand="back" data-cid="${c.id}" title="Return the class to ${esc(c.holder)}">Take back</button>`
-          : `<button type="button" class="btn" data-hand="house" data-cid="${c.id}" title="No ${esc(c.holder)} instructor is available">Hand to ${esc(c.house)}</button>`);
-        acts.push(`<button type="button" class="btn" data-pick="${c.id}" data-part="${c.meetings[0].part}">Open</button>`);
+        const canAsk = !editRight(c) && (a.state === "unasked" || a.state === "rejected");
+        acts.push(`<button type="button" class="btn${canAsk ? " primary" : ""}" data-pick="${c.id}" data-part="${c.meetings[0].part}">${canAsk ? (a.state === "unasked" ? "Ask a department" : "Ask another") : "Open"}</button>`);
         const status = a.state === "approved" ? `<span class="chip good">Approved</span><div class="small muted">${esc((r.approved_by || "").split("@")[0])}</div>`
           : a.state === "rejected" ? `<span class="chip bad">Not approved</span><div class="small muted">${esc((r.rejected_by || "").split("@")[0])}${r.note ? `: “${esc(r.note)}”` : ""}</div>`
-          : `<span class="chip warn">Waiting</span>`;
+          : a.state === "unasked" ? `<span class="chip none">Not asked yet</span>` : `<span class="chip warn">Waiting</span>`;
         return `<tr><td><b>${esc(c.course)}</b> · ${esc(c.section)}<div class="small muted">${esc(DATA.courses[c.course].title)} · ${esc(progDept(c.section))}</div></td>
           <td class="small">${esc(scheduleSig(c).replace(/(Lec|Lab|PE|NSTP):/g, "").trim())}</td>
-          <td>${esc(holderOf(c).dept)}<div class="small muted">${esc(holderOf(c).college)}${holderOf(c).handed ? ` · handed over by ${esc(c.holder)}` : ""}</div></td>
-          <td>${mine && a.state !== "approved" ? approverTeacherSelect(c, a) : esc(a.teacher ? DATA.teachers[a.teacher].name : "Not yet chosen")}</td>
+          <td>${a.dept ? `${esc(a.dept)}<div class="small muted">${esc(DATA.deptCollege[a.dept])}${ownGeLeft(a.dept) ? ` · booking its own GE first (${ownGeLeft(a.dept)} left)` : ""}</div>` : "—"}</td>
+          <td>${mine && a.state !== "approved" ? approverTeacherSelect(c, a) : esc(a.teacher ? DATA.teachers[a.teacher].name : a.state === "unasked" ? "—" : "Not yet chosen")}</td>
           <td class="small">${esc(a.approver.replace(/^the /, ""))}</td>
           <td>${status}</td>
           <td><div class="actions">${acts.join("")}</div></td></tr>`;
@@ -1529,7 +1566,19 @@ function renderSettings(page) {
       <form id="passForm" style="display:grid;gap:10px"><label>New password<input id="nPass" type="password" minlength="8" autocomplete="new-password" required></label>
       <label>Type it again<input id="nPass2" type="password" minlength="8" autocomplete="new-password" required></label>
       <div class="actions"><button type="submit" class="btn primary">Change password</button><span class="msg good" id="pwmsg"></span></div></form></div>`;
-  page.querySelector(".grid3").insertAdjacentHTML("afterbegin", account + phase + people);
+  const depts = [...new Set(Object.values(DATA.teachers).map((t) => t.dept))].filter((x) => x !== "General Education").sort();
+  const courses = Object.keys(geLists).length ? [...new Set([...Object.keys(DATA.geTeachers || {}), ...Object.keys(geLists)])].sort() : Object.keys(DATA.geTeachers || {}).sort();
+  const lists = `<div class="card" style="grid-column:1/-1"><div class="cardhead"><h2>Who may teach each GE course</h2><span class="small muted">GE Department courses are not listed: the GE Coordinator schedules them</span></div>
+      <p class="small muted" style="margin:0">A department teaches a GE course for its own sections when it is listed here. Other sections ask one of the listed departments.</p>
+      <div class="scroll"><table><thead><tr><th>Course</th><th>Departments</th></tr></thead><tbody>
+        ${courses.map((code) => `<tr><td><b>${esc(code)}</b><div class="small muted">${esc(DATA.courses[code]?.title || "")}</div></td><td><div class="pills">${(geLists[code] || []).map((dp) =>
+          `<span class="pill" style="cursor:default">${esc(dp)}${isAdmin() ? ` <button type="button" class="btn link" data-geremove="${esc(code)}|${esc(dp)}" aria-label="Remove ${esc(dp)} from ${esc(code)}" title="Remove">×</button>` : ""}</span>`).join("") || `<span class="muted small">Nobody yet</span>`}</div></td></tr>`).join("")}
+      </tbody></table></div>
+      ${isAdmin() ? `<form class="form" id="geAddForm" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;align-items:end">
+        <label>Course<select id="geCourse">${courses.map((c) => `<option>${esc(c)}</option>`).join("")}</select></label>
+        <label>Department<select id="geDept">${depts.map((dp) => `<option>${esc(dp)}</option>`).join("")}</select></label>
+        <div class="actions"><button type="submit" class="btn primary">Add department</button></div></form>` : ""}</div>`;
+  page.querySelector(".grid3").insertAdjacentHTML("afterbegin", account + phase + people + lists);
 }
 function renderSettingsBase(page) {
   const lec = optionsFor("lecture").filter((o) => !o.ex), lab = optionsFor("lab").filter((o) => !o.ex);
@@ -1565,7 +1614,11 @@ function openPick(clsId, part) {
   state.pick = { cls: clsId, part };
   teacherQuery = "";
   const t = teacherOf(cls);
-  state.draft = { pattern: b?.pattern || (m.kind === "nstp" ? optionsFor("nstp")[0]?.label : null), room: b?.room || "", teacher: t?.key || "" };
+  state.draft = { pattern: b?.pattern || (m.kind === "nstp" ? optionsFor("nstp")[0]?.label : null), room: b?.room || "", teacher: t?.key || "", askDept: "" };
+  if (classKind(cls) === "borrowed") {          // the department asked before, or the plan teacher's, or the house
+    const can = askable(cls, null).map((x) => x.dept), planDept = cls.teacher ? DATA.teachers[cls.teacher].dept : null;
+    state.draft.askDept = requestOf(cls)?.department || [planDept, cls.house].find((x) => x && can.includes(x)) || can[0] || "";
+  }
   // Jump to the class's own section on the booking desk.
   const sec = DATA.sections[cls.section];
   state.view = "timetable"; state.college = DATA.programs[sec.program].college; state.program = sec.program; state.section = cls.section;
@@ -1578,6 +1631,13 @@ function choosePattern(label) {
   const opt = findOpt(m.kind, label);
   if (state.draft.room && !freeRooms(cls, m, opt).includes(state.draft.room)) state.draft.room = "";
   if (!state.draft.room && m.pools.some((p) => p)) state.draft.room = homeFirst(cls, freeRooms(cls, m, opt))[0] || "";
+  if (classKind(cls) === "borrowed" && !requestOf(cls)) {   // not asked yet: suggest a department that can take it then
+    const ok = askable(cls, opt).filter((x) => !x.left && x.free.length).map((x) => x.dept);
+    if (!ok.includes(state.draft.askDept)) {
+      const planDept = cls.teacher ? DATA.teachers[cls.teacher].dept : null;
+      state.draft.askDept = [planDept, cls.house].find((x) => x && ok.includes(x)) || ok[0] || state.draft.askDept;
+    }
+  }
 }
 function openSection(s) {
   const sec = DATA.sections[s];
@@ -1610,7 +1670,11 @@ async function save() {
       }
       const r = await sb.from("bookings").upsert({ class_id: cls.id, part, sem: DATA.semester, pattern: d.pattern, room: d.room || null });
       if (r.error) throw r.error;
-      await Promise.all([sbLoad.bookings(), sbLoad.teacher_changes()]);
+      if (classKind(cls) === "borrowed" && d.askDept && requestOf(cls)?.department !== d.askDept) {
+        const q = await sb.rpc("request_ge", { cid: cls.id, d: d.askDept });
+        if (q.error) throw q.error;
+      }
+      await Promise.all([sbLoad.bookings(), sbLoad.teacher_changes(), sbLoad.ge_requests(), sbLoad.ge_decisions()]);
       rebuild(); render();
       const m2 = $("msg"); if (m2) { m2.textContent = "Saved."; m2.className = "msg good"; }
     } catch (err) { const m2 = $("msg") || msg; if (m2) { m2.textContent = sbMessage(err); m2.className = "msg bad"; } const b = document.querySelector('[data-act="save"]'); if (b) b.disabled = false; }
@@ -1709,17 +1773,6 @@ document.addEventListener("click", async (ev) => {
     if (await decide(ds.cid, ds.decide)) { await Promise.all([sbLoad.ge_decisions(), sbLoad.teacher_changes()]); rebuild(); render(); } else t.disabled = false;
     return;
   }
-  if (ds.hand) {
-    const c = CLASS[ds.cid];
-    const q = ds.hand === "back" ? `Take ${c.course} ${c.section} back for ${c.holder}? Its teacher returns to the loading plan.`
-      : `Hand ${c.course} ${c.section} to ${c.house}? ${c.house} will hold it and pick the teacher.`;
-    if (!window.confirm(q)) return;
-    const { error } = await sb.rpc("hand_to_house", { cid: ds.cid, undo: ds.hand === "back" });
-    if (error) { toast(sbMessage(error)); return; }
-    await Promise.all([sbLoad.ge_holders(), sbLoad.ge_decisions(), sbLoad.teacher_changes()]);
-    if (state.draft && state.pick?.cls === ds.cid) state.draft.teacher = teacherOf(c)?.key || "";
-    rebuild(); render(); toast(ds.hand === "back" ? `Returned to ${c.holder}.` : `Handed to ${c.house}.`); return;
-  }
   if (ds.decideall) {
     const list = approvalList().filter((x) => needsMe(x.c, x.a));
     t.disabled = true;
@@ -1727,6 +1780,12 @@ document.addEventListener("click", async (ev) => {
     await Promise.all([sbLoad.ge_decisions(), sbLoad.teacher_changes()]); rebuild(); render(); return;
   }
   if (ds.apprfilter) { state.apprFilter = ds.apprfilter; render(); return; }
+  if (ds.geremove) {
+    const [course, department] = ds.geremove.split("|");
+    if (!window.confirm(`Remove ${department} from the departments that may teach ${course}?`)) return;
+    const { error } = await sb.from("ge_teachers").update({ allowed: false }).eq("course", course).eq("department", department);
+    if (error) toast(sbMessage(error)); await sbLoad.ge_teachers(); rebuild(); render(); return;
+  }
   if (ds.staffedit !== undefined) { state.staffEdit = staffList.find((x) => x.email === ds.staffedit) || null; render(); return; }
   if (ds.staffdel) {
     if (!window.confirm(`Remove ${ds.staffdel}? They will no longer see the schedule.`)) return;
@@ -1799,6 +1858,7 @@ document.addEventListener("change", async (ev) => {
   if (!state.draft) return;
   if (id === "roomSel") { state.draft.room = ev.target.value; render(); }
   if (id === "teacherSel") { state.draft.teacher = ev.target.value; render(); }
+  if (id === "askSel") { state.draft.askDept = ev.target.value; render(); }
 });
 // Drag from the unscheduled list onto the dashboard timetable.
 document.addEventListener("dragstart", (ev) => {

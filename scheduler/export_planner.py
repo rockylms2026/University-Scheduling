@@ -38,19 +38,28 @@ def holder_department(housed_by: str | None, program_dept: str) -> str | None:
     return m.group(1) if m else None
 
 
-def ge_holder(k, uni: University, dept_college: dict) -> dict:
-    """Which department handles a GE class.
-
-    The house is the department in housed_by. The holder is the department whose teacher the
-    loading plan gives the class (Social Work teaching PSYC 160, say), or the house when the plan
-    names no teacher. Non-GE classes have neither.
-    """
+def ge_house(k, uni: University, dept_college: dict) -> dict:
+    """The house department of a GE class: the department in housed_by (None for non-GE classes)."""
     if not k.course.is_core:
-        return {"house": None, "houseCollege": None, "holder": None, "holderCollege": None}
+        return {"house": None, "houseCollege": None}
     house = holder_department(k.course.housed_by, uni.programs[k.section.program].department)
-    holder = k.faculty.department if k.faculty and house != "General Education" else house
-    return {"house": house, "houseCollege": dept_college.get(house),
-            "holder": holder, "holderCollege": dept_college.get(holder)}
+    return {"house": house, "houseCollege": dept_college.get(house)}
+
+
+def ge_teaching_lists(uni: University, semester: int, dept_college: dict) -> dict:
+    """Departments that may teach each GE course (not GE Department courses): the house department
+    and every department the loading plans give the course to. Social Work, say, for PSYC 160."""
+    lists: dict[str, set] = {}
+    for k in uni.classes_for(semester):
+        if not k.course.is_core:
+            continue
+        house = holder_department(k.course.housed_by, uni.programs[k.section.program].department)
+        if house == "General Education":
+            continue
+        lists.setdefault(k.course.code, set()).add(house)
+        if k.faculty and k.faculty.department != "General Education":
+            lists[k.course.code].add(k.faculty.department)
+    return {code: sorted(depts) for code, depts in sorted(lists.items())}
 
 
 def planner_data(uni: University, semester: int) -> dict:
@@ -85,7 +94,7 @@ def planner_data(uni: University, semester: int) -> dict:
                            "labRooms": list(c.lab_rooms), "placement": list(c.placement)}
         classes.append({"id": k.id, "course": c.code, "section": k.section.name,
                         "teacher": k.faculty.key if k.faculty else None,
-                        **ge_holder(k, uni, dept_college),
+                        **ge_house(k, uni, dept_college),
                         "lu": c.load_units, "meetings": by_class.get(k.id, [])})
 
     load = faculty_load_summary(uni, semester)
@@ -114,6 +123,7 @@ def planner_data(uni: University, semester: int) -> dict:
             "buildings": {c: b["name"] for c, b in uni.campus.buildings.items()},
             "intro": sorted(uni.intro_courses), "programs": programs, "sections": sections, "courses": courses, "classes": classes,
             "teachers": teachers, "rooms": rooms, "options": options, "labDays": lab_days,
+            "geTeachers": ge_teaching_lists(uni, semester, dept_college), "deptCollege": dept_college,
             "facPref": uni.timeframe.fac_pref_hours, "facMax": uni.timeframe.fac_max_hours}
 
 

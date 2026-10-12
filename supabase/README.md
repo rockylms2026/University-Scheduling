@@ -2,14 +2,14 @@
 
 The scheduling page in `web/index.html` signs people in with Supabase and limits what each role can do. The limits are enforced by the database (row level security in `schema.sql`), not only by the page.
 
-| Role | Can schedule | Approves |
+| Role | Can schedule | Answers requests |
 |---|---|---|
-| Registrar, Dean | everything; manage people; open GE Department scheduling; publish | anything |
-| Department Chair | their department's major classes, with their own faculty; GE courses their department holds, for their own sections; GE courses another department holds, for their own sections (time and room only) | borrowed GE classes from their department, when the borrowing department is in the same college (and they pick the teacher) |
-| Associate Dean | the classes of their college's sections | borrowed GE classes from their college, when the borrowing department is in another college (and they pick the teacher) |
+| Registrar, Dean | everything; manage people and the GE teaching lists; open GE Department scheduling; publish | any |
+| Department Chair | their department's major classes, with their own faculty; GE courses their department may teach, for their own sections, with their own faculty; other GE classes of their own sections (time and room, then ask a department) | requests to their department from a department of the same college (and they pick the teacher) |
+| Associate Dean | the classes of their college's sections | requests to a department of their college from another college (and they pick the teacher) |
 | GE Coordinator | GE Department courses (PE, CWTS, PHIL 190, PHIL 220, ARTS 101, ENGL 302), last, once opened | none |
 
-The department holding a GE class is the one the loading plan gives it to: Social Work, say, for the PSYC 160 and GAD 171 classes its faculty teach. A class with no teacher in the plan goes to the house department in `housed_by` (`data/institutional_core.yaml`; UNI 103 is held by each program's own department). A department teaching a GE course for its own sections needs no approval. A GE class a department books from another department stays *Waiting* until the holding department approves it and picks the teacher from its own faculty. A holding department without an available instructor can hand the class to the house department (and take it back). A new time asks again.
+**Who may teach each GE course** is a list on the Settings page, started from the loading plans: for example Psychology, Social Work, and Elementary Education for PSYC 160. A department on the list books that course for its own sections with its own instructors, with no approval. A section whose department is not on the list books the time and asks one of the listed departments; the page shows which of them have a teacher free then. The asked department answers and picks the teacher from its own faculty; if it says no, the section asks another. A department may ask, or answer requests, only after it has booked every GE class it teaches for its own sections.
 
 ## One-time setup
 

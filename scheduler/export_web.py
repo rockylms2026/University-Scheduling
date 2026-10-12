@@ -45,13 +45,34 @@ def seed_sql(uni: University, semester: int) -> str:
     for c in data["classes"]:
         prog = data["programs"][data["sections"][c["section"]]["program"]]
         rows.append(f"({q(c['id'])}, {semester}, {q(c['course'])}, {q(c['section'])}, {q(data['sections'][c['section']]['program'])}, "
-                    f"{q(prog['college'])}, {q(prog['dept'])}, {q(data['courses'][c['course']]['college'] == 'CORE')}, {q(c['teacher'])}, {q(c['holder'])}, {q(c['holderCollege'])}, {q(c['house'])}, {q(c['houseCollege'])})")
-    out.append("insert into public.classes (id, sem, course, section, program, college, department, is_ge, plan_teacher, holder_dept, holder_college, house_dept, house_college) values\n  "
+                    f"{q(prog['college'])}, {q(prog['dept'])}, {q(data['courses'][c['course']]['college'] == 'CORE')}, {q(c['teacher'])}, {q(c['house'])}, {q(c['houseCollege'])})")
+    out.append("insert into public.classes (id, sem, course, section, program, college, department, is_ge, plan_teacher, house_dept, house_college) values\n  "
                + ",\n  ".join(rows) + "\non conflict (id) do update set course = excluded.course, section = excluded.section,"
                " program = excluded.program, college = excluded.college, department = excluded.department,"
-               " is_ge = excluded.is_ge, plan_teacher = excluded.plan_teacher, holder_dept = excluded.holder_dept, holder_college = excluded.holder_college, house_dept = excluded.house_dept, house_college = excluded.house_college;")
+               " is_ge = excluded.is_ge, plan_teacher = excluded.plan_teacher, house_dept = excluded.house_dept, house_college = excluded.house_college;")
+    rows = [f"({q(code)}, {q(d)}, {q(data['deptCollege'][d])})" for code, depts in data["geTeachers"].items() for d in depts]
+    out.append("-- Departments that may teach each GE course (kept as edited on the Settings page).\n"
+               "insert into public.ge_teachers (course, department, college) values\n  " + ",\n  ".join(rows)
+               + "\non conflict (course, department) do nothing;")
     out.append("commit;")
     return "\n".join(out) + "\n"
+
+
+# GE classes already booked that their section must ask for: ask the department the loading plan
+# gives them to, or else the house department.
+DEFAULT_REQUESTS = """-- Booked GE classes that must be asked of another department: ask the department of the plan teacher, or the house.
+insert into public.ge_requests (class_id, department, college, requested_by)
+select c.id, d.department, d.college, 'setup'
+from public.classes c
+left join public.faculty f on f.key = c.plan_teacher
+join lateral (
+  select g.department, g.college from public.ge_teachers g
+  where g.course = c.course and g.allowed
+  order by (g.department = f.department) desc nulls last, (g.department = c.house_dept) desc, g.department
+  limit 1) d on true
+where public.class_kind(c.id) = 'borrowed' and exists (select 1 from public.bookings b where b.class_id = c.id)
+on conflict (class_id) do nothing;
+"""
 
 
 def import_sql(semester: int) -> str:
@@ -91,7 +112,7 @@ def write_web(uni: University, semester: int = 1) -> list[Path]:
              f"insert into public.staff (email, full_name, role) values ({q(admin['email'].lower())}, {q(admin.get('name', ''))}, 'registrar')\n"
              "on conflict (email) do nothing;\n") if admin else ""
     setup = "\n".join(["-- Class Scheduling: run this once in the Supabase SQL Editor (it is safe to run again).",
-                       (SUPABASE_DIR / "schema.sql").read_text(), seed, first, import_sql(semester)])
+                       (SUPABASE_DIR / "schema.sql").read_text(), seed, first, import_sql(semester), DEFAULT_REQUESTS])
     (SUPABASE_DIR / "setup.sql").write_text(setup)
 
     data = json.dumps(planner_data(uni, semester), separators=(",", ":")).replace("</", "<\\/")
