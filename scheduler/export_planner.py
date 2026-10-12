@@ -60,7 +60,7 @@ def planner_data(uni: University, semester: int) -> dict:
 
     load = faculty_load_summary(uni, semester)
     teachers = {key: {"name": f.name, "rank": f.rank, "dept": f.department, "college": f.college,
-                      "role": f.designation, "max": f.max_lu, "lu": load[key]["lu"],
+                      "role": f.designation, "max": f.max_lu, "prepCap": f.prep_cap, "lu": load[key]["lu"],
                       "office": offices.get(key, "")}
                 for key, f in uni.faculty.items()}
 
@@ -82,7 +82,7 @@ def planner_data(uni: University, semester: int) -> dict:
     return {"semester": semester, "days": uni.timeframe.days, "start": uni.timeframe.day_start,
             "end": uni.timeframe.day_end, "slot": uni.timeframe.slot, "colleges": COLLEGES,
             "buildings": {c: b["name"] for c, b in uni.campus.buildings.items()},
-            "programs": programs, "sections": sections, "courses": courses, "classes": classes,
+            "intro": sorted(uni.intro_courses), "programs": programs, "sections": sections, "courses": courses, "classes": classes,
             "teachers": teachers, "rooms": rooms, "options": options, "labDays": lab_days,
             "facPref": uni.timeframe.fac_pref_hours, "facMax": uni.timeframe.fac_max_hours}
 
