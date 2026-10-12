@@ -285,6 +285,23 @@ dl.about dd { margin: 0; }
 .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
 .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; align-items: start; }
 
+/* ----- quiet motion: short, subtle feedback on hover and click ----- */
+.side button, .results button, .menu .pop button, .seg button, .pill, .btn, .kpi, .publish, .bell, .userchip button, .topbar select, .topbar input {
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .12s ease; }
+.side button:hover:not([aria-current="page"]) { background: var(--bg); box-shadow: inset 3px 0 0 var(--line); }
+.side button:active, .seg button:active, .pill:active, .btn:active:not(:disabled), .publish:active:not(:disabled), .bell:active, .userchip button:active { transform: scale(.97); }
+.side button:focus-visible, .seg button:focus-visible, .pill:focus-visible, .btn:focus-visible, .kpi:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg button:hover:not([aria-pressed="true"]) { background: var(--accent-soft); color: var(--accent); }
+.pill:hover:not([aria-pressed="true"]) { border-color: var(--accent); color: var(--accent); }
+.btn.primary:hover:not(:disabled) { box-shadow: 0 2px 6px rgba(31,63,116,.25); }
+.kpi:hover { box-shadow: 0 3px 10px rgba(15,25,45,.08); transform: translateY(-1px); }
+.kpi:active { transform: translateY(0); }
+.publish:hover:not(:disabled) { box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+.bell:hover, .userchip button:hover { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.6); }
+.main.enter > * { animation: page-in .22s ease-out both; }
+@keyframes page-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
 /* ----- responsive: desktop first (1440), usable on tablets ----- */
 @media (max-width: 1360px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bottom { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bottom > :first-child { grid-column: 1 / -1; } }
 @media (max-width: 1100px) {
@@ -991,6 +1008,7 @@ function render() {
   if ((state.view === "approvals" || state.view === "submissions") && !BACKEND) state.view = "dashboard";
   renderShell(); remember();
   const page = $("page");
+  if (render.view !== state.view) { render.view = state.view; page.classList.remove("enter"); void page.offsetWidth; page.classList.add("enter"); clearTimeout(render.t); render.t = setTimeout(() => page.classList.remove("enter"), 300); }
   const fn = { dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, rooms: renderRooms, sections: renderSections,
                courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, settings: renderSettings }[state.view] || renderDashboard;
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
