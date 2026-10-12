@@ -1069,7 +1069,7 @@ function loadTable(keys, limit) {
     const t = DATA.teachers[k], L = loads[k];
     const p = Math.min(100, (100 * L.lu) / t.max);
     return `<tr class="clickable" data-goteacher="${k}" title="${esc(`${t.name} · ${t.role || "Faculty"}`)}"><td>${esc(t.name)}<div class="small muted">${esc(t.dept)}</div></td>
-      <td class="num">${L.lu}/${t.max}<div class="bar ${L.status}"><i style="width:${p}%"></i></div></td>
+      <td class="num" title="Loading plan: ${t.lu} LU">${L.lu}/${t.max}${t.lu !== L.lu ? `<div class="small muted">plan ${t.lu}</div>` : ""}<div class="bar ${L.status}"><i style="width:${p}%"></i></div></td>
       <td class="num">${L.cap != null ? `${L.capped}/${L.cap}` : "—"}</td><td class="num">${L.total}/5</td><td>${STATUS_CHIP[L.status]}</td></tr>`;
   }).join("");
   return `<table class="loads"><thead><tr><th>Faculty · department</th><th class="num">LU</th><th class="num" title="Preparations, not counting intro and GE courses">Preps</th><th class="num" title="Different courses, counting intro and GE">All</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
@@ -1208,7 +1208,7 @@ function classRow(c, other) {
   return `<div class="cls${state.pick?.cls === c.id ? " on" : ""}">
     <div class="t"><b>${esc(c.course)}${other ? ` · ${esc(c.section)}` : ""}</b><span>${course.credits} cr · ${course.lab ? `Lec ${course.lec} + Lab ${course.lab}` : `${course.lec} h`}</span></div>
     <div class="title">${esc(course.title)}</div>
-    <div class="muted small">${esc(teacherName(t))}${assigned[c.id] ? " · changed from plan" : ""}</div>
+    <div class="muted small">${esc(teacherName(t))}${assigned[c.id] && !isGE(c.course) ? " · changed from plan" : ""}${!t && c.planTeacher ? ` · loading plan: ${esc(DATA.teachers[c.planTeacher].name)}` : ""}</div>
     ${field}<div class="parts">${parts}</div></div>`;
 }
 function editor(cls, part) {
@@ -1256,7 +1256,8 @@ function editor(cls, part) {
     const dept = t?.key ? DATA.teachers[t.key].dept : "";
     const usual = (course.usual || "").replace(/^GE Department$/, "General Education");
     const near = ft.filter((x) => { const td = DATA.teachers[x.key].dept; return td === dept || (usual && usual.includes(td)); });
-    teacherChoices = { free: ft.map((x) => ({ key: x.key, text: `${DATA.teachers[x.key].name} · ${DATA.teachers[x.key].dept} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}` })),
+    const ftSorted = ft.slice().sort((x, y) => (y.key === cls.planTeacher) - (x.key === cls.planTeacher));
+    teacherChoices = { free: ftSorted.map((x) => ({ key: x.key, text: `${DATA.teachers[x.key].name} · ${DATA.teachers[x.key].dept} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}${x.key === cls.planTeacher && isGE(cls.course) ? " · loading plan" : ""}` })),
                        busy: teacherKey && !ft.some((x) => x.key === teacherKey) ? teacherKey : null, selected: teacherKey };
     const teacherSel = tRight ? `<div style="display:grid;gap:4px"><span class="fieldlabel">Teacher</span>
       <div class="readonly">${esc(borrowed && (!teacherKey || DATA.teachers[teacherKey].dept !== d.askDept) ? "Not yet chosen" : teacherKey ? DATA.teachers[teacherKey].name : "Not yet chosen")}${!borrowed && teacherKey && t?.key === cls.teacher ? " (loading plan)" : ""}${tRight !== right ? `<br><span class="small muted">${esc(tRight.replace(/^View only: /, ""))}</span>` : ""}</div></div>`
@@ -1360,7 +1361,7 @@ function renderFaculty(page) {
           <div class="row">${STATUS_CHIP[L.status]}<button type="button" class="btn" data-print="teacher" data-id="${k}">Print…</button></div></div>
         <dl class="about"><dt>Department</dt><dd>${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}</dd>
           <dt>Office</dt><dd>${esc(t.office || "—")}</dd>
-          <dt>Teaching load</dt><dd><b>${L.lu}</b> of ${t.max} LU this semester</dd>
+          <dt>Teaching load</dt><dd><b>${L.lu}</b> of ${t.max} LU this semester${t.lu !== L.lu ? ` · loading plan: ${t.lu} LU (${t.lu - L.lu > 0 ? `${t.lu - L.lu} LU of GE classes not yet given` : `${L.lu - t.lu} LU more than planned`})` : ""}</dd>
           <dt>Preparations</dt><dd>${L.cap != null ? `<b>${L.capped}</b> of ${L.cap} (not counting intro and GE) · ` : ""}<b>${L.total}</b> of 5 different courses</dd>
           <dt>Hours by day</dt><dd>${DAYS.filter((d) => perDay[d]).map((d) => `${d} ${perDay[d].toFixed(1)} h`).join(" · ") || "Nothing scheduled yet"}</dd></dl>
         <div class="scroll"><table><thead><tr><th>Course</th><th>Section</th><th class="num">LU</th><th>Schedule</th></tr></thead><tbody>
@@ -1470,9 +1471,9 @@ function approverTeacherSelect(c, a) {
   const sessionsOf = sessions.filter((x) => x.cls === c);
   const free = (k) => sessionsOf.every((x) => !teacherBusy(k, x, c.id).length);
   const list = Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === a.dept)
-    .sort((x, y) => free(y) - free(x) || DATA.teachers[x].name.localeCompare(DATA.teachers[y].name));
+    .sort((x, y) => (y === c.planTeacher) - (x === c.planTeacher) || free(y) - free(x) || DATA.teachers[x].name.localeCompare(DATA.teachers[y].name));
   return `<select class="inp" id="apT-${c.id}" aria-label="Teacher for ${esc(c.course)} ${esc(c.section)}">
-    <option value="">Choose a teacher</option>${list.map((k) => `<option value="${k}"${k === a.teacher ? " selected" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${free(k) ? "" : " · busy then"}</option>`).join("")}</select>`;
+    <option value="">Choose a teacher</option>${list.map((k) => `<option value="${k}"${k === a.teacher ? " selected" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${k === c.planTeacher ? " · loading plan" : ""}${free(k) ? "" : " · busy then"}</option>`).join("")}</select>`;
 }
 function renderApprovals(page) {
   const all = approvalList();
@@ -1917,12 +1918,12 @@ async function exportExcel() {
       hmap(o.iv[0][1]), hmap(o.iv[0][2]), b.room || (m.kind === "nstp" ? "Grounds" : ""), teacherName(teacherOf(c)).replace("No teacher yet", "TBA")]);
   });
   add("Class schedule", sched, [8, 10, 11, 10, 40, 12, 12, 12, 10, 10, 12, 30]);
-  const loadRows = [["Faculty", "Department", "College", "Designation", "LU", "Max LU", "Preparations", "Prep limit", "Different courses", "Status", "Courses"]];
+  const loadRows = [["Faculty", "Department", "College", "Designation", "LU", "Loading plan LU", "Max LU", "Preparations", "Prep limit", "Different courses", "Status", "Courses"]];
   Object.keys(DATA.teachers).sort((a, b) => DATA.teachers[a].name.localeCompare(DATA.teachers[b].name)).forEach((k) => {
     const t = DATA.teachers[k], L = loads[k];
-    loadRows.push([t.name, t.dept, t.college, t.role || "Faculty", L.lu, t.max, L.capped, L.cap ?? "", L.total, { over: "Over", near: "Near limit", ok: "OK" }[L.status], [...L.courses].join(", ")]);
+    loadRows.push([t.name, t.dept, t.college, t.role || "Faculty", L.lu, t.lu, t.max, L.capped, L.cap ?? "", L.total, { over: "Over", near: "Near limit", ok: "OK" }[L.status], [...L.courses].join(", ")]);
   });
-  add("Faculty loads", loadRows, [32, 24, 8, 20, 6, 8, 12, 10, 10, 11, 50]);
+  add("Faculty loads", loadRows, [32, 24, 8, 20, 6, 10, 8, 12, 10, 10, 11, 50]);
   const un = [["Year", "Section", "Course", "Title", "Part", "Needs", "Hours/week", "Faculty"]];
   DATA.classes.forEach((c) => c.meetings.forEach((m) => { if (!bookings[`${c.id}|${m.part}`]) un.push([DATA.sections[c.section].year, c.section, c.course, DATA.courses[c.course].title, PART[m.part], needOf(m.kind), weeklyHours(m.kind), teacherName(teacherOf(c)).replace("No teacher yet", "TBA")]); }));
   add("Unscheduled", un, [6, 11, 10, 40, 12, 10, 10, 30]);
