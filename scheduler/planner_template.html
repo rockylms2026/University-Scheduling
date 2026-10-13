@@ -404,6 +404,83 @@ dl.about dd { margin: 0; }
 .hownote p { margin: 8px 0 0; }
 @media (max-width: 900px) { .subrow { grid-template-columns: minmax(0, 1fr) auto; } .substat { grid-column: 1 / -1; grid-row: 2; } .subact { grid-column: 2; grid-row: 1; } .subprog { grid-row: 3; } }
 
+/* ----- workspace: section menu + light cards ----- */
+.ws { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 24px; align-items: start; }
+.ws.slim { grid-template-columns: 48px minmax(0, 1fr); }
+.subnav { position: sticky; top: calc(var(--top) + 16px); background: var(--panel); border-radius: 14px; padding: 14px 10px; display: grid; gap: 2px; box-shadow: 0 1px 2px rgba(15,25,45,.06); }
+.subnav.slim { padding: 4px; justify-items: center; }
+.snhead { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 2px 4px 12px 8px; }
+.snhead b { font-size: 1.15rem; font-weight: 500; }
+.snicon { display: grid; place-items: center; color: var(--accent); }
+.snicon svg { width: 22px; height: 22px; }
+.snitem, .sngroup { display: flex; align-items: center; gap: 12px; width: 100%; font: inherit; text-align: left; border: 0; background: transparent; color: var(--ink); cursor: pointer; border-radius: 10px; }
+.snitem { font-size: .92rem; padding: 9px 12px 9px 46px; }
+.snitem.top { padding-left: 12px; font-weight: 500; font-size: .98rem; }
+.sngroup { font-weight: 500; font-size: .98rem; padding: 10px 12px; margin-top: 4px; }
+.sngroup i { margin-left: auto; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(-135deg); transition: transform .15s ease; }
+.sngroup[aria-expanded="false"] i { transform: rotate(45deg); }
+.snitem:hover, .sngroup:hover { background: var(--bg); }
+.snitem[aria-current="page"] { background: var(--accent-soft); box-shadow: inset 4px 0 0 var(--accent); font-weight: 500; }
+.wsmain { display: grid; gap: 22px; min-width: 0; }
+.notices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.notice { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px 28px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 22px; align-items: center; }
+.notice:has(> .ring) { grid-template-columns: minmax(0, 1fr); }
+.notice .nicon { color: var(--accent); } .notice .nicon.bad { color: var(--bad); } .notice .nicon.warn { color: var(--warn); }
+.notice .nicon svg { width: 56px; height: 56px; }
+.notice h3 { font-size: 1.15rem; font-weight: 500; margin-bottom: 6px; }
+.notice p { margin: 0 0 10px; color: var(--muted); }
+.notice .go { font: inherit; font-weight: 500; color: #1a66d6; background: none; border: 0; padding: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.ovtitle { font-size: 1.3rem; font-weight: 500; margin-top: 4px; }
+.ovgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: stretch; }
+.ovcard { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px 0; display: grid; grid-template-rows: auto 1fr auto; gap: 16px; min-width: 0; }
+.ovhead { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: start; }
+.ovicon { color: var(--accent); width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); display: grid; place-items: center; }
+.ovhead h3 { font-size: 1.08rem; font-weight: 500; }
+.ovhead p { margin: 2px 0 0; color: var(--muted); font-size: .88rem; }
+.ovbody { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.ovline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; font-size: .9rem; }
+.ovline b { display: block; font-weight: 500; }
+.ovline span { display: block; color: var(--muted); font-size: .84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ovline em { font-style: normal; color: var(--muted); font-size: .84rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ovline em .bad { color: var(--bad); font-weight: 500; }
+.morebtn { display: flex; justify-content: center; align-items: center; gap: 8px; font: inherit; font-weight: 500; color: var(--ink); background: var(--panel); border: 1px solid #b9c0cb; border-radius: 999px; padding: 9px; cursor: pointer; }
+.morebtn:hover { border-color: var(--accent); color: var(--accent); }
+.ovfoot { border-top: 1px solid var(--line2); margin: 0 -24px; padding: 14px 24px 16px; }
+.ovlink { font: inherit; font-weight: 500; font-size: .95rem; color: var(--ink); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; }
+.ovlink:hover { color: var(--accent); text-decoration-color: currentColor; }
+
+/* ----- faculty profiles ----- */
+.profbar { display: flex; flex-wrap: wrap; gap: 10px; }
+.profbar input { flex: 1 1 260px; max-width: 420px; }
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.pcard { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; text-align: left; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease; }
+.pcard:hover { border-color: #c4cbd6; box-shadow: 0 3px 12px rgba(15,25,45,.07); }
+.pav { flex: none; width: 46px; height: 46px; border-radius: 50%; background: var(--accent-soft); color: var(--navy); display: grid; place-items: center; font-weight: 500; font-size: .95rem; letter-spacing: .03em; }
+.pav.big { width: 84px; height: 84px; font-size: 1.6rem; background: var(--navy); color: #fff; }
+.pinfo { display: grid; gap: 2px; min-width: 0; }
+.pinfo b { font-weight: 500; font-size: .98rem; }
+.pinfo span { font-size: .86rem; }
+.pinfo em { font-style: normal; font-size: .82rem; color: var(--accent); }
+.pinfo small { font-size: .78rem; color: var(--muted); }
+.backlink { display: inline-flex; align-items: center; gap: 4px; width: fit-content; font: inherit; font-weight: 500; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
+.phead { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px 28px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 24px; align-items: center; }
+.pwho h1 { font-size: 1.6rem; font-weight: 500; }
+.pwho > p { margin: 2px 0 8px; font-size: 1rem; color: var(--muted); }
+.pduties { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.pcols { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.pside { display: grid; gap: 22px; }
+.pclass { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 16px; align-items: start; padding-bottom: 12px; border-bottom: 1px solid var(--line2); font-size: .92rem; }
+.pclass:last-child { border-bottom: 0; }
+.pclass span { display: block; color: var(--muted); font-size: .84rem; }
+.pclass b { font-weight: 500; }
+.pwhen { display: grid; gap: 2px; text-align: right; font-size: .84rem; }
+.pwhen span { color: var(--ink); }
+.pclass em { font-style: normal; color: var(--muted); font-size: .84rem; white-space: nowrap; }
+.pdl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; margin: 0; font-size: .9rem; }
+.pdl dt { color: var(--muted); } .pdl dd { margin: 0; }
+@media (max-width: 1100px) { .ws, .ws.slim { grid-template-columns: minmax(0, 1fr); } .subnav { position: static; } .notices, .pcols, .ovgrid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) { .phead { grid-template-columns: minmax(0, 1fr); } .pclass { grid-template-columns: minmax(0, 1fr) auto; } .pwhen { grid-column: 1 / -1; text-align: left; } }
+
 /* ----- responsive: desktop first (1440), usable on tablets ----- */
 @media (max-width: 1360px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bottom { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bottom > :first-child { grid-column: 1 / -1; } }
 @media (max-width: 1100px) {
@@ -472,7 +549,7 @@ const DAY_MAX = { Mon: 8, Tue: 7.5, Wed: 8, Thu: 7.5, Fri: 8, Sat: 3 };     // t
 const PART = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Supervision: "Practicum supervision" };
 const COLLEGE_KEYS = ["CSS", "CISC", "CBE", "COE", "CCJPS"];
 const SCOPES = [["ALL", "All colleges"], ["CSS", "CSS"], ["CISC", "CISC"], ["CBE", "CBE"], ["COE", "COE"], ["CCJPS", "CCJPS"], ["GE", "GE Department"]];
-const VIEWS = [["home", "Home"], ["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["rooms", "Rooms"], ["sections", "Sections"],
+const VIEWS = [["home", "Home"], ["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["profiles", "Faculty Profiles"], ["rooms", "Rooms"], ["sections", "Sections"],
                ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["availability", "GE Availability"], ["submissions", "Submissions"], ["reports", "Reports"], ["settings", "Settings"]];
 const ROLE_NAME = { registrar: "Registrar", dean: "Dean", associate_dean: "Associate Dean", chair: "Department Chair", ge_coordinator: "GE Coordinator" };
 const TYPE_LABEL = { lec: "Lecture (major)", lab: "Laboratory block (3 h)", ge: "General education", pe: "PE", cwts: "CWTS (Saturday)", prac: "Practicum supervision" };
@@ -501,7 +578,8 @@ const state = { view: "home", scope: "ALL", college: "CSS", program: null, secti
 try { Object.assign(state, JSON.parse(localStorage.getItem("cs-nav2") || "{}"), { pick: null, draft: null }); } catch (e) {}
 function remember() {
   try { localStorage.setItem("cs-nav2", JSON.stringify({ view: state.view, scope: state.scope, college: state.college, program: state.program,
-    section: state.section, teacher: state.teacher, room: state.room, gridMode: state.gridMode, gridKey: state.gridKey })); } catch (e) {}
+    section: state.section, teacher: state.teacher, room: state.room, gridMode: state.gridMode, gridKey: state.gridKey,
+    dashTab: state.dashTab, dashClosed: state.dashClosed, dashNavHidden: state.dashNavHidden, profile: state.profile, profDept: state.profDept })); } catch (e) {}
 }
 
 // ---------- shared store (claude.ai) with an in-memory fallback ----------
@@ -1096,12 +1174,12 @@ function navGroups() {
   const name = Object.fromEntries(VIEWS);
   const g = (key, label, icon, keys, bottom) => ({ key, label, icon, bottom, views: keys.filter(has).map((k) => [k, name[k]]) });
   return [g("home", "Home", "home", ["home"]), g("dashboard", "Dashboard", "dashboard", ["dashboard"]),
-    g("schedule", "Scheduling", "schedule", ["timetable", "sections", "courses"]), g("faculty", "Faculty", "faculty", ["faculty", "availability"]),
+    g("schedule", "Scheduling", "schedule", ["timetable", "sections", "courses"]), g("faculty", "Faculty", "faculty", ["profiles", "faculty", "availability"]),
     g("rooms", "Rooms", "rooms", ["rooms"]), g("review", "Review", "review", ["conflicts", "approvals", "submissions"]),
     g("reports", "Reports", "reports", ["reports"]), g("settings", "Settings", "settings", ["settings"], true)].filter((x) => x.views.length);
 }
 const VIEW_NOTE = { timetable: "Book times, rooms and teachers", sections: "Each section's week", courses: "Every class of a course",
-  faculty: "Teaching load of each instructor", availability: "Free instructors for borrowed GE", conflicts: "Clashes and broken rules",
+  faculty: "Teaching load of each instructor", profiles: "Rank, duties and classes", availability: "Free instructors for borrowed GE", conflicts: "Clashes and broken rules",
   approvals: "Borrowed GE bookings", submissions: "Which departments are done" };
 let flyKey = null, userMenuOpen = false, flyCounts = {}, flyTimer = null;
 const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
@@ -1192,7 +1270,7 @@ function render() {
   renderShell(); remember();
   const page = $("page");
   if (render.view !== state.view) { render.view = state.view; page.classList.remove("enter"); void page.offsetWidth; page.classList.add("enter"); clearTimeout(render.t); render.t = setTimeout(() => page.classList.remove("enter"), 300); }
-  const fn = { home: renderHome, dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, rooms: renderRooms, sections: renderSections,
+  const fn = { home: renderHome, dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, profiles: renderProfiles, rooms: renderRooms, sections: renderSections,
                courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, settings: renderSettings }[state.view] || renderHome;
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
   fn(page);
@@ -1596,19 +1674,78 @@ function renderAvailability(page) {
       <div class="legend"><span><i style="background:var(--good-soft)"></i>Free for that period on all its days</span><span>· busy</span></div></div>`;
 }
 
+// The dashboard: a section menu on the left (like a workspace) and one light section at a time.
+const DASH_NAV = [["overview", "Overview", null], ["timetable", "Weekly timetable", "Scheduling"], ["loads", "Faculty load", "Resources"], ["rooms", "Room use", "Resources"],
+                  ["conflicts", "Conflicts", "Checks"], ["figures", "Term figures", "Checks"]];
+const DASH_ICON = { Scheduling: "schedule", Resources: "faculty", Checks: "review" };
+function dashNav() {
+  const closed = state.dashClosed || [];
+  if (state.dashNavHidden) return `<aside class="subnav slim"><button type="button" class="iconbtn" data-dashcollapse="0" title="Show the section menu" aria-label="Show the section menu">${svg('<path d="M14 6l6 6-6 6M4 4v16"/>', 20)}</button></aside>`;
+  let html = `<aside class="subnav"><div class="snhead"><span class="snicon">${ICON.dashboard}</span><b>Dashboard</b><button type="button" class="iconbtn" data-dashcollapse="1" title="Hide the section menu" aria-label="Hide the section menu">${svg('<path d="M10 6l-6 6 6 6M20 4v16"/>', 20)}</button></div>`;
+  let group = null;
+  DASH_NAV.forEach(([k, l, g]) => {
+    if (g !== group) {
+      if (group) html += `</div>`;
+      group = g;
+      if (g) html += `<button type="button" class="sngroup" data-dashgroup="${g}" aria-expanded="${!closed.includes(g)}"><span class="snicon">${ICON[DASH_ICON[g]]}</span>${g}<i aria-hidden="true"></i></button><div class="snkids"${closed.includes(g) ? " hidden" : ""}>`;
+      else html += `<div>`;
+    }
+    html += `<button type="button" class="snitem${g ? "" : " top"}" data-dashtab="${k}" aria-current="${state.dashTab === k ? "page" : "false"}">${g ? "" : `<span class="snicon">${ICON.home}</span>`}${l}</button>`;
+  });
+  return html + `</div></aside>`;
+}
+function ovCard(icon, title, sub, body, link) {
+  return `<section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON[icon]}</span><div><h3>${esc(title)}</h3><p>${esc(sub)}</p></div></div>
+    <div class="ovbody">${body}</div><div class="ovfoot">${link}</div></section>`;
+}
 function renderDashboard(page) {
-  const { key, html: picker } = gridPicker();
-  const g = gridSessions(key);
+  if (!DASH_NAV.some(([k]) => k === state.dashTab)) state.dashTab = "overview";
+  const tab = state.dashTab;
   const tks = Object.keys(DATA.teachers).filter(teacherInScope);
   const rooms = Object.keys(DATA.rooms).filter(roomInScope).sort(numSort);
   const confs = conflictsInScope().sort((a, b) => (a.sev === "bad" ? 0 : 1) - (b.sev === "bad" ? 0 : 1));
   const done = DATA.classes.filter(classInScope).reduce((a, c) => a + c.meetings.filter((m) => bookings[`${c.id}|${m.part}`]).length, 0);
   const all = DATA.classes.filter(classInScope).reduce((a, c) => a + c.meetings.length, 0);
-  page.innerHTML = `${head("Dashboard", `1st Semester, SY ${esc(printCfg.ay)} · ${esc(scopeName())} · ${done} of ${all} class meetings booked`, submitButton())}
-    ${kpis()}
-    <div class="dash">
+  const term = `1st Semester, SY ${esc(printCfg.ay)} · ${esc(scopeName())}`;
+  const link = (label, attrs) => `<button type="button" class="ovlink" ${attrs}>${esc(label)}</button>`;
+  let body;
+  if (tab === "overview") {
+    const { act, sug } = homeItems();
+    const next = act[0] || sug[0];
+    const secs = sectionsInScope();
+    const fullSecs = secs.filter((sec) => DATA.classes.filter((c) => c.section === sec).every((c) => c.meetings.every((m) => bookings[`${c.id}|${m.part}`]))).length;
+    const q = queueItems();
+    const order = { over: 0, near: 1, ok: 2 };
+    const heavy = tks.slice().sort((a, b) => order[loads[a].status] - order[loads[b].status] || loads[b].lu / DATA.teachers[b].max - loads[a].lu / DATA.teachers[a].max).slice(0, 4);
+    const bad = confs.filter((c) => c.sev === "bad");
+    const roomHours = (n) => sessions.filter((x) => x.room === n && x.day !== "Sat").reduce((a, x) => a + x.end - x.start, 0) / 60;
+    const busy = rooms.filter((n) => DATA.rooms[n].pool !== "pe").map((n) => [n, roomHours(n)]).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const line = (left, sub, right) => `<div class="ovline"><div><b>${left}</b>${sub ? `<span>${sub}</span>` : ""}</div>${right ? `<em>${right}</em>` : ""}</div>`;
+    body = `<div class="notices">
+        <section class="notice">${ring(done, all, "Class Meetings", `${done} Booked`, `of ${all} class meetings · ${fullSecs} of ${secs.length} sections complete`)}</section>
+        <section class="notice"><span class="nicon ${next.cls || ""}">${ICON[next.icon]}</span><div><h3>${esc(next.title)}</h3><p>${esc(next.text)}</p>${next.link}</div></section>
+      </div>
+      <h2 class="ovtitle">Dashboard Overview</h2>
+      <div class="ovgrid">
+        ${ovCard("schedule", "Unscheduled Classes", "Class meetings still to book", q.length ? q.slice(0, 4).map(({ c, m, who }) =>
+            line(`${esc(c.course)}${m.part === "Lec" ? "" : " " + esc(m.part === "Lab" ? "Lab" : PART[m.part])} · ${esc(c.section)}`, `${esc(DATA.courses[c.course].title)} · ${esc(who)}`, needOf(m.kind))).join("")
+            + (q.length > 4 ? `<button type="button" class="morebtn" data-dashtab="timetable">${svg('<path d="M4 6h16M4 12h16M4 18h16"/>', 18)} More (${q.length - 4})</button>` : "")
+          : `<p class="empty">Every class in this view is booked.</p>`, link("Open weekly timetable", 'data-dashtab="timetable"'))}
+        ${ovCard("faculty", "Faculty Load", "Heaviest loads in this view", heavy.map((k) => {
+            const t = DATA.teachers[k], L = loads[k];
+            return line(esc(t.name), esc(t.dept), `<span class="${L.status === "over" ? "bad" : ""}">${L.lu}/${t.max} LU</span>`);
+          }).join("") || `<p class="empty">No faculty in this view.</p>`, link("View faculty load", 'data-dashtab="loads"'))}
+        ${ovCard("review", "Conflicts", bad.length ? `${bad.length} to resolve` : "Clashes and broken rules", bad.length ? bad.slice(0, 3).map((c) =>
+            line(esc(c.type), esc(c.what), "")).join("") : `<p class="empty">No conflicts. Every booking passes the checks.</p>`, link("View conflicts", 'data-dashtab="conflicts"'))}
+        ${ovCard("rooms", "Room Use", "Busiest rooms, Monday to Friday", busy.map(([n, h]) =>
+            line(esc(n), esc(roomKind(DATA.rooms[n])), `${h.toFixed(h % 1 ? 1 : 0)} h`)).join("") || `<p class="empty">No rooms in this view.</p>`, link("View room use", 'data-dashtab="rooms"'))}
+      </div>`;
+  } else if (tab === "timetable") {
+    const { key, html: picker } = gridPicker();
+    const g = gridSessions(key);
+    body = `<div class="dash">
       <div class="card">
-        <div class="cardhead"><div><h2>Weekly timetable</h2><p class="sub">${esc(g.sub)}</p></div>
+        <div class="cardhead"><div><p class="sub" style="margin:0">${esc(g.sub)}</p></div>
           <div class="row"><div class="seg" role="group" aria-label="View">${[["section", "By Section"], ["faculty", "By Faculty"], ["room", "By Room"]].map(([k, l]) =>
             `<button type="button" data-gridmode="${k}" aria-pressed="${state.gridMode === k}">${l}</button>`).join("")}</div>${picker}
             ${state.gridMode === "section" && key ? `<button type="button" class="btn" data-opensection="${esc(key)}">Open in timetable</button>` : ""}</div></div>
@@ -1620,17 +1757,20 @@ function renderDashboard(page) {
         <input class="inp" id="queueSearch" type="search" placeholder="Filter by course, section, faculty" value="${esc(state.queueQuery)}" aria-label="Filter unscheduled classes">
         <p class="small muted" style="margin:0">Drag a class onto the timetable at the time you want, or click it to open the booking form.</p>
         <div class="queue" id="queue">${queueHtml()}</div>
-      </div>
-    </div>
-    <div class="bottom">
-      <div class="card"><div class="cardhead"><h2>Faculty load</h2><button type="button" class="btn link" data-view="faculty">All ${tks.length} faculty</button></div>
-        <div class="tablebox">${loadTable(tks, 40)}</div>
-        <p class="small muted" style="margin:0">Limits: 24 LU (15 for chairs). Preps: at most 4, not counting intro and GE courses. All: at most 5 different courses.</p></div>
-      <div class="card"><div class="cardhead"><h2>Room use</h2><span class="small muted">Booked hours per day</span></div>
-        <div class="tablebox">${heatmap(rooms)}</div></div>
-      <div class="card"><div class="cardhead"><h2>Conflicts</h2><span class="chip ${confs.some((c) => c.sev === "bad") ? "bad" : "good"}">${confs.filter((c) => c.sev === "bad").length} open</span></div>
-        <div class="tablebox">${conflictList(confs, 12)}</div></div>
-    </div>`;
+      </div></div>`;
+  } else if (tab === "loads") {
+    body = `<div class="card"><div class="cardhead"><span class="small muted">Heaviest first · click a row to open</span><button type="button" class="btn link" data-view="faculty">Open Faculty Loads</button></div>
+      <div class="tablebox" style="max-height:none">${loadTable(tks)}</div>
+      <p class="small muted" style="margin:0">Limits: 24 LU (15 for chairs). Preps: at most 4, not counting intro and GE courses. All: at most 5 different courses.</p></div>`;
+  } else if (tab === "rooms") {
+    body = `<div class="card"><div class="cardhead"><span class="small muted">Booked hours per day · click a room to open it</span></div>
+      <div class="tablebox" style="max-height:none">${heatmap(rooms)}</div></div>`;
+  } else if (tab === "conflicts") {
+    body = `<div class="card"><div class="cardhead"><span class="small muted">Students, teachers, rooms and load rules</span><span class="chip ${confs.some((c) => c.sev === "bad") ? "bad" : "good"}">${confs.filter((c) => c.sev === "bad").length} open</span></div>${conflictList(confs)}</div>`;
+  } else body = kpis();
+  const title = DASH_NAV.find(([k]) => k === tab)[1];
+  page.innerHTML = `<div class="ws${state.dashNavHidden ? " slim" : ""}">${dashNav()}<div class="wsmain">
+    ${head(tab === "overview" ? "Dashboard" : title, `${term} · ${done} of ${all} class meetings booked`, tab === "overview" ? submitButton() : "")}${body}</div></div>`;
 }
 
 // ===== Timetable (the booking desk) =====
@@ -1884,7 +2024,7 @@ function renderFaculty(page) {
         .sort((a, b) => DATA.teachers[a].name.localeCompare(DATA.teachers[b].name)).map((x) =>
         `<button type="button" class="item" data-teacher="${x}" aria-current="${x === k}"><span>${esc(DATA.teachers[x].name)}</span><small>${luFor(x)}/${DATA.teachers[x].max}${loads[x].status === "over" ? " ⚠" : ""}</small></button>`).join("")).join("")}</div></div>
       <div class="card">${t ? `<div class="headrow"><div><h2>${esc(t.name)}</h2><p class="sub">${esc(t.rank)} · ${esc(t.role || "Faculty")}</p></div>
-          <div class="row">${STATUS_CHIP[L.status]}<button type="button" class="btn" data-print="teacher" data-id="${k}">Print…</button></div></div>
+          <div class="row">${STATUS_CHIP[L.status]}<button type="button" class="btn" data-profile="${k}">Profile</button><button type="button" class="btn" data-print="teacher" data-id="${k}">Print…</button></div></div>
         ${ring(L.lu, t.max, "Teaching Load", `${L.lu} LU`, `of ${t.max} LU allowed${L.status === "over" ? " · over the limit" : ""}`, { small: true, bad: L.status === "over" })}
         <dl class="about"><dt>Department</dt><dd>${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}</dd>
           <dt>Office</dt><dd>${esc(t.office || "—")}</dd>
@@ -1897,6 +2037,61 @@ function renderFaculty(page) {
         </tbody></table></div>
         <div class="scroll">${grid(mine, { focus: { teacher: k } })}</div>${legend()}` : `<p class="muted">No faculty here.</p>`}</div></div>
     <div class="card"><div class="cardhead"><h2>All loads</h2><span class="small muted">Click a row to open</span></div><div class="tablebox" style="max-height:480px">${loadTable(keys)}</div></div>`;
+}
+
+// ===== Faculty profiles: rank, duties and classes of each instructor =====
+const duties = (t) => (t.role || "Faculty").split(/;\s*/).map((d) => (d === "Faculty" ? "Teaching" : d.charAt(0).toUpperCase() + d.slice(1)));
+function profileCards() {
+  const q = (state.profQuery || "").trim().toLowerCase();
+  const keys = Object.keys(DATA.teachers).filter(teacherInScope).filter((k) => {
+    const t = DATA.teachers[k];
+    return (!state.profDept || t.dept === state.profDept) && (!q || `${t.name} ${t.rank} ${t.role} ${t.dept}`.toLowerCase().includes(q));
+  }).sort((a, b) => DATA.teachers[a].dept.localeCompare(DATA.teachers[b].dept) || DATA.teachers[a].name.localeCompare(DATA.teachers[b].name));
+  if (!keys.length) return `<p class="empty">No faculty match.</p>`;
+  return keys.map((k) => {
+    const t = DATA.teachers[k];
+    return `<button type="button" class="pcard" data-profile="${k}"><span class="pav">${esc(initials(t.name))}</span>
+      <span class="pinfo"><b>${esc(t.name)}</b><span>${esc(t.rank)}</span><em>${esc(duties(t).join(" · "))}</em><small>${esc(t.dept)} · ${esc(t.college)}</small></span></button>`;
+  }).join("");
+}
+function renderProfiles(page) {
+  const k = state.profile && DATA.teachers[state.profile] && teacherInScope(state.profile) ? state.profile : null;
+  if (!k) {
+    const keys = Object.keys(DATA.teachers).filter(teacherInScope);
+    const depts = [...new Set(keys.map((x) => DATA.teachers[x].dept))].sort();
+    if (state.profDept && !depts.includes(state.profDept)) state.profDept = "";
+    page.innerHTML = `${head("Faculty Profiles", `${keys.length} faculty in ${esc(scopeName())}`)}
+      <div class="profbar"><input class="inp" id="profSearch" type="search" placeholder="Search by name, rank or duty" value="${esc(state.profQuery || "")}" aria-label="Search faculty">
+        ${depts.length > 1 ? `<select class="inp" id="profDept" aria-label="Department"><option value="">All departments</option>${depts.map((d) => `<option${d === state.profDept ? " selected" : ""}>${esc(d)}</option>`).join("")}</select>` : ""}</div>
+      <div class="pgrid" id="profGrid">${profileCards()}</div>`;
+    return;
+  }
+  const t = DATA.teachers[k], L = loads[k];
+  const classes = L.classes.slice().sort((a, b) => a.course.localeCompare(b.course) || numSort(a.section, b.section));
+  const rows = classes.map((c) => {
+    const when = c.meetings.map((m) => { const b = bookings[`${c.id}|${m.part}`]; return b ? `${m.part === "Lec" ? "" : `${PART[m.part]} `}${b.pattern}${b.room ? ` · ${b.room}` : ""}` : null; });
+    const booked = when.filter(Boolean);
+    return `<div class="pclass"><div><b>${esc(c.course)}</b> · ${esc(c.section)}<span>${esc(DATA.courses[c.course].title)}</span></div>
+      <div class="pwhen">${booked.length ? booked.map((w) => `<span>${esc(w)}</span>`).join("") : `<span class="muted">Not yet scheduled</span>`}</div><em>${c.lu} LU</em></div>`;
+  }).join("");
+  page.innerHTML = `<button type="button" class="backlink" data-profile="">${svg('<path d="M15 6l-6 6 6 6"/>', 18)} All faculty</button>
+    <section class="phead"><span class="pav big">${esc(initials(t.name))}</span>
+      <div class="pwho"><h1>${esc(t.name)}</h1><p>${esc(t.rank)}</p><div class="pduties">${duties(t).map((d) => `<span class="chip info">${esc(d)}</span>`).join("")}</div>
+        <p class="small muted">Department of ${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}${t.office ? ` · Office ${esc(t.office)}` : ""}</p></div>
+      ${ring(L.lu, t.max, "Teaching Load", `${L.lu} LU`, `of ${t.max} LU allowed`, { small: true, bad: L.status === "over" })}</section>
+    <div class="pcols">
+      <section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON.schedule}</span><div><h3>1st Semester</h3><p>SY ${esc(printCfg.ay)} · ${classes.length} class${classes.length === 1 ? "" : "es"} · ${L.lu} LU</p></div><span class="chip good">Current</span></div>
+        <div class="ovbody">${rows || `<p class="empty">No classes assigned this semester.</p>`}</div>
+        <div class="ovfoot"><button type="button" class="ovlink" data-goteacher="${k}">Open weekly schedule</button></div></section>
+      <div class="pside">
+        <section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON.schedule}</span><div><h3>2nd Semester</h3><p>SY ${esc(printCfg.ay)}</p></div><span class="chip warn">Coming up</span></div>
+          <div class="ovbody"><p class="empty">Not scheduled yet. Classes show here once the 2nd semester is set up.</p></div></section>
+        <section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON.faculty}</span><div><h3>Details</h3><p>From the loading plan</p></div></div>
+          <div class="ovbody"><dl class="pdl"><dt>Rank</dt><dd>${esc(t.rank)}</dd><dt>Designation</dt><dd>${esc(t.role || "Faculty")}</dd>
+            <dt>Load limit</dt><dd>${t.max} LU</dd><dt>Loading plan</dt><dd>${t.lu} LU</dd>
+            <dt>Preparations</dt><dd>${L.cap != null ? `${L.capped} of ${L.cap} · ` : ""}${L.total} of 5 courses</dd></dl></div></section>
+      </div>
+    </div>`;
 }
 
 // ===== Rooms =====
@@ -2337,6 +2532,10 @@ document.addEventListener("click", async (ev) => {
     await Promise.all([sbLoad.ge_decisions(), sbLoad.teacher_changes()]); rebuild(); render(); return;
   }
   if (ds.apprfilter) { state.apprFilter = ds.apprfilter; render(); return; }
+  if (ds.dashtab) { state.view = "dashboard"; state.dashTab = ds.dashtab; render(); return; }
+  if (ds.dashgroup) { const c = new Set(state.dashClosed || []); c.has(ds.dashgroup) ? c.delete(ds.dashgroup) : c.add(ds.dashgroup); state.dashClosed = [...c]; render(); return; }
+  if (ds.dashcollapse) { state.dashNavHidden = ds.dashcollapse === "1"; render(); return; }
+  if (ds.profile !== undefined) { state.view = "profiles"; state.profile = ds.profile || null; render(); scrollTo(0, 0); return; }
   if (ds.subfilter) { state.subFilter = ds.subfilter; render(); return; }
   if (ds.subcollege !== undefined) { state.subCollege = ds.subcollege; render(); return; }
   if (ds.submit) { openSubmit(ds.submit); return; }
@@ -2413,6 +2612,7 @@ if (canHover) document.addEventListener("mouseover", (ev) => {
 document.addEventListener("input", (ev) => {
   const id = ev.target.id;
   if (id === "teacherSearch") { teacherQuery = ev.target.value; const sel = $("teacherSel"); if (sel) sel.innerHTML = teacherOptions(); }   // keeps focus while typing
+  else if (id === "profSearch") { state.profQuery = ev.target.value; $("profGrid").innerHTML = profileCards(); }
   else if (id === "queueSearch") { state.queueQuery = ev.target.value; $("queue").innerHTML = queueHtml(); }
   else if (id === "search") runSearch(ev.target.value);
 });
@@ -2428,6 +2628,7 @@ document.addEventListener("keydown", (ev) => {
 });
 document.addEventListener("change", async (ev) => {
   const id = ev.target.id;
+  if (id === "profDept") { state.profDept = ev.target.value; render(); return; }
   if (id === "scopeSel") { state.scope = ev.target.value; state.pick = null; state.draft = null; render(); return; }
   if (id === "aySel") { printCfg.ay = ev.target.value.replace(/^SY /, ""); try { localStorage.setItem("cs-print", JSON.stringify(printCfg)); } catch (e) {} render(); return; }
   if (id === "gridKey") { state.gridKey[state.gridMode] = ev.target.value; render(); return; }
