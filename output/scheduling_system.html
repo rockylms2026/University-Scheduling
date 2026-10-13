@@ -2314,34 +2314,73 @@ function renderOrg(page) {
       </aside>
     </div>`;
 }
+// Moving through the chart. Down: the clicked card drops out of its row while the rows above slide up and away,
+// then its team falls into place below it. Up: the team slides down and away and the parent comes down from above.
 function orgGo(id, highlight) {
   const old = state.orgFocus, nodes = orgTree();
-  const up = nodes[old]?.parent === id || orgPath(nodes, old).some((n) => n.id === id && n.id !== old);
-  const rectOf = (pid) => { const el = document.querySelector(`#orgChart [data-person="${CSS.escape(pid)}"]`); return el ? el.getBoundingClientRect() : null; };
-  const from = up ? rectOf(old) : rectOf(id);                 // where the moving card is now
+  const up = orgPath(nodes, old).some((n) => n.id === id && n.id !== old);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const oldChart = $("orgChart");
+  const sel = (root, pid) => root?.querySelector(`[data-person="${CSS.escape(pid)}"]`);
+  // 1. Keep a picture of the chart as it is, to animate away.
+  let ghost = null, from = null;
+  if (!reduce && oldChart) {
+    const r = oldChart.getBoundingClientRect();
+    from = (up ? sel(oldChart, old) : sel(oldChart, id))?.getBoundingClientRect() || null;
+    ghost = oldChart.cloneNode(true);
+    ghost.removeAttribute("id"); ghost.querySelectorAll("[id]").forEach((e) => e.removeAttribute("id"));
+    ghost.setAttribute("aria-hidden", "true");
+    const moving = up ? sel(ghost, old) : sel(ghost, id);
+    if (moving) moving.style.visibility = "hidden";            // that card is drawn by the new chart instead
+    Object.assign(ghost.style, { position: "fixed", left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, margin: "0", zIndex: "0", pointerEvents: "none" });
+  }
+  // 2. Draw the new chart, with the chosen person on top.
   state.orgFocus = id; render();
   const chart = $("orgChart");
   if (!chart) return;
-  const top = chart.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--top")) || 64) - 12;
-  if (Math.abs(scrollY - top) > 4 && (scrollY > top || chart.getBoundingClientRect().top > innerHeight * .5)) scrollTo({ top, behavior: "instant" });
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const mover = up ? document.querySelector(`#orgChart .okids [data-person="${CSS.escape(old)}"]`) : chart.querySelector(".ocard.focus");
-  if (!reduce && from && mover) {
-    const to = mover.getBoundingClientRect();
-    mover.animate([{ transform: `translate(${from.left - to.left + (from.width - to.width) / 2}px, ${from.top - to.top}px) scale(${from.width / to.width})`, zIndex: 5 },
-                   { transform: "none", zIndex: 5 }], { duration: 480, easing: "cubic-bezier(.2,.8,.2,1)" });
+  const barH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--top")) || 64;
+  const chartTop = chart.getBoundingClientRect().top;
+  if (chartTop < barH || chartTop > innerHeight * .5) { scrollBy({ top: chartTop - barH - 12, behavior: "instant" }); if (ghost && from) { const d = chartTop - barH - 12; ghost.style.top = `${parseFloat(ghost.style.top) - d}px`; from = new DOMRect(from.x, from.y - d, from.width, from.height); } }
+  if (reduce || !ghost) return orgHighlight(highlight);
+  const clipTop = Math.max(barH, chart.getBoundingClientRect().top - 8);
+  const frame = document.createElement("div");
+  frame.setAttribute("aria-hidden", "true");
+  Object.assign(frame.style, { position: "fixed", left: "0", right: "0", top: `${clipTop}px`, bottom: "0", overflow: "hidden", zIndex: "0", pointerEvents: "none" });
+  ghost.style.top = `${parseFloat(ghost.style.top) - clipTop}px`; ghost.style.position = "absolute";
+  frame.appendChild(ghost); document.body.appendChild(frame);
+  const ease = "cubic-bezier(.22,.8,.24,1)", T = 560;
+  const focusCard = chart.querySelector(".ocard.focus");
+  const kids = [...chart.querySelectorAll(".okids > *")];
+  const lines = [...chart.querySelectorAll(".otrunk, .okids")];
+  if (!up) {
+    // Like scrolling down the tree: everything travels up together. The old rows go a little faster and fade
+    // under the top edge, so the clicked card drops out of its row; its team rises into view right behind it.
+    const to = focusCard.getBoundingClientRect();
+    const rise = from ? Math.max(0, from.top - to.top) : 0;
+    const dx = from ? from.left + from.width / 2 - (to.left + to.width / 2) : 0;
+    ghost.animate([{ transform: "none", opacity: 1 }, { transform: `translateY(${-(rise + 120)}px)`, opacity: 0 }], { duration: T, easing: ease, fill: "forwards" });
+    if (from) focusCard.animate([{ transform: `translate(${dx}px, ${rise}px) scale(${from.width / to.width})` }, { transform: "none" }], { duration: T, easing: ease });
+    chart.querySelector(".oup")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 260, delay: T - 220, fill: "backwards" });
+    lines.forEach((el) => el.animate([{ opacity: 0, transform: `translateY(${rise + 60}px)` }, { opacity: 1, transform: "none" }], { duration: T, easing: ease }));
+    kids.forEach((el, i) => el.animate([{ opacity: 0, transform: `translateY(${rise + 60 + Math.floor(i / 5) * 24}px)` }, { opacity: 1, transform: "none" }],
+      { duration: T + 60, delay: Math.min(i, 14) * 12, easing: ease, fill: "backwards" }));
+  } else {
+    // Going up: the old team slides down and away; the old top card settles back into its row; the parent comes down.
+    ghost.animate([{ transform: "none", opacity: 1 }, { transform: "translateY(160px)", opacity: 0 }], { duration: T, easing: ease, fill: "forwards" });
+    const back = sel(chart.querySelector(".okids"), old);
+    if (back && from) { const to = back.getBoundingClientRect();
+      back.animate([{ transform: `translate(${from.left + from.width / 2 - (to.left + to.width / 2)}px, ${from.top - to.top}px) scale(${from.width / to.width})`, zIndex: 5 }, { transform: "none", zIndex: 5 }], { duration: T, easing: ease }); }
+    focusCard.animate([{ opacity: 0, transform: "translateY(-60px)" }, { opacity: 1, transform: "none" }], { duration: 460, easing: ease, fill: "backwards" });
+    kids.filter((el) => el !== back).forEach((el, i) => el.animate([{ opacity: 0, transform: "translateY(-24px)" }, { opacity: 1, transform: "none" }],
+      { duration: 380, delay: 160 + Math.floor(i / 5) * 70 + (i % 5) * 30, easing: ease, fill: "backwards" }));
   }
-  if (!reduce) {
-    [...chart.querySelectorAll(".otrunk, .okids > *, .okids")].filter((el) => el !== mover).forEach((el, i) => {
-      el.animate([{ opacity: 0, transform: el.classList.contains("okids") ? "none" : "translateY(-10px)" }, { opacity: 1, transform: "none" }],
-        { duration: 320, delay: 200 + Math.min(i, 12) * 30, easing: "ease-out", fill: "backwards" });
-    });
-    if (up && !mover) chart.querySelector(".ocard.focus")?.animate([{ opacity: 0, transform: "translateY(-12px)" }, { opacity: 1, transform: "none" }], { duration: 300, easing: "ease-out" });
-  }
-  if (highlight) {
-    const el = [...document.querySelectorAll(".okids [data-person]")].find((e) => e.dataset.person === highlight);
-    if (el) { setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 300); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 2000); }
-  }
+  setTimeout(() => frame.remove(), T + 40);
+  orgHighlight(highlight);
+}
+function orgHighlight(pid) {
+  if (!pid) return;
+  const el = [...document.querySelectorAll(".okids [data-person]")].find((e) => e.dataset.person === pid);
+  if (el) { setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 450); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 2200); }
 }
 function orgFind(q) {
   const box = $("orgHits");
