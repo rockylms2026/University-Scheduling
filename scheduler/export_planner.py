@@ -20,6 +20,13 @@ from .store import OUTPUT_DIR
 from .validate import faculty_load_summary
 
 TEMPLATE_PATH = Path(__file__).with_name("planner_template.html")
+SEAL_PATH = Path(__file__).with_name("assets") / "laucv_seal.png"
+
+
+def seal_data_url() -> str:
+    """The university seal as a data URL, for the top bar, the sign-in page and printed schedules."""
+    import base64
+    return "data:image/png;base64," + base64.b64encode(SEAL_PATH.read_bytes()).decode() if SEAL_PATH.exists() else ""
 KINDS = ["lecture", "lab_lecture", "lab", "pe", "uni", "nstp", "supervision"]
 COLLEGES = {"CSS": "College of Social Sciences", "CISC": "College of Information Sciences and Computing",
             "CBE": "College of Business and Entrepreneurship", "COE": "College of Education",
@@ -133,7 +140,7 @@ def planner_data(uni: University, semester: int) -> dict:
 def write_planner(uni: University, semester: int = 1, path: Path | None = None) -> Path:
     path = path or OUTPUT_DIR / "scheduling_system.html"
     data = json.dumps(planner_data(uni, semester), separators=(",", ":"))
-    html = TEMPLATE_PATH.read_text().replace("/*__DATA__*/null", data.replace("</", "<\\/"))
+    html = TEMPLATE_PATH.read_text().replace("/*__DATA__*/null", data.replace("</", "<\\/")).replace('/*__SEAL__*/""', json.dumps(seal_data_url()))
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(html)
     return path

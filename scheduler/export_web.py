@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from .export_planner import TEMPLATE_PATH, planner_data
+from .export_planner import TEMPLATE_PATH, planner_data, seal_data_url
 from .model import DATA_DIR, University
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -110,6 +110,7 @@ def write_web(uni: University, semester: int = 1) -> list[Path]:
     backend = json.dumps({"kind": "supabase", "url": cfg["url"], "key": cfg["anon_key"]})
     html = (TEMPLATE_PATH.read_text()
             .replace("/*__DATA__*/null", data)
+            .replace('/*__SEAL__*/""', json.dumps(seal_data_url()))
             .replace("/*__BACKEND__*/null", backend)
             .replace('/*__BUILD__*/""', json.dumps(build_label()))
             .replace("<!--__SUPABASE_JS__-->", f'<script src="{SUPABASE_JS}"></script>'))

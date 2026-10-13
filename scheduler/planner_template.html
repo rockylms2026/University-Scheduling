@@ -11,7 +11,7 @@
    and one working area per page. Home greets the person and lists what waits for them. */
 :root {
   --bg: #f4f5f7; --panel: #ffffff; --ink: #172030; --muted: #5a6575; --line: #dde1e7; --line2: #eceff3;
-  --navy: #1b2f55; --navy-2: #24406f; --accent: #1f3f74; --accent-ink: #ffffff; --accent-soft: #e7ecf5; --lunch: #eceef2;
+  --navy: #1b2f55; --navy-2: #24406f; --accent: #1f3f74; --accent-ink: #ffffff; --accent-soft: #e7ecf5; --lunch: #eceef2; --hover: #e3e5e9;
   --warn: #8a5a00; --warn-soft: #fff1cc; --bad: #b42318; --bad-soft: #fde4e1; --good: #1b6e40; --good-soft: #dcf2e4;
   --t-lec: #e2e9f6;  --t-lec-ink: #1d3a6b;
   --t-lab: #d9efe2;  --t-lab-ink: #155c35;
@@ -40,7 +40,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .app { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; min-height: 100vh; }
 .topbar { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(220px, 560px) auto; justify-content: space-between; align-items: center; gap: 10px 20px; min-height: var(--top); padding: 8px 20px; background: var(--panel); color: var(--ink); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 15; }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.brand .mark { flex: none; width: 38px; height: 38px; border-radius: 9px; background: var(--navy); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: .82rem; letter-spacing: .04em; }
+.brand .seal { flex: none; width: 42px; height: 42px; border-radius: 50%; }
 .brand div { display: grid; line-height: 1.15; min-width: 0; }
 .brand b { font-weight: 700; font-size: 1.05rem; color: var(--navy); letter-spacing: .02em; }
 .brand span { font-size: .74rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -75,15 +75,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-v
 .side .spacer { flex: 1; }
 .rail { position: relative; display: grid; justify-items: center; gap: 5px; width: 100%; font: inherit; font-size: .72rem; font-weight: 500; line-height: 1.2; text-align: center; border: 0; background: transparent; color: var(--ink); padding: 6px 2px; cursor: pointer; }
 .rail .ic { position: relative; width: 46px; height: 40px; border-radius: 10px; display: grid; place-items: center; color: var(--ink); }
-.rail:hover .ic { background: var(--bg); }
-.rail[aria-current="page"] .ic, .rail[aria-expanded="true"] .ic { background: var(--accent-soft); color: var(--accent); }
-.rail[aria-current="page"] { color: var(--accent); }
+.rail:hover .ic, .rail[aria-current="page"] .ic, .rail[aria-expanded="true"] .ic { background: var(--hover); }
+.rail[aria-current="page"] { font-weight: 700; }
 .rail .ic b { position: absolute; top: -3px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #d92d20; color: #fff; font-size: .66rem; font-weight: 700; display: grid; place-items: center; border: 2px solid var(--panel); }
 .flyout { position: fixed; z-index: 35; width: 270px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 34px rgba(15,25,45,.18); padding: 14px 8px 8px; display: grid; gap: 2px; }
 .flyout h2 { font-size: 1rem; font-weight: 700; padding: 0 10px 8px; }
 .flyout button { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: inherit; font-size: .92rem; text-align: left; border: 0; background: transparent; color: var(--ink); padding: 10px 10px; border-radius: 8px; cursor: pointer; }
 .flyout button:hover { background: var(--bg); }
-.flyout button[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 500; }
+.flyout button[aria-current="page"] { background: var(--hover); font-weight: 500; }
 .flyout button small { color: var(--muted); font-size: .76rem; display: block; margin-top: 1px; }
 .count { font-family: var(--f-mono); font-size: .7rem; font-weight: 500; padding: 1px 7px; border-radius: 999px; background: var(--lunch); color: var(--muted); }
 .count.bad { background: var(--bad-soft); color: var(--bad); }
@@ -266,11 +265,14 @@ dl.about dd { margin: 0; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
 /* ----- sign-in, people, approvals ----- */
-.login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: linear-gradient(180deg, var(--navy) 0 38%, var(--bg) 38%); }
+.login { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; background: var(--bg); overflow: hidden; isolation: isolate; }
+.login .uni::before { content: ""; position: absolute; z-index: -1; left: 50%; width: 200vw; transform: translateX(-50%); top: -100vh; bottom: 0; background: var(--navy); }
+.login .box { position: relative; }
 .login .box { width: min(420px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; display: grid; gap: 14px; box-shadow: 0 10px 30px rgba(15,25,45,.12); }
 .login h1 { font-size: 1.2rem; }
-.login .uni { color: #fff; text-align: center; margin-bottom: 14px; font-family: var(--f-display); }
+.login .uni { position: relative; color: #fff; text-align: center; padding-bottom: 56px; margin-bottom: -32px; font-family: var(--f-display); }
 .login .uni b { display: block; font-size: 1.15rem; }
+.login .loginseal { display: block; width: 104px; height: 104px; margin: 0 auto 12px; border-radius: 50%; box-shadow: 0 0 0 4px rgba(255,255,255,.9), 0 8px 24px rgba(0,0,0,.25); }
 .login .uni span { font-size: .82rem; opacity: .8; }
 .form label, label.form { min-width: 0; }
 .form select, label.form select { width: 100%; min-width: 0; }
@@ -322,6 +324,19 @@ dl.about dd { margin: 0; }
 .main.enter > * { animation: page-in .22s ease-out both; }
 @keyframes page-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* ----- progress ring ----- */
+.ring { display: grid; grid-template-columns: 104px minmax(0, 1fr); align-items: center; gap: 18px; }
+.ring svg { width: 104px; height: 104px; }
+.ring .track { fill: none; stroke: #ebedf0; stroke-width: 8; }
+.ring .fill { fill: none; stroke: var(--navy); stroke-width: 8; stroke-linecap: round; transition: stroke-dasharray .5s ease; }
+.ring text { font-family: var(--f-body); font-size: 17px; font-weight: 400; fill: var(--navy); font-variant-numeric: tabular-nums; }
+.ring b { display: block; font-weight: 700; font-size: 1rem; color: var(--ink); }
+.ring strong { display: block; font-weight: 500; font-size: 1.45rem; line-height: 1.25; color: var(--navy); font-variant-numeric: tabular-nums; }
+.ring span { color: var(--muted); font-size: .92rem; }
+.ring.bad .fill { stroke: var(--bad); } .ring.bad text, .ring.bad strong { fill: var(--bad); color: var(--bad); }
+.ring.small { grid-template-columns: 84px minmax(0, 1fr); gap: 14px; }
+.ring.small svg { width: 84px; height: 84px; }
 
 /* ----- home ----- */
 .home { display: grid; gap: 22px; }
@@ -401,7 +416,7 @@ dl.about dd { margin: 0; }
 <div class="login" id="login" hidden></div>
 <div class="app" id="app">
   <header class="topbar">
-    <div class="brand"><span class="mark" aria-hidden="true">LAU</span><div><b>LAUCV</b><span>Class Scheduling · Registrar</span></div></div>
+    <div class="brand"><img class="seal" id="topSeal" alt="" width="42" height="42"><div><b>LAUCV</b><span>Class Scheduling · Registrar</span></div></div>
     <div class="search"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="search" type="search" placeholder="Search" aria-label="Search sections, faculty, rooms, courses" autocomplete="off"><div class="results" id="results" hidden></div></div>
     <div class="tb-right">
       <div class="tb-field">
@@ -428,6 +443,7 @@ const DATA = /*__DATA__*/null;
 const BACKEND = /*__BACKEND__*/null;
 const BUILD = /*__BUILD__*/"";            // shown in the footer, to tell which version is loaded     // null on claude.ai; { kind: "supabase", url, key } for the hosted version
 const UNIVERSITY = "Liberal Arts University of Cagayan Valley";
+const SEAL = /*__SEAL__*/"";            // the university seal, a PNG data URL filled in by the build
 const DAYS = DATA.days;
 const LUNCH = { Mon: [690, 750], Wed: [690, 750], Fri: [690, 750], Tue: [720, 810], Thu: [720, 810] };
 const DAY_MAX = { Mon: 8, Tue: 7.5, Wed: 8, Thu: 7.5, Fri: 8, Sat: 3 };     // teaching hours a room can hold each day
@@ -727,7 +743,7 @@ function showLogin(mode, email = "") {
     <button class="btn primary" type="submit">Sign in</button></form>${msg}
     <button type="button" class="btn link" data-auth="forgot">Forgot your password?</button>
     <p class="small muted" style="margin:0">Accounts are created by the Office of the University Registrar.</p>`;
-  el.innerHTML = `<div><div class="uni"><b>${esc(UNIVERSITY)}</b><span>Office of the University Registrar · Class Scheduling</span></div><div class="box">${body}</div></div>`;
+  el.innerHTML = `<div><div class="uni">${SEAL ? `<img class="loginseal" src="${SEAL}" alt="Seal of the ${esc(UNIVERSITY)}" width="104" height="104">` : ""}<b>${esc(UNIVERSITY)}</b><span>Office of the University Registrar · Class Scheduling</span></div><div class="box">${body}</div></div>`;
   el.querySelector("input")?.focus();
 }
 document.addEventListener("submit", async (ev) => {
@@ -1065,7 +1081,16 @@ function navGroups() {
 const VIEW_NOTE = { timetable: "Book times, rooms and teachers", sections: "Each section's week", courses: "Every class of a course",
   faculty: "Teaching load of each instructor", availability: "Free instructors for borrowed GE", conflicts: "Clashes and broken rules",
   approvals: "Borrowed GE bookings", submissions: "Which departments are done" };
-let flyKey = null, userMenuOpen = false;
+let flyKey = null, userMenuOpen = false, flyCounts = {}, flyTimer = null;
+const canHover = matchMedia("(hover: hover) and (pointer: fine)").matches;
+// Open a group's panel (or close it, with null) without redrawing the page.
+function setFly(key) {
+  clearTimeout(flyTimer);
+  if (flyKey === key) return;
+  flyKey = key;
+  document.querySelectorAll("[data-flyout]").forEach((b) => b.setAttribute("aria-expanded", String(b.dataset.flyout === key)));
+  renderFlyout(flyCounts);
+}
 function renderFlyout(counts) {
   const el = $("flyout"), g = navGroups().find((x) => x.key === flyKey);
   const anchor = g && document.querySelector(`[data-flyout="${g.key}"]`);
@@ -1111,6 +1136,7 @@ function renderShell() {
     return `${g.bottom && !all[i - 1]?.bottom ? `<div class="spacer"></div>` : ""}<button type="button" class="rail" ${one ? `data-view="${views[0][0]}"` : `data-flyout="${g.key}" aria-haspopup="true" aria-expanded="${flyKey === g.key}"`} aria-current="${on ? "page" : "false"}">
       <span class="ic">${ICON[g.icon]}${alert ? `<b>${alert}</b>` : ""}</span>${esc(g.label)}</button>`;
   }).join("");
+  flyCounts = counts;
   renderFlyout(counts);
   const pub = pubState();
   const chip = $("userchip");
@@ -1154,6 +1180,17 @@ function head(title, sub, right = "") {
   return `<div class="pagehead"><div><h1>${esc(title)}</h1><p class="sub">${sub}</p></div>${right}</div>`;
 }
 
+// ===== Progress ring: a circle that fills with the share done, the number in the middle =====
+function ring(done, total, title, word, of, opts = {}) {
+  const share = total ? done / total : 0, r = 40, c = 2 * Math.PI * r;
+  const pct = share * 100, label = pct === 0 || pct >= 100 || Number.isInteger(pct) ? `${Math.round(pct)}%` : `${pct.toFixed(1)}%`;
+  const bad = opts.bad || share > 1;
+  return `<div class="ring${opts.small ? " small" : ""}${bad ? " bad" : ""}"><svg viewBox="0 0 100 100" role="img" aria-label="${esc(`${title}: ${label}`)}">
+      <circle cx="50" cy="50" r="${r}" class="track"/>${share > 0 ? `<circle cx="50" cy="50" r="${r}" class="fill" stroke-dasharray="${(Math.min(1, share) * c).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 50 50)"/>` : ""}
+      <text x="50" y="50" dominant-baseline="central" text-anchor="middle">${label}</text></svg>
+    <div><b>${esc(title)}</b><strong>${esc(String(word))}</strong><span>${esc(of)}</span></div></div>`;
+}
+
 // ===== Home =====
 // A greeting, quick links, what waits for this person, and a short view of the term.
 function heroArt() {
@@ -1195,6 +1232,15 @@ function homeItems() {
   if (!sug.length) sug.push({ icon: "check", title: "Everything is on track", text: "Every class meeting in this view is booked.", link: go("Dashboard", 'data-view="dashboard"') });
   return { act, sug, meet, nConf, over };
 }
+// A chair's own part: the classes Submit checks (majors and the GE classes the department teaches).
+function deptCard(d) {
+  const total = DATA.classes.filter((c) => progDept(c.section) === d && ["major", "own"].includes(classKind(c)) && c.meetings.length).length;
+  const done = total - missingFor(d).length, sub = submissions?.[d];
+  const status = sub ? (changedSince(d) ? `<span class="chip warn">Changed since submitting</span>` : `<span class="chip good">Submitted ${esc(new Date(sub.submitted_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }))}</span>`) : `<span class="chip none">Not submitted</span>`;
+  return `<section class="hcard glance"><h2>My Department</h2>
+    ${ring(done, total, `${d} Department`, `${done} Complete`, `of ${total} classes in your own part`)}
+    <div class="row" style="justify-content:space-between">${status}<button type="button" class="btn${done === total && !sub ? " primary" : ""}" data-submit="${esc(d)}">${sub ? "Submit again" : "Submit schedule"}</button></div></section>`;
+}
 function renderHome(page) {
   const hour = new Date().getHours();
   const hello = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
@@ -1209,7 +1255,6 @@ function renderHome(page) {
   const card = (x) => `<div class="sugg ${x.cls || ""}"><span class="si">${ICON[x.icon]}</span><div><b>${esc(x.title)}</b><p>${esc(x.text)}</p></div>${x.link}</div>`;
   const secs = sectionsInScope();
   const fullSecs = secs.filter((s) => DATA.classes.filter((c) => c.section === s).every((c) => c.meetings.every((m) => bookings[`${c.id}|${m.part}`]))).length;
-  const pct = meet.all ? Math.round((100 * meet.done) / meet.all) : 0;
   const when = (iso) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   const pub = pubState();
   const news = [];
@@ -1227,11 +1272,11 @@ function renderHome(page) {
           <section class="hcard"><h2>Timely Suggestions</h2>${sug.map(card).join("")}</section>
         </div>
         <div class="homecol">
+          ${d ? deptCard(d) : ""}
           <section class="hcard glance"><h2>This Term</h2>
             <p class="small muted" style="margin:0">1st Semester, SY ${esc(printCfg.ay)} · ${esc(scopeName())}</p>
-            <div class="big"><b>${pct}%</b><span class="muted">of class meetings booked</span></div>
-            <div class="bar"><i style="width:${pct}%"></i></div>
-            <dl><dt>Class meetings booked</dt><dd>${meet.done} / ${meet.all}</dd><dt>Sections complete</dt><dd>${fullSecs} / ${secs.length}</dd>
+            ${ring(meet.done, meet.all, "Class Meetings", `${meet.done} Booked`, `of ${meet.all} class meetings`)}
+            <dl><dt>Sections complete</dt><dd>${fullSecs} / ${secs.length}</dd>
               <dt>Conflicts</dt><dd class="${nConf ? "bad" : ""}">${nConf}</dd><dt>Faculty over the limit</dt><dd class="${over ? "bad" : ""}">${over}</dd>
               ${BACKEND && submissions ? `<dt>Departments submitted</dt><dd>${Object.keys(submissions).length} / ${new Set(Object.values(DATA.programs).map((p) => p.dept)).size}</dd>` : ""}</dl>
           </section>
@@ -1794,6 +1839,7 @@ function renderFaculty(page) {
         `<button type="button" class="item" data-teacher="${x}" aria-current="${x === k}"><span>${esc(DATA.teachers[x].name)}</span><small>${luFor(x)}/${DATA.teachers[x].max}${loads[x].status === "over" ? " ⚠" : ""}</small></button>`).join("")).join("")}</div></div>
       <div class="card">${t ? `<div class="headrow"><div><h2>${esc(t.name)}</h2><p class="sub">${esc(t.rank)} · ${esc(t.role || "Faculty")}</p></div>
           <div class="row">${STATUS_CHIP[L.status]}<button type="button" class="btn" data-print="teacher" data-id="${k}">Print…</button></div></div>
+        ${ring(L.lu, t.max, "Teaching Load", `${L.lu} LU`, `of ${t.max} LU allowed${L.status === "over" ? " · over the limit" : ""}`, { small: true, bad: L.status === "over" })}
         <dl class="about"><dt>Department</dt><dd>${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}</dd>
           <dt>Office</dt><dd>${esc(t.office || "—")}</dd>
           <dt>Teaching load</dt><dd><b>${L.lu}</b> of ${t.max} LU this semester${t.lu !== L.lu ? ` · loading plan: ${t.lu} LU (${t.lu - L.lu > 0 ? `${t.lu - L.lu} LU of GE classes not yet given` : `${L.lu - t.lu} LU more than planned`})` : ""}</dd>
@@ -2223,11 +2269,11 @@ document.addEventListener("click", async (ev) => {
   const t = ev.target.closest("button, tr[data-goteacher], tr[data-goroom]");
   if (!ev.target.closest(".search")) $("results").hidden = true;
   if (!ev.target.closest("#exportMenu")) $("exportMenu")?.removeAttribute("open");
-  if (flyKey && !ev.target.closest("#flyout, [data-flyout]")) { flyKey = null; $("flyout").hidden = true; document.querySelectorAll("[data-flyout]").forEach((b) => b.setAttribute("aria-expanded", "false")); }
+  if (flyKey && !ev.target.closest("#flyout, [data-flyout]")) setFly(null);
   if (userMenuOpen && !ev.target.closest("#userchip")) { userMenuOpen = false; renderShell(); }
   if (!t) return;
   const ds = t.dataset;
-  if (ds.flyout) { flyKey = flyKey === ds.flyout ? null : ds.flyout; renderShell(); return; }
+  if (ds.flyout) { setFly(flyKey === ds.flyout && !canHover ? null : ds.flyout); return; }
   if (ds.usermenu) { userMenuOpen = !userMenuOpen; renderShell(); return; }
   if (ds.openpublish) { openPublish(); return; }
   if (ds.view) { flyKey = null; userMenuOpen = false; }
@@ -2306,7 +2352,16 @@ document.addEventListener("click", async (ev) => {
   if (goingUp && !ds.opt) window.scrollTo(0, 0);
 });
 // The panel of a menu group sits beside its icon; close it when the page moves.
-["resize", "scroll"].forEach((t) => window.addEventListener(t, () => { if (flyKey) { flyKey = null; $("flyout").hidden = true; document.querySelectorAll("[data-flyout]").forEach((b) => b.setAttribute("aria-expanded", "false")); } }, { passive: true }));
+["resize", "scroll"].forEach((t) => window.addEventListener(t, () => { if (flyKey) setFly(null); }, { passive: true }));
+// With a mouse, a group's panel opens on hover and closes shortly after the pointer leaves it.
+if (canHover) document.addEventListener("mouseover", (ev) => {
+  const g = ev.target.closest("[data-flyout]");
+  if (g) { setFly(g.dataset.flyout); return; }
+  if (ev.target.closest("#flyout")) { clearTimeout(flyTimer); return; }
+  if (!flyKey) return;
+  if (ev.target.closest(".rail")) { setFly(null); return; }
+  clearTimeout(flyTimer); flyTimer = setTimeout(() => setFly(null), 250);
+});
 document.addEventListener("input", (ev) => {
   const id = ev.target.id;
   if (id === "teacherSearch") { teacherQuery = ev.target.value; const sel = $("teacherSel"); if (sel) sel.innerHTML = teacherOptions(); }   // keeps focus while typing
@@ -2320,7 +2375,7 @@ document.addEventListener("keydown", (ev) => {
     else if (ev.key === "Enter") { ev.preventDefault(); goHit(searchOn); }
     else if (ev.key === "Escape") $("results").hidden = true;
   }
-  if (ev.key === "Escape" && (flyKey || userMenuOpen)) { const k = flyKey; flyKey = null; userMenuOpen = false; renderShell(); document.querySelector(k ? `[data-flyout="${k}"]` : ".avatar")?.focus(); }
+  if (ev.key === "Escape" && (flyKey || userMenuOpen)) { const k = flyKey; setFly(null); userMenuOpen = false; renderShell(); document.querySelector(k ? `[data-flyout="${k}"]` : ".avatar")?.focus(); }
   if (ev.key === "Escape") { if (printJob) { printJob = null; renderPrintPanel(); } $("publishPanel").hidden = true; $("submitPanel").hidden = true; }
 });
 document.addEventListener("change", async (ev) => {
@@ -2571,6 +2626,7 @@ function drawSheet(doc, sheet) {
   let y = M;
   doc.setTextColor(0); doc.setDrawColor(0);
   const center = (text, size, style = "normal") => { doc.setFont("times", style); doc.setFontSize(size); doc.text(text, W / 2, y, { align: "center" }); };
+  if (SEAL) { try { doc.addImage(SEAL, "PNG", M, M - 14, 56, 56); } catch (e) {} }
   if (printCfg.university) { center(printCfg.university.toUpperCase(), 14, "bold"); y += 16; }
   if (printCfg.office) { center(printCfg.office, 11); y += 15; }
   y += 4;
@@ -2694,6 +2750,7 @@ document.addEventListener("click", (ev) => {
 });
 
 // ---------- start ----------
+if (SEAL) $("topSeal").src = SEAL; else $("topSeal").hidden = true;
 if (BACKEND) { $("app").hidden = true; startHosted().catch((e) => { loginMsg = "Could not reach the server: " + e.message; showLogin("signin"); }); }
 else rebuild(), render();
 if (!BACKEND) (async () => {
