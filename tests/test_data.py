@@ -13,7 +13,10 @@ def test_no_data_errors():
 
 
 def test_counts():
-    assert len(UNI.faculty) == 110            # CSS 20, CISC 17, CBE 20, COE 20, CCJPS 14, GE 19
+    assert len(UNI.faculty) == 115            # CSS 21, CISC 18, CBE 21, COE 21, CCJPS 15, GE 19 (each college: its Associate Dean)
+    ads = [f for f in UNI.faculty.values() if f.designation == "Associate Dean"]
+    assert len(ads) == 5 and all(f.max_lu == 6 and f.class_cap == 2 and f.course_cap == 1 and f.prep_cap == 1 for f in ads)
+    assert not any("GE Handler" in f.designation or "GE handler" in f.designation for f in UNI.faculty.values())
     assert len(UNI.programs) == 19
     assert len(UNI.campus.pool("classrooms:CSS")) == 15
     assert len(UNI.campus.pool("classrooms:CCJPS")) == 8

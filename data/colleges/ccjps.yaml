@@ -146,6 +146,7 @@ programs:
       4-2: [SW 491]
 
 faculty:
+  AD: {name: Dr. Ian P. Bonilla, rank: Associate Professor IV, department: Criminology, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
   R1: {name: Dr. Nestor B. Alcaraz, rank: Associate Professor I, department: Criminology, designation: Department Chair, max_lu: 15}
   R2: {name: Atty. Celeste M. Rivera, rank: Assistant Professor II, department: Criminology, designation: Faculty}
   R3: {name: Mr. Herminio D. Bagasbas, rank: Assistant Professor I, department: Criminology, designation: Internship Coordinator}
@@ -154,12 +155,12 @@ faculty:
   R6: {name: Ms. Marjorie L. Pascual, rank: Instructor II, department: Criminology, designation: Faculty}
   D1: {name: Dr. Reynaldo C. Villamor, rank: Associate Professor I, department: Public Administration, designation: Department Chair, max_lu: 15}
   D2: {name: Ms. Lorna G. Fabian, rank: Assistant Professor I, department: Public Administration, designation: Faculty}
-  D3: {name: Mr. Joel R. Macapagal, rank: Instructor III, department: Public Administration, designation: "Internship Coordinator; Department GE Handler (SOCS 195)"}
-  D4: {name: Atty. Kristine D. Ramos, rank: Instructor III, department: Public Administration, designation: Department GE Handler (SOCS 195)}
+  D3: {name: Mr. Joel R. Macapagal, rank: Instructor III, department: Public Administration, designation: Internship Coordinator}
+  D4: {name: Atty. Kristine D. Ramos, rank: Instructor III, department: Public Administration, designation: Faculty}
   W1: {name: Dr. Evangeline P. Soriano, rank: Associate Professor I, department: Social Work, designation: Department Chair, max_lu: 15}
-  W2: {name: Ms. Rhea Lyn C. Galang, rank: Assistant Professor I, department: Social Work, designation: "Field Instruction Coordinator; Department GE Handler (PSYC 160)"}
+  W2: {name: Ms. Rhea Lyn C. Galang, rank: Assistant Professor I, department: Social Work, designation: Field Instruction Coordinator}
   W3: {name: Mr. Emmanuel T. Dacanay, rank: Instructor III, department: Social Work, designation: Faculty}
-  W4: {name: Ms. Charisse M. Lopez, rank: Instructor II, department: Social Work, designation: "Department GE Handler (GAD 171, PSYC 160)"}
+  W4: {name: Ms. Charisse M. Lopez, rank: Instructor II, department: Social Work, designation: Faculty}
 
 # Teaching loads: faculty ID -> list of {course: sections}
 loads:

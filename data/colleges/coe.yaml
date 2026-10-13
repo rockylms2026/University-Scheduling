@@ -192,17 +192,18 @@ programs:
       4-2: [ED 490]
 
 faculty:
+  AD: {name: Dr. Hillary Joy M. Rufino, rank: Professor I, department: Secondary Education, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
   S1: {name: Dr. Teresa G. Evangelista, rank: Associate Professor II, department: Secondary Education, designation: Department Chair, max_lu: 15}
   S2: {name: Dr. Manuel A. Francisco, rank: Associate Professor I, department: Secondary Education, designation: Field Study and Internship Coordinator}
   S4: {name: Mr. Julius B. Natividad, rank: Instructor III, department: Secondary Education, designation: Faculty}
   S5: {name: Dr. Rebecca L. Medina, rank: Assistant Professor II, department: Secondary Education, designation: English Major Coordinator}
   S6: {name: Mr. Nathaniel C. Ortega, rank: Instructor III, department: Secondary Education, designation: Faculty}
   S7: {name: Dr. Rodolfo M. Umali, rank: Assistant Professor II, department: Secondary Education, designation: Mathematics Major Coordinator}
-  S8: {name: Ms. Kimberly D. Saldana, rank: Instructor III, department: Secondary Education, designation: "Department GE Handler (MATH 180, MATH 350)"}
-  S9: {name: Mr. Rogelio O. Legaspi, rank: Assistant Professor I, department: Secondary Education, designation: "Department GE Handler (HIST 201, HIST 220)"}
+  S8: {name: Ms. Kimberly D. Saldana, rank: Instructor III, department: Secondary Education, designation: Faculty}
+  S9: {name: Mr. Rogelio O. Legaspi, rank: Assistant Professor I, department: Secondary Education, designation: Faculty}
   S10: {name: Ms. Divina P. Magbanua, rank: Instructor III, department: Secondary Education, designation: Social Sciences Major Coordinator}
   S11: {name: Dr. Amado T. Nepomuceno, rank: Assistant Professor II, department: Secondary Education, designation: Filipino Major Coordinator}
-  S12: {name: Ms. Liwayway C. Salvador, rank: Instructor III, department: Secondary Education, designation: Department GE Handler (FIL 207)}
+  S12: {name: Ms. Liwayway C. Salvador, rank: Instructor III, department: Secondary Education, designation: Faculty}
   S13: {name: Mr. Emilio D. Arceo, rank: Instructor II, department: Secondary Education, designation: Faculty}
   S14: {name: Ms. Rosario F. Guevarra, rank: Instructor II, department: Secondary Education, designation: Faculty}
   S15: {name: Ms. Bianca Mae T. Villanueva, rank: Instructor II, department: Secondary Education, designation: Faculty}

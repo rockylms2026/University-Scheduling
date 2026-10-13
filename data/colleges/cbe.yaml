@@ -175,6 +175,7 @@ programs:
       4-2: [THM 490]
 
 faculty:
+  AD: {name: Dr. Fernando E. Ferrer, rank: Professor I, department: Accountancy, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
   A1: {name: Dr. Leonora B. Velasco, rank: Associate Professor I, department: Accountancy, designation: Department Chair, max_lu: 15}
   A2: {name: Atty. Ronaldo P. Marquez, rank: Assistant Professor II, department: Accountancy, designation: Faculty}
   A3: {name: Ms. Charmaine D. Uy, rank: Assistant Professor I, department: Accountancy, designation: Review Coordinator}
@@ -188,7 +189,7 @@ faculty:
   B2: {name: Mr. Rodel P. Morales, rank: Assistant Professor I, department: Business Administration, designation: Financial Management Coordinator}
   B3: {name: Ms. Liezl G. Castro, rank: Assistant Professor I, department: Business Administration, designation: Marketing Coordinator}
   B4: {name: Mr. Adrian V. Ramirez, rank: Instructor III, department: Business Administration, designation: Business Analytics Coordinator}
-  B5: {name: Ms. Josephine L. Delos Reyes, rank: Instructor III, department: Business Administration, designation: "Department GE Handler; Internship Coordinator"}
+  B5: {name: Ms. Josephine L. Delos Reyes, rank: Instructor III, department: Business Administration, designation: Internship Coordinator}
   B6: {name: Mr. Francis Noel D. Galang, rank: Instructor III, department: Business Administration, designation: Faculty}
   H1: {name: Dr. Marilou C. Padilla, rank: Associate Professor I, department: Tourism and Hospitality Management, designation: Department Chair, max_lu: 15}
   H2: {name: Mr. Paolo R. Gutierrez, rank: Instructor III, department: Tourism and Hospitality Management, designation: Kitchen Laboratory Coordinator}

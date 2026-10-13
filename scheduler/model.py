@@ -71,7 +71,9 @@ class Faculty:
     college: str
     designation: str = ""
     max_lu: int = 24
-    prep_cap: int | None = 4
+    prep_cap: int | None = 4       # preparations, not counting intro and GE courses
+    course_cap: int = 5            # different courses, counting intro and GE courses
+    class_cap: int | None = None   # classes at most (an Associate Dean teaches two)
 
     @property
     def short(self) -> str:
@@ -340,7 +342,8 @@ def load_university(data_dir: Path = DATA_DIR) -> University:
         for fid, f in raw["faculty"].items():
             key = f"{college}-{fid}"
             faculty[key] = Faculty(key, fid, f["name"], f["rank"], f["department"], college,
-                                   f.get("designation", ""), f.get("max_lu", 24), prep_cap)
+                                   f.get("designation", ""), f.get("max_lu", 24), f.get("prep_cap", prep_cap),
+                                   f.get("course_cap", 5), f.get("class_cap"))
         for sem, per_fac in (raw.get("loads") or {}).items():
             for fid, entries in per_fac.items():
                 for entry in entries:

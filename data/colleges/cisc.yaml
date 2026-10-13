@@ -120,21 +120,22 @@ programs:
       4-2: [LIS 420, LIS 490]
 
 faculty:
+  AD: {name: Dr. Dolores R. Cayaban, rank: Associate Professor V, department: Computer Science, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
   C1: {name: Dr. Arnel P. Macaraeg, rank: Associate Professor I, department: Computer Science, designation: Department Chair, max_lu: 15}
   C2: {name: Mr. Carlo Miguel D. Santiago, rank: Assistant Professor I, department: Computer Science, designation: Thesis and Practicum Coordinator}
-  C3: {name: Dr. Jasmine T. Lorenzo, rank: Assistant Professor II, department: Computer Science, designation: "Research Coordinator; second GE handler"}
+  C3: {name: Dr. Jasmine T. Lorenzo, rank: Assistant Professor II, department: Computer Science, designation: Research Coordinator}
   C4: {name: Mr. Noel B. Ferrer, rank: Instructor III, department: Computer Science, designation: Laboratory Coordinator}
-  C5: {name: Ms. Rhea Anne L. Cruz, rank: Assistant Professor I, department: Computer Science, designation: Department GE Handler}
+  C5: {name: Ms. Rhea Anne L. Cruz, rank: Assistant Professor I, department: Computer Science, designation: Faculty}
   C6: {name: Mr. Kevin S. Domingo, rank: Instructor II, department: Computer Science, designation: Faculty}
   T1: {name: Dr. Marivic S. Pascual, rank: Associate Professor I, department: Information Technology, designation: Department Chair, max_lu: 15}
-  T2: {name: Mr. Ramon J. Villareal, rank: Assistant Professor I, department: Information Technology, designation: "Laboratory Coordinator; second GE handler"}
+  T2: {name: Mr. Ramon J. Villareal, rank: Assistant Professor I, department: Information Technology, designation: Laboratory Coordinator}
   T3: {name: Ms. Diane Mae R. Caballero, rank: Instructor III, department: Information Technology, designation: Faculty}
   T4: {name: Mr. Francis G. Ignacio, rank: Assistant Professor I, department: Information Technology, designation: Capstone and Practicum Coordinator}
   T5: {name: Ms. Jennifer C. Salazar, rank: Instructor III, department: Information Technology, designation: Faculty}
-  T6: {name: Mr. Antonio L. Mendoza, rank: Instructor II, department: Information Technology, designation: Department GE Handler}
+  T6: {name: Mr. Antonio L. Mendoza, rank: Instructor II, department: Information Technology, designation: Faculty}
   B1: {name: Dr. Evelyn M. Lim, rank: Associate Professor I, department: Library and Information Science, designation: Department Chair, max_lu: 15}
-  B2: {name: Ms. Rosalind T. Garcia, rank: Assistant Professor I, department: Library and Information Science, designation: "Faculty; second GE handler"}
-  B3: {name: Ms. Pauline A. de Guzman, rank: Instructor III, department: Library and Information Science, designation: Department GE Handler}
+  B2: {name: Ms. Rosalind T. Garcia, rank: Assistant Professor I, department: Library and Information Science, designation: Faculty}
+  B3: {name: Ms. Pauline A. de Guzman, rank: Instructor III, department: Library and Information Science, designation: Faculty}
   B4: {name: Mr. Arvin C. Tan, rank: Assistant Professor I, department: Library and Information Science, designation: Library Technology Coordinator}
   B5: {name: Ms. Grace L. Bernardo, rank: Instructor III, department: Library and Information Science, designation: Practicum Coordinator}
 

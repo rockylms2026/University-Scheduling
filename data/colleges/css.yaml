@@ -164,26 +164,27 @@ programs:
       4-2: [ECON 420, ECON 490]
 
 faculty:
+  AD: {name: Dr. Marissa F. Prudencio, rank: Professor I, department: Psychology, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
   P1: {name: Dr. Rowena C. Dalisay, rank: Associate Professor II, department: Psychology, designation: Department Chair, max_lu: 15}
-  P2: {name: Ms. Kristine Joy M. Lacsamana, rank: Assistant Professor I, department: Psychology, designation: "Faculty; second GE handler"}
+  P2: {name: Ms. Kristine Joy M. Lacsamana, rank: Assistant Professor I, department: Psychology, designation: Faculty}
   P3: {name: Mr. Joaquin R. Esguerra, rank: Assistant Professor I, department: Psychology, designation: I-O Track Coordinator}
   P4: {name: Dr. Benedict A. Manalastas, rank: Assistant Professor III, department: Psychology, designation: Research Coordinator}
-  P5: {name: Ms. Angelica P. Tolentino, rank: Instructor III, department: Psychology, designation: Department GE Handler}
+  P5: {name: Ms. Angelica P. Tolentino, rank: Instructor III, department: Psychology, designation: Faculty}
   L1: {name: Dr. Ernesto V. Dimaculangan, rank: Associate Professor I, department: Political Science, designation: Department Chair, max_lu: 15}
-  L2: {name: Atty. Mariel S. Agustin, rank: Assistant Professor II, department: Political Science, designation: "Legal Studies Coordinator; second GE handler"}
+  L2: {name: Atty. Mariel S. Agustin, rank: Assistant Professor II, department: Political Science, designation: Legal Studies Coordinator}
   L3: {name: Atty. Rafael T. Bautista, rank: Assistant Professor I, department: Political Science, designation: Internship Coordinator}
-  L4: {name: Mr. Paolo D. Ilagan, rank: Instructor III, department: Political Science, designation: Department GE Handler}
-  L5: {name: Ms. Liza Marie G. Soriano, rank: Instructor III, department: Political Science, designation: Department GE Handler}
+  L4: {name: Mr. Paolo D. Ilagan, rank: Instructor III, department: Political Science, designation: Faculty}
+  L5: {name: Ms. Liza Marie G. Soriano, rank: Instructor III, department: Political Science, designation: Faculty}
   M1: {name: Dr. Teresita L. Valdez, rank: Associate Professor I, department: Communication, designation: Department Chair, max_lu: 15}
   M2: {name: Mr. Gabriel N. Ocampo, rank: Assistant Professor I, department: Communication, designation: Faculty}
   M3: {name: Mr. Daniel F. Robles, rank: Instructor III, department: Communication, designation: Media Laboratory Coordinator}
-  M4: {name: Ms. Patricia Anne E. Yap, rank: Assistant Professor I, department: Communication, designation: "Internship Coordinator; second GE handler"}
-  M5: {name: Ms. Camille R. Navarro, rank: Instructor II, department: Communication, designation: Department GE Handler}
+  M4: {name: Ms. Patricia Anne E. Yap, rank: Assistant Professor I, department: Communication, designation: Internship Coordinator}
+  M5: {name: Ms. Camille R. Navarro, rank: Instructor II, department: Communication, designation: Faculty}
   E1: {name: Dr. Florante S. Mangubat, rank: Associate Professor I, department: Economics, designation: Department Chair, max_lu: 15}
   E2: {name: Dr. Imelda R. Cabrera, rank: Assistant Professor III, department: Economics, designation: Research Coordinator}
   E3: {name: Mr. Ronnel T. Salonga, rank: Assistant Professor I, department: Economics, designation: Faculty}
-  E4: {name: Ms. Katrina V. Lucero, rank: Instructor III, department: Economics, designation: "Department GE Handler; Internship Coordinator"}
-  E5: {name: Mr. Jose Emmanuel P. Sison, rank: Instructor II, department: Economics, designation: Department GE Handler}
+  E4: {name: Ms. Katrina V. Lucero, rank: Instructor III, department: Economics, designation: Internship Coordinator}
+  E5: {name: Mr. Jose Emmanuel P. Sison, rank: Instructor II, department: Economics, designation: Faculty}
 
 loads:
   1:

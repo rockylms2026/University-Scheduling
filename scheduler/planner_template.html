@@ -977,8 +977,10 @@ function computeLoads() {
     L.total = L.courses.size;
     L.capped = [...L.courses].filter((x) => !INTRO.has(x) && !isGE(x)).length;
     L.cap = t.prepCap ?? null;
-    const over = L.lu > t.max || (L.cap != null && L.capped > L.cap) || L.total > 5;
-    const near = !over && (L.lu >= t.max - 3 || (L.cap != null && L.capped === L.cap) || L.total === 5);
+    L.courseCap = t.courseCap ?? 5;                 // different courses, counting intro and GE
+    L.classCap = t.classCap ?? null;                // classes at most (Associate Deans: two)
+    const over = L.lu > t.max || (L.cap != null && L.capped > L.cap) || L.total > L.courseCap || (L.classCap != null && L.classes.length > L.classCap);
+    const near = !over && (L.lu >= t.max - 3 || (L.cap != null && L.capped === L.cap) || L.total === L.courseCap || (L.classCap != null && L.classes.length === L.classCap));
     L.status = over ? "over" : near ? "near" : "ok";
   });
 }
@@ -1124,7 +1126,8 @@ function computeConflicts() {
     const t = DATA.teachers[k];
     if (L.lu > t.max) out.push({ sev: "bad", type: "Over load", what: `${t.name} carries ${L.lu} LU (limit ${t.max})`, items: [...L.courses], when: "", classes: [], teacher: k, go: { teacher: k } });
     if (L.cap != null && L.capped > L.cap) out.push({ sev: "bad", type: "Preparations", what: `${t.name} has ${L.capped} preparations (limit ${L.cap}, not counting intro and GE courses)`, items: [...L.courses], when: "", classes: [], teacher: k, go: { teacher: k } });
-    else if (L.total > 5) out.push({ sev: "bad", type: "Preparations", what: `${t.name} has ${L.total} different courses (limit 5)`, items: [...L.courses], when: "", classes: [], teacher: k, go: { teacher: k } });
+    else if (L.total > L.courseCap) out.push({ sev: "bad", type: "Preparations", what: `${t.name} has ${L.total} different courses (limit ${L.courseCap})`, items: [...L.courses], when: "", classes: [], teacher: k, go: { teacher: k } });
+    if (L.classCap != null && L.classes.length > L.classCap) out.push({ sev: "bad", type: "Teaching load", what: `${t.name} has ${L.classes.length} classes (limit ${L.classCap})`, items: L.classes.map((c) => `${c.course} ${c.section}`), when: "", classes: [], teacher: k, go: { teacher: k } });
   });
   DATA.classes.forEach((c) => {
     const a = approvalOf(c);
@@ -1537,7 +1540,7 @@ function loadTable(keys, limit) {
     const p = Math.min(100, (100 * L.lu) / t.max);
     return `<tr class="clickable" data-goteacher="${k}" title="${esc(`${t.name} · ${t.role || "Faculty"}`)}"><td>${esc(t.name)}<div class="small muted">${esc(t.dept)}</div></td>
       <td class="num">${L.lu}/${t.max}<div class="bar ${L.status}"><i style="width:${p}%"></i></div></td>
-      <td class="num">${L.cap != null ? `${L.capped}/${L.cap}` : "—"}</td><td class="num">${L.total}/5</td><td>${STATUS_CHIP[L.status]}</td></tr>`;
+      <td class="num">${L.cap != null ? `${L.capped}/${L.cap}` : "—"}</td><td class="num">${L.total}/${L.courseCap}</td><td>${STATUS_CHIP[L.status]}</td></tr>`;
   }).join("");
   return `<table class="loads"><thead><tr><th>Faculty · department</th><th class="num">LU</th><th class="num" title="Preparations, not counting intro and GE courses">Preps</th><th class="num" title="Different courses, counting intro and GE">All</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
@@ -1989,10 +1992,11 @@ function editor(cls, part) {
       const lu = luFor(teacherKey) + (t?.key === teacherKey ? 0 : cls.lu);
       if (lu > DATA.teachers[teacherKey].max) checks.push(["warn", `Teacher: ${DATA.teachers[teacherKey].name} would carry ${lu} LU (limit ${DATA.teachers[teacherKey].max})`]);
       const L = loads[teacherKey];
+      if (t?.key !== teacherKey && L.classCap != null && L.classes.length + 1 > L.classCap) checks.push(["warn", `Teacher: ${DATA.teachers[teacherKey].name} would have ${L.classes.length + 1} classes (limit ${L.classCap})`]);
       if (!L.courses.has(cls.course)) {
         const capped = L.capped + (!INTRO.has(cls.course) && !isGE(cls.course) ? 1 : 0);
         if (L.cap != null && capped > L.cap) checks.push(["warn", `Teacher: this would be preparation ${capped} (limit ${L.cap})`]);
-        else if (L.total + 1 > 5) checks.push(["warn", `Teacher: this would be ${L.total + 1} different courses (limit 5)`]);
+        else if (L.total + 1 > L.courseCap) checks.push(["warn", `Teacher: this would be ${L.total + 1} different courses (limit ${L.courseCap})`]);
       }
     } else if (m.kind !== "nstp" && !tRight) checks.push(["warn", "No teacher assigned yet"]);
     const ok = !checks.some(([l]) => l === "bad") && !right;
@@ -2071,7 +2075,7 @@ function renderFaculty(page) {
         <dl class="about"><dt>Department</dt><dd>${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}</dd>
           <dt>Office</dt><dd>${esc(t.office || "—")}</dd>
           <dt>Teaching load</dt><dd><b>${L.lu}</b> of ${t.max} LU this semester</dd>
-          <dt>Preparations</dt><dd>${L.cap != null ? `<b>${L.capped}</b> of ${L.cap} (not counting intro and GE) · ` : ""}<b>${L.total}</b> of 5 different courses</dd>
+          <dt>Preparations</dt><dd>${L.cap != null ? `<b>${L.capped}</b> of ${L.cap} (not counting intro and GE) · ` : ""}<b>${L.total}</b> of ${L.courseCap} different courses${L.classCap != null ? ` · <b>${L.classes.length}</b> of ${L.classCap} classes` : ""}</dd>
           <dt>Hours by day</dt><dd>${DAYS.filter((d) => perDay[d]).map((d) => `${d} ${perDay[d].toFixed(1)} h`).join(" · ") || "Nothing scheduled yet"}</dd></dl>
         <div class="scroll"><table><thead><tr><th>Course</th><th>Section</th><th class="num">LU</th><th>Schedule</th></tr></thead><tbody>
           ${L.classes.map((c) => `<tr><td><b>${esc(c.course)}</b> ${esc(DATA.courses[c.course].title)}</td><td>${esc(c.section)}</td><td class="num">${c.lu}</td>

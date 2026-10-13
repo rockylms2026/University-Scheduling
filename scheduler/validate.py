@@ -56,9 +56,12 @@ def validate(uni: University) -> list[Issue]:
             if fac.prep_cap is not None and row["preps_capped"] > fac.prep_cap:
                 issues.append(Issue("error", "preps",
                                     f"Semester {sem}: {fac.name} has {row['preps_capped']} preparations (cap {fac.prep_cap})"))
-            if row["preps_total"] > 5:
+            if row["preps_total"] > fac.course_cap:
                 issues.append(Issue("error", "preps",
-                                    f"Semester {sem}: {fac.name} has {row['preps_total']} different courses (cap 5)"))
+                                    f"Semester {sem}: {fac.name} has {row['preps_total']} different courses (cap {fac.course_cap})"))
+            if fac.class_cap is not None and row["classes"] > fac.class_cap:
+                issues.append(Issue("error", "load",
+                                    f"Semester {sem}: {fac.name} has {row['classes']} classes (cap {fac.class_cap})"))
 
     return issues
 
