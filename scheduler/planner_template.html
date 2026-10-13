@@ -1380,8 +1380,13 @@ function render() {
   const moved = render.where !== where, sameView = render.where?.split("|")[0] === state.view;
   const fn = { home: renderHome, dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, profiles: renderProfiles, rooms: renderRooms, sections: renderSections,
                courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, org: renderOrg, settings: renderSettings }[state.view] || renderHome;
+  // Lists that scroll inside the page (times, unscheduled classes, faculty, tables) keep their position
+  // when the page is redrawn, e.g. after clicking a time.
+  const SCROLLERS = ".opts, .queue, .list, .tablebox, .scroll, .misslist";
+  const kept = moved ? [] : [...page.querySelectorAll(SCROLLERS)].map((el) => [el.scrollTop, el.scrollLeft]);
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
   fn(page);
+  if (kept.length) [...page.querySelectorAll(SCROLLERS)].forEach((el, i) => { if (kept[i]) { el.scrollTop = kept[i][0]; el.scrollLeft = kept[i][1]; } });
   if (moved) {             // a new page or section: fade it in and start at the top
     if (render.where) scrollTo({ top: 0 });
     render.where = where;
