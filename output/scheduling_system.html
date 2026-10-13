@@ -11,7 +11,7 @@
    and one working area per page. Home greets the person and lists what waits for them. */
 :root {
   --bg: #f4f5f7; --panel: #ffffff; --ink: #172030; --muted: #5a6575; --line: #dde1e7; --line2: #eceff3;
-  --navy: #1b2f55; --navy-2: #24406f; --accent: #1f3f74; --accent-ink: #ffffff; --accent-soft: #e7ecf5; --lunch: #eceef2; --hover: #e3e5e9;
+  --navy: #1b2f55; --navy-2: #24406f; --accent: #1f3f74; --accent-ink: #ffffff; --accent-soft: #e7ecf5; --lunch: #eceef2; --hover: #e3e5e9; --ease: cubic-bezier(.2, .8, .2, 1);
   --warn: #8a5a00; --warn-soft: #fff1cc; --bad: #b42318; --bad-soft: #fde4e1; --good: #1b6e40; --good-soft: #dcf2e4;
   --t-lec: #e2e9f6;  --t-lec-ink: #1d3a6b;
   --t-lab: #d9efe2;  --t-lab-ink: #155c35;
@@ -319,10 +319,26 @@ dl.about dd { margin: 0; }
 .kpi:hover { box-shadow: 0 3px 10px rgba(15,25,45,.08); transform: translateY(-1px); }
 .kpi:active { transform: translateY(0); }
 .publish:hover:not(:disabled) { box-shadow: 0 2px 6px rgba(31,63,116,.25); }
-.flyout { animation: fly-in .14s ease-out; }
-@keyframes fly-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
-.main.enter > * { animation: page-in .22s ease-out both; }
-@keyframes page-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* menus and panels glide in and out instead of popping */
+.flyout { opacity: 0; visibility: hidden; pointer-events: none; transform: translateX(-8px); transform-origin: left top;
+  transition: opacity .16s ease, transform .2s var(--ease), visibility 0s linear .2s; }
+.flyout.open { opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition: opacity .16s ease, transform .2s var(--ease), visibility 0s; }
+.flyout.open.sliding { transition: opacity .16s ease, transform .2s var(--ease), top .22s var(--ease), left .22s var(--ease), visibility 0s; }
+.usermenu .pop { opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-6px) scale(.98); transform-origin: right top;
+  transition: opacity .15s ease, transform .18s var(--ease), visibility 0s linear .18s; }
+.usermenu .pop.open { opacity: 1; visibility: visible; pointer-events: auto; transform: none; transition: opacity .15s ease, transform .18s var(--ease), visibility 0s; }
+.menu[open] .pop { animation: pop-up .16s var(--ease); }
+.results:not([hidden]) { animation: drop-in .16s var(--ease); }
+.waitlist[open] ul, .hownote[open] p { animation: drop-in .18s var(--ease); }
+@keyframes pop-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes drop-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.snkids { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .24s var(--ease), opacity .2s ease; }
+.snkids.shut { grid-template-rows: 0fr; opacity: 0; }
+.snkids > div { overflow: hidden; min-height: 0; }
+.main.enter > *, .wsmain.enter > * { animation: page-in .26s var(--ease) both; }
+.main.enter > :nth-child(2), .wsmain.enter > :nth-child(2) { animation-delay: .03s; }
+.main.enter > :nth-child(n+3), .wsmain.enter > :nth-child(n+3) { animation-delay: .06s; }
+@keyframes page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 
 /* ----- progress ring ----- */
@@ -528,7 +544,7 @@ dl.about dd { margin: 0; }
     </div>
   </header>
   <nav class="side" id="side" aria-label="Main menu"></nav>
-  <div class="flyout" id="flyout" hidden></div>
+  <div class="flyout" id="flyout" aria-hidden="true"></div>
   <main class="main" id="page"></main>
   <footer class="footer" id="footer"></footer>
 </div>
@@ -1191,18 +1207,26 @@ function setFly(key) {
   document.querySelectorAll("[data-flyout]").forEach((b) => b.setAttribute("aria-expanded", String(b.dataset.flyout === key)));
   renderFlyout(flyCounts);
 }
+function setUserMenu(open) {
+  userMenuOpen = open;
+  const pop = document.querySelector("#userchip .pop");
+  pop?.classList.toggle("open", open); pop?.setAttribute("aria-hidden", String(!open));
+  document.querySelector("#userchip .avatar")?.setAttribute("aria-expanded", String(open));
+}
 function renderFlyout(counts) {
   const el = $("flyout"), g = navGroups().find((x) => x.key === flyKey);
   const anchor = g && document.querySelector(`[data-flyout="${g.key}"]`);
-  if (!g || !anchor) { el.hidden = true; return; }
+  if (!g || !anchor) { el.classList.remove("open"); el.setAttribute("aria-hidden", "true"); return; }
+  const wasOpen = el.classList.contains("open");
   el.innerHTML = `<h2>${esc(g.label)}</h2>${g.views.map(([k, l]) => {
     const c = counts[k];
     return `<button type="button" data-view="${k}" aria-current="${state.view === k ? "page" : "false"}"><span>${esc(l)}<small>${esc(VIEW_NOTE[k] || "")}</small></span>${c && (c[0] || k === "conflicts") ? `<span class="count${c[1] ? " bad" : ""}">${c[0]}</span>` : ""}</button>`;
   }).join("")}`;
-  el.hidden = false;
+  el.classList.toggle("sliding", wasOpen);        // already open: glide to the new group instead of popping in again
   const r = anchor.getBoundingClientRect(), narrow = innerWidth <= 1100;
   el.style.left = `${narrow ? Math.max(8, Math.min(r.left, innerWidth - 278)) : r.right + 6}px`;
   el.style.top = `${narrow ? r.bottom + 6 : Math.max(8, Math.min(r.top - 6, innerHeight - el.offsetHeight - 8))}px`;
+  el.classList.add("open"); el.setAttribute("aria-hidden", "false");
 }
 // "Rocky Spencer A. Ricardo" -> "Rocky Ricardo"; "Ernesto D. Dela Cruz" -> "Ernesto Dela Cruz"; "Ma. Luisa T. Pangilinan" -> "Ma. Luisa Pangilinan".
 function greetName(n) {
@@ -1242,7 +1266,7 @@ function renderShell() {
   const chip = $("userchip");
   chip.hidden = !BACKEND || !me.email;
   if (BACKEND && me.email) chip.innerHTML = `<button type="button" class="avatar" data-usermenu="1" aria-haspopup="true" aria-expanded="${userMenuOpen}" title="${esc(me.name)}">${esc(initials(me.name || me.email))}</button>
-    <div class="pop" ${userMenuOpen ? "" : "hidden"}><div class="who"><b>${esc(me.name || me.email)}</b><span>${esc(ROLE_NAME[me.role] || "")}${me.department ? ` · ${esc(me.department)}` : me.college ? ` · ${esc(me.college)}` : ""}</span><span>${esc(me.email)}</span></div>
+    <div class="pop${userMenuOpen ? " open" : ""}" aria-hidden="${!userMenuOpen}"><div class="who"><b>${esc(me.name || me.email)}</b><span>${esc(ROLE_NAME[me.role] || "")}${me.department ? ` · ${esc(me.department)}` : me.college ? ` · ${esc(me.college)}` : ""}</span><span>${esc(me.email)}</span></div>
       <button type="button" data-view="settings">Settings and password</button><button type="button" data-auth="signout">Sign out</button></div>`;
   const pubOk = !BACKEND || isAdmin();
   const when = (iso) => iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
@@ -1269,11 +1293,18 @@ function render() {
   if ((state.view === "approvals" || state.view === "submissions") && !BACKEND) state.view = "dashboard";
   renderShell(); remember();
   const page = $("page");
-  if (render.view !== state.view) { render.view = state.view; page.classList.remove("enter"); void page.offsetWidth; page.classList.add("enter"); clearTimeout(render.t); render.t = setTimeout(() => page.classList.remove("enter"), 300); }
+  const where = `${state.view}|${state.view === "dashboard" ? state.dashTab : ""}|${state.view === "profiles" ? state.profile || "" : ""}`;
+  const moved = render.where !== where, sameView = render.where?.split("|")[0] === state.view;
   const fn = { home: renderHome, dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, profiles: renderProfiles, rooms: renderRooms, sections: renderSections,
                courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, settings: renderSettings }[state.view] || renderHome;
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
   fn(page);
+  if (moved) {             // a new page or section: fade it in and start at the top
+    if (render.where) scrollTo({ top: 0 });
+    render.where = where;
+    const box = (sameView && page.querySelector(".wsmain")) || page;
+    box.classList.add("enter"); clearTimeout(render.t); render.t = setTimeout(() => box.classList.remove("enter"), 320);
+  }
   if (banner) (page.querySelector(".hero") || page).insertAdjacentHTML(page.querySelector(".hero") ? "afterend" : "afterbegin", banner);
 }
 function head(title, sub, right = "") {
@@ -1682,17 +1713,14 @@ function dashNav() {
   const closed = state.dashClosed || [];
   if (state.dashNavHidden) return `<aside class="subnav slim"><button type="button" class="iconbtn" data-dashcollapse="0" title="Show the section menu" aria-label="Show the section menu">${svg('<path d="M14 6l6 6-6 6M4 4v16"/>', 20)}</button></aside>`;
   let html = `<aside class="subnav"><div class="snhead"><span class="snicon">${ICON.dashboard}</span><b>Dashboard</b><button type="button" class="iconbtn" data-dashcollapse="1" title="Hide the section menu" aria-label="Hide the section menu">${svg('<path d="M10 6l-6 6 6 6M20 4v16"/>', 20)}</button></div>`;
-  let group = null;
-  DASH_NAV.forEach(([k, l, g]) => {
-    if (g !== group) {
-      if (group) html += `</div>`;
-      group = g;
-      if (g) html += `<button type="button" class="sngroup" data-dashgroup="${g}" aria-expanded="${!closed.includes(g)}"><span class="snicon">${ICON[DASH_ICON[g]]}</span>${g}<i aria-hidden="true"></i></button><div class="snkids"${closed.includes(g) ? " hidden" : ""}>`;
-      else html += `<div>`;
-    }
-    html += `<button type="button" class="snitem${g ? "" : " top"}" data-dashtab="${k}" aria-current="${state.dashTab === k ? "page" : "false"}">${g ? "" : `<span class="snicon">${ICON.home}</span>`}${l}</button>`;
+  const item = ([k, l, g]) => `<button type="button" class="snitem${g ? "" : " top"}" data-dashtab="${k}" aria-current="${state.dashTab === k ? "page" : "false"}">${g ? "" : `<span class="snicon">${ICON.home}</span>`}${l}</button>`;
+  DASH_NAV.filter(([, , g]) => !g).forEach((x) => (html += item(x)));
+  [...new Set(DASH_NAV.map(([, , g]) => g).filter(Boolean))].forEach((g) => {
+    const open = !closed.includes(g);
+    html += `<button type="button" class="sngroup" data-dashgroup="${g}" aria-expanded="${open}"><span class="snicon">${ICON[DASH_ICON[g]]}</span>${g}<i aria-hidden="true"></i></button>
+      <div class="snkids${open ? "" : " shut"}"><div>${DASH_NAV.filter(([, , x]) => x === g).map(item).join("")}</div></div>`;
   });
-  return html + `</div></aside>`;
+  return html + `</aside>`;
 }
 function ovCard(icon, title, sub, body, link) {
   return `<section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON[icon]}</span><div><h3>${esc(title)}</h3><p>${esc(sub)}</p></div></div>
@@ -2511,11 +2539,11 @@ document.addEventListener("click", async (ev) => {
   if (!ev.target.closest(".search")) $("results").hidden = true;
   if (!ev.target.closest("#exportMenu")) $("exportMenu")?.removeAttribute("open");
   if (flyKey && !ev.target.closest("#flyout, [data-flyout]")) setFly(null);
-  if (userMenuOpen && !ev.target.closest("#userchip")) { userMenuOpen = false; renderShell(); }
+  if (userMenuOpen && !ev.target.closest("#userchip")) setUserMenu(false);
   if (!t) return;
   const ds = t.dataset;
   if (ds.flyout) { setFly(flyKey === ds.flyout && !canHover ? null : ds.flyout); return; }
-  if (ds.usermenu) { userMenuOpen = !userMenuOpen; renderShell(); return; }
+  if (ds.usermenu) { setUserMenu(!userMenuOpen); return; }
   if (ds.openpublish) { openPublish(); return; }
   if (ds.view) { flyKey = null; userMenuOpen = false; }
   if (ds.hit) { goHit(+ds.hit); return; }
@@ -2533,9 +2561,14 @@ document.addEventListener("click", async (ev) => {
   }
   if (ds.apprfilter) { state.apprFilter = ds.apprfilter; render(); return; }
   if (ds.dashtab) { state.view = "dashboard"; state.dashTab = ds.dashtab; render(); return; }
-  if (ds.dashgroup) { const c = new Set(state.dashClosed || []); c.has(ds.dashgroup) ? c.delete(ds.dashgroup) : c.add(ds.dashgroup); state.dashClosed = [...c]; render(); return; }
+  if (ds.dashgroup) {
+    const c = new Set(state.dashClosed || []), open = c.has(ds.dashgroup);
+    open ? c.delete(ds.dashgroup) : c.add(ds.dashgroup); state.dashClosed = [...c]; remember();
+    t.setAttribute("aria-expanded", String(open)); t.nextElementSibling?.classList.toggle("shut", !open);
+    return;
+  }
   if (ds.dashcollapse) { state.dashNavHidden = ds.dashcollapse === "1"; render(); return; }
-  if (ds.profile !== undefined) { state.view = "profiles"; state.profile = ds.profile || null; render(); scrollTo(0, 0); return; }
+  if (ds.profile !== undefined) { state.view = "profiles"; state.profile = ds.profile || null; render(); return; }
   if (ds.subfilter) { state.subFilter = ds.subfilter; render(); return; }
   if (ds.subcollege !== undefined) { state.subCollege = ds.subcollege; render(); return; }
   if (ds.submit) { openSubmit(ds.submit); return; }
@@ -2601,9 +2634,11 @@ document.addEventListener("click", async (ev) => {
 // The panel of a menu group sits beside its icon; close it when the page moves.
 ["resize", "scroll"].forEach((t) => window.addEventListener(t, () => { if (flyKey) setFly(null); }, { passive: true }));
 // With a mouse, a group's panel opens on hover and closes shortly after the pointer leaves it.
+let flyOpenTimer = null;
 if (canHover) document.addEventListener("mouseover", (ev) => {
   const g = ev.target.closest("[data-flyout]");
-  if (g) { setFly(g.dataset.flyout); return; }
+  clearTimeout(flyOpenTimer);
+  if (g) { if (flyKey) setFly(g.dataset.flyout); else flyOpenTimer = setTimeout(() => setFly(g.dataset.flyout), 90); return; }
   if (ev.target.closest("#flyout")) { clearTimeout(flyTimer); return; }
   if (!flyKey) return;
   if (ev.target.closest(".rail")) { setFly(null); return; }
@@ -2623,7 +2658,7 @@ document.addEventListener("keydown", (ev) => {
     else if (ev.key === "Enter") { ev.preventDefault(); goHit(searchOn); }
     else if (ev.key === "Escape") $("results").hidden = true;
   }
-  if (ev.key === "Escape" && (flyKey || userMenuOpen)) { const k = flyKey; setFly(null); userMenuOpen = false; renderShell(); document.querySelector(k ? `[data-flyout="${k}"]` : ".avatar")?.focus(); }
+  if (ev.key === "Escape" && (flyKey || userMenuOpen)) { const k = flyKey; setFly(null); setUserMenu(false); document.querySelector(k ? `[data-flyout="${k}"]` : ".avatar")?.focus(); }
   if (ev.key === "Escape") { if (printJob) { printJob = null; renderPrintPanel(); } $("publishPanel").hidden = true; $("submitPanel").hidden = true; }
 });
 document.addEventListener("change", async (ev) => {
