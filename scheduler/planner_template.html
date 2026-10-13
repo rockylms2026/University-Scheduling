@@ -566,6 +566,30 @@ button.oname { cursor: pointer; } button.oname:hover { text-decoration: underlin
 @media (max-width: 1250px) { .okids { grid-template-columns: repeat(min(var(--cols), 4), var(--w)); } .okids > :nth-child(n+5)::before { display: none; } .okids:not(.one)::before { left: 14px; right: 14px; } }
 @media (max-width: 760px) { .okids { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; } .okids > :nth-child(n+3)::before { display: none; } }
 
+/* ----- hover and selection, everywhere ----- */
+/* boxes you can click: a soft shadow and a 1px lift; text links: an underline that slides in */
+.opt, .part, .qi, .pill, .item, .cls, .pcard, .ocard.tap, .ounit, .quick, .sugg, .kpi, .omore, .morebtn, .subrow, .orgsearch .results button, .results button {
+  transition: box-shadow .16s ease, transform .16s ease, border-color .16s ease, background-color .16s ease, color .16s ease; }
+.opt:hover, .part:hover, .qi:hover, .pill:hover, .quick:hover, .omore:hover, .morebtn:hover, .ounit:hover {
+  box-shadow: 0 4px 12px rgba(15,25,45,.12); transform: translateY(-1px); border-color: #b9c3d1; }
+.part.on:hover { box-shadow: 0 0 0 2px var(--accent), 0 4px 12px rgba(15,25,45,.12); }
+.item:hover { background: var(--bg); box-shadow: 0 2px 8px rgba(15,25,45,.08); transform: translateY(-1px); }
+.cls:hover { box-shadow: 0 3px 10px rgba(15,25,45,.07); border-color: #c9d0da; }
+.opt:active, .part:active, .qi:active, .pill:active, .item:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(15,25,45,.1); }
+/* selected: navy outline, light fill and a check */
+.opt.on { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
+.opt.on:hover { box-shadow: 0 0 0 1px var(--accent), 0 4px 12px rgba(15,25,45,.12); }
+.opt.on > .chip::before, .part.on::before, .item[aria-current="true"]::before { content: "✓"; font-weight: 700; margin-right: 4px; }
+.item[aria-current="true"] { justify-content: flex-start; }
+.item[aria-current="true"] small { margin-left: auto; }
+/* text links */
+.btn.link, .go, .ovlink, .backlink, .otrail button, summary, .oteam, button.oname, .hownote summary, .waitlist summary {
+  text-decoration-line: underline; text-decoration-color: transparent; text-underline-offset: 3px; text-decoration-thickness: 1.5px; transition: text-decoration-color .16s ease, color .16s ease; }
+.btn.link:hover, .go:hover, .ovlink:hover, .backlink:hover, summary:hover, button.oname:hover { text-decoration-color: currentColor; }
+.otrail button, .oteam, .go { text-decoration-color: currentColor; }
+.otrail button:hover, .go:hover { color: var(--navy); }
+tr.clickable td { transition: background-color .14s ease; }
+
 /* ----- responsive: desktop first (1440), usable on tablets ----- */
 @media (max-width: 1360px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bottom { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bottom > :first-child { grid-column: 1 / -1; } }
 @media (max-width: 1100px) {
@@ -1328,9 +1352,9 @@ function renderShell() {
   const ay = $("aySel");
   const years = ["2025–2026", "2026–2027", "2027–2028"];
   if (!years.includes(printCfg.ay)) years.push(printCfg.ay);
-  ay.innerHTML = years.map((y) => `<option${y === printCfg.ay ? " selected" : ""}>SY ${esc(y)}</option>`).join("");
+  setHTML(ay, years.map((y) => `<option${y === printCfg.ay ? " selected" : ""}>SY ${esc(y)}</option>`).join(""));
   const scopes = allowedScopes();
-  $("scopeSel").innerHTML = SCOPES.filter(([k]) => scopes.includes(k)).map(([k, l]) => `<option value="${k}"${state.scope === k ? " selected" : ""}>${esc(chairDept() ? `${l} · ${chairDept()}` : l)}</option>`).join("");
+  setHTML($("scopeSel"), SCOPES.filter(([k]) => scopes.includes(k)).map(([k, l]) => `<option value="${k}"${state.scope === k ? " selected" : ""}>${esc(chairDept() ? `${l} · ${chairDept()}` : l)}</option>`).join(""));
   $("scopeSel").disabled = scopes.length < 2;
   const nConf = conflictsInScope().filter((c) => c.sev === "bad").length;
   const unsched = DATA.classes.filter(classInScope).reduce((a, c) => a + c.meetings.filter((m) => !bookings[`${c.id}|${m.part}`]).length, 0);
@@ -1339,37 +1363,72 @@ function renderShell() {
   $("bellBtn").hidden = !BACKEND || !me.email;
   $("bellCount").hidden = !unseen; $("bellCount").textContent = unseen;
   const counts = { timetable: [unsched, false], conflicts: [nConf, nConf > 0], approvals: [nMine, nMine > 0], submissions: [unseen, unseen > 0] };
-  $("side").innerHTML = navGroups().map((g, i, all) => {
+  setHTML($("side"), navGroups().map((g, i, all) => {
     const views = g.views, one = views.length === 1;
     const on = views.some(([k]) => k === state.view);
     const alert = views.reduce((a, [k]) => a + (counts[k]?.[1] ? counts[k][0] : 0), 0);
     return `${g.bottom && !all[i - 1]?.bottom ? `<div class="spacer"></div>` : ""}<button type="button" class="rail" ${one ? `data-view="${views[0][0]}"` : `data-flyout="${g.key}" aria-haspopup="true" aria-expanded="${flyKey === g.key}"`} aria-current="${on ? "page" : "false"}">
       <span class="ic">${ICON[g.icon]}${alert ? `<b>${alert}</b>` : ""}</span>${esc(g.label)}</button>`;
-  }).join("");
+  }).join(""));
   flyCounts = counts;
   renderFlyout(counts);
   const pub = pubState();
   const chip = $("userchip");
   chip.hidden = !BACKEND || !me.email;
-  if (BACKEND && me.email) chip.innerHTML = `<button type="button" class="avatar" data-usermenu="1" aria-haspopup="true" aria-expanded="${userMenuOpen}" title="${esc(me.name)}">${esc(initials(me.name || me.email))}</button>
+  if (BACKEND && me.email) setHTML(chip, `<button type="button" class="avatar" data-usermenu="1" aria-haspopup="true" aria-expanded="${userMenuOpen}" title="${esc(me.name)}">${esc(initials(me.name || me.email))}</button>
     <div class="pop${userMenuOpen ? " open" : ""}" aria-hidden="${!userMenuOpen}"><div class="who"><b>${esc(me.name || me.email)}</b><span>${esc(ROLE_NAME[me.role] || "")}${me.department ? ` · ${esc(me.department)}` : me.college ? ` · ${esc(me.college)}` : ""}</span><span>${esc(me.email)}</span></div>
-      <button type="button" data-view="settings">Settings and password</button><button type="button" data-auth="signout">Sign out</button></div>`;
+      <button type="button" data-view="settings">Settings and password</button><button type="button" data-auth="signout">Sign out</button></div>`);
   const pubOk = !BACKEND || isAdmin();
   const when = (iso) => iso ? new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
-  $("footer").innerHTML = `<span>Last saved: <b>${esc(when(lastSaved))}</b></span>
+  setHTML($("footer"), `<span>Last saved: <b>${esc(when(lastSaved))}</b></span>
     <span class="chip ${pub.cls}">${esc(pub.label)}</span>
     <span>${shared ? (canWrite ? "Changes are saved for everyone" : "View-only access") : "Not connected: changes here are not saved"}</span>
     <span class="grow"></span>${BUILD ? `<span class="small">Version ${esc(BUILD)}</span>` : ""}
     ${pubOk ? `<button type="button" class="publish" id="publishBtn"${!canWrite || !shared ? " disabled" : ""} title="${!shared ? "Open the page on claude.ai to publish" : !canWrite ? "View-only access" : ""}">Publish schedule</button>` : ""}
     <details class="menu" id="exportMenu"><summary class="btn">Export ▾</summary><div class="pop">
       <button type="button" data-export="pdf">PDF schedules (section, faculty, room)…</button>
-      <button type="button" data-export="xlsx">Excel workbook (.xlsx)</button></div></details>`;
+      <button type="button" data-export="xlsx">Excel workbook (.xlsx)</button></div></details>`);
 }
 function pubState() {
   if (!pubStatus?.at) return { cls: "warn", label: "Draft (not yet published)" };
   const d = new Date(pubStatus.at).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   if (lastSaved && Date.parse(lastSaved) > Date.parse(pubStatus.at)) return { cls: "warn", label: `Draft · changed since publishing on ${d}` };
   return { cls: "good", label: `Published ${d}` };
+}
+
+// ---------- updating the page in place ----------
+// Instead of rebuilding a part of the page, compare the new version with what is on screen and change only
+// what differs. Elements that stay keep their scroll position, focus, hover state and running animations.
+function patchChildren(a, b) {
+  const an = [...a.childNodes], bn = [...b.childNodes];
+  bn.forEach((y, i) => {
+    const x = an[i];
+    if (!x) a.appendChild(y);
+    else if (x.nodeType === y.nodeType && x.nodeName === y.nodeName && (x.nodeType !== 1 || (x.id || "") === (y.id || ""))) patchNode(x, y);
+    else a.replaceChild(y, x);
+  });
+  for (let i = bn.length; i < an.length; i++) an[i].remove();
+}
+function patchNode(x, y) {
+  if (x.nodeType === 3 || x.nodeType === 8) { if (x.nodeValue !== y.nodeValue) x.nodeValue = y.nodeValue; return; }
+  for (const { name, value } of [...y.attributes]) if (x.getAttribute(name) !== value) x.setAttribute(name, value);
+  for (const { name } of [...x.attributes]) if (!y.hasAttribute(name) && !(name === "open" && x.nodeName === "DETAILS")) x.removeAttribute(name);
+  if (x.nodeName === "TEXTAREA") { if (x !== document.activeElement && x.value !== y.value) x.value = y.value; return; }
+  patchChildren(x, y);
+  if (x.nodeName === "INPUT") {
+    if (x.type === "checkbox" || x.type === "radio") x.checked = y.hasAttribute("checked");
+    else if (x !== document.activeElement && x.value !== (y.getAttribute("value") ?? "")) x.value = y.getAttribute("value") ?? "";
+  } else if (x.nodeName === "SELECT") {
+    const want = [...y.options].findIndex((o) => o.hasAttribute("selected"));
+    const idx = want < 0 ? 0 : want;
+    if (x.selectedIndex !== idx) x.selectedIndex = idx;
+  }
+}
+// Set the contents of an element without rebuilding it.
+function setHTML(el, html) {
+  if (!el) return;
+  const t = el.cloneNode(false); t.innerHTML = html;
+  patchChildren(el, t);
 }
 
 // ---------- pages ----------
@@ -1383,20 +1442,19 @@ function render() {
   const moved = render.where !== where, sameView = render.where?.split("|")[0] === state.view;
   const fn = { home: renderHome, dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, profiles: renderProfiles, rooms: renderRooms, sections: renderSections,
                courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, org: renderOrg, settings: renderSettings }[state.view] || renderHome;
-  // Lists that scroll inside the page (times, unscheduled classes, faculty, tables) keep their position
-  // when the page is redrawn, e.g. after clicking a time.
-  const SCROLLERS = ".opts, .queue, .list, .tablebox, .scroll, .misslist";
-  const kept = moved ? [] : [...page.querySelectorAll(SCROLLERS)].map((el) => [el.scrollTop, el.scrollLeft]);
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
-  fn(page);
-  if (kept.length) [...page.querySelectorAll(SCROLLERS)].forEach((el, i) => { if (kept[i]) { el.scrollTop = kept[i][0]; el.scrollLeft = kept[i][1]; } });
+  const next = page.cloneNode(false);           // the new version, built off-screen
+  fn(next);
+  if (banner) (next.querySelector(".hero") || next).insertAdjacentHTML(next.querySelector(".hero") ? "afterend" : "afterbegin", banner);
+  if (moved) page.replaceChildren(...next.childNodes);   // another page: show it fresh
+  else patchChildren(page, next);                         // same page: change only what differs
   if (moved) {             // a new page or section: fade it in and start at the top
     if (render.where) scrollTo({ top: 0 });
     render.where = where;
     const box = (sameView && page.querySelector(".wsmain")) || page;
     box.classList.add("enter"); clearTimeout(render.t); render.t = setTimeout(() => box.classList.remove("enter"), 320);
   }
-  if (banner) (page.querySelector(".hero") || page).insertAdjacentHTML(page.querySelector(".hero") ? "afterend" : "afterbegin", banner);
+  if (state.view === "profiles" && state.specEdit) $("specInput")?.focus();
 }
 function head(title, sub, right = "") {
   return `<div class="pagehead"><div><h1>${esc(title)}</h1><p class="sub">${sub}</p></div>${right}</div>`;
@@ -3018,8 +3076,8 @@ document.addEventListener("input", (ev) => {
   const id = ev.target.id;
   if (id === "teacherSearch") { teacherQuery = ev.target.value; const sel = $("teacherSel"); if (sel) sel.innerHTML = teacherOptions(); }   // keeps focus while typing
   else if (id === "orgSearch") { state.orgQuery = ev.target.value; orgFind(ev.target.value); }
-  else if (id === "profSearch") { state.profQuery = ev.target.value; $("profGrid").innerHTML = profileCards(); }
-  else if (id === "queueSearch") { state.queueQuery = ev.target.value; $("queue").innerHTML = queueHtml(); }
+  else if (id === "profSearch") { state.profQuery = ev.target.value; setHTML($("profGrid"), profileCards()); }
+  else if (id === "queueSearch") { state.queueQuery = ev.target.value; setHTML($("queue"), queueHtml()); }
   else if (id === "search") runSearch(ev.target.value);
 });
 document.addEventListener("keydown", (ev) => {
