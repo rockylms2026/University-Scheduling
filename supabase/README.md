@@ -17,11 +17,19 @@ The scheduling page in `web/index.html` signs people in with Supabase and limits
 
 ## One-time setup
 
-1. **Database.** In Supabase, open **SQL Editor → New query**, paste all of `supabase/setup.sql`, and click **Run**. This creates the tables and rules, loads the faculty and classes, gives the Registrar's email full access, and copies the 49 bookings and 3 teacher changes made in the claude.ai version. It is safe to run again.
+1. **Database.** In Supabase, open **SQL Editor → New query**, paste all of `supabase/setup.sql`, and click **Run**. This creates the tables and rules, loads the faculty and classes, gives the Registrar's email full access, and copies the 49 bookings made in the claude.ai version. It is safe to run again.
 2. **Your login.** Open **Authentication → Users → Add user → Create new user**. Enter the Registrar's email and a password, and tick **Auto Confirm User**.
 3. **Close public sign-up** (recommended). Open **Authentication → Sign In / Providers** and turn off **Allow new users to sign up**. Accounts are then created only by you. An account with no role can sign in but sees nothing either way.
 4. **Host the page.** On [Vercel](https://vercel.com), choose **Add New → Project**, import `rockylms2026/university-scheduling`, and click **Deploy**. Leave **Root Directory** empty and the framework as **Other**: `vercel.json` tells Vercel to serve the `web` folder as it is, with nothing to install or build.
 5. **Tell Supabase the address.** In **Authentication → URL Configuration**, set **Site URL** to the Vercel address (for example `https://university-scheduling.vercel.app`) and add the same address under **Redirect URLs**. Password-reset emails link there.
+
+## Teachers and specializations
+
+Every class starts with **No teacher yet**: the loading plans no longer assign anyone. The Registrar (or the Dean) assigns teachers, and chairs assign their own faculty to their department's classes.
+
+To clear teachers already saved in the database, open **SQL Editor → New query**, paste all of `supabase/clear_teachers.sql`, and click **Run** once. It keeps the instructors of borrowed GE classes booked through a department request, because the request and its approval depend on them.
+
+Each faculty profile has a **Specialization**, typed on the Faculty Profiles page by the Registrar or the Dean (**Add** or **Edit** next to it). Nobody else can change it.
 
 ## Adding people
 
@@ -37,4 +45,4 @@ When the data files change, run `python -m scheduler web`, then run the new `sup
 
 ## Checking the rules
 
-`tests/rls_check.py` runs 38 checks against a local Postgres loaded with `setup.sql` (with a small stand-in for Supabase's `auth` schema). Examples: a chair cannot book another department's class or a GE class, and an approval cannot be written except through `decide_ge()`.
+`tests/rls_check.py` runs the access checks against a local Postgres loaded with `setup.sql` (with a small stand-in for Supabase's `auth` schema). Examples: a chair cannot book another department's class or a GE class, and an approval cannot be written except through `decide_ge()`.

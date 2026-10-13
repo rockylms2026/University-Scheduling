@@ -100,16 +100,14 @@ def planner_data(uni: University, semester: int) -> dict:
                            "kind": c.kind, "college": c.college, "usual": c.housed_by,
                            "labRooms": list(c.lab_rooms), "placement": list(c.placement)}
         classes.append({"id": k.id, "course": c.code, "section": k.section.name,
-                        # GE classes start with no teacher: whoever schedules them picks one. The
-                        # loading-plan teacher stays as a hint (planTeacher).
-                        "teacher": k.faculty.key if k.faculty and not c.is_core else None,
-                        "planTeacher": k.faculty.key if k.faculty else None,
+                        # Every class starts with no teacher: the Registrar and the chairs assign them.
+                        "teacher": None,
                         **ge_house(k, uni, dept_college),
                         "lu": c.load_units, "meetings": by_class.get(k.id, [])})
 
     load = faculty_load_summary(uni, semester)
     teachers = {key: {"name": f.name, "rank": f.rank, "dept": f.department, "college": f.college,
-                      "role": f.designation, "max": f.max_lu, "prepCap": f.prep_cap, "lu": load[key]["lu"],
+                      "role": f.designation, "max": f.max_lu, "prepCap": f.prep_cap,
                       "office": offices.get(key, "")}
                 for key, f in uni.faculty.items()}
 

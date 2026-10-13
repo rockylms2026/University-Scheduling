@@ -485,17 +485,20 @@ dl.about dd { margin: 0; }
 .pduties { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .pcols { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 22px; align-items: start; }
 .pside { display: grid; gap: 22px; }
-.pclass { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 16px; align-items: start; padding-bottom: 12px; border-bottom: 1px solid var(--line2); font-size: .92rem; }
-.pclass:last-child { border-bottom: 0; }
-.pclass span { display: block; color: var(--muted); font-size: .84rem; }
-.pclass b { font-weight: 500; }
-.pwhen { display: grid; gap: 2px; text-align: right; font-size: .84rem; }
-.pwhen span { color: var(--ink); }
-.pclass em { font-style: normal; color: var(--muted); font-size: .84rem; white-space: nowrap; }
+.pspec { margin: 0 0 8px; font-size: .95rem; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.pspec > span { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; }
+.pspec b { font-weight: 500; } .pspec em { color: var(--muted); }
+.specform { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 8px; }
+.specform input { flex: 1 1 260px; max-width: 420px; }
+.pinfo i { font-style: normal; font-size: .82rem; color: var(--ink); }
+.pcourse { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; gap: 12px; align-items: baseline; padding-bottom: 12px; border-bottom: 1px solid var(--line2); font-size: .92rem; }
+.pcourse:last-child { border-bottom: 0; padding-bottom: 0; }
+.pcourse b { font-weight: 500; }
+.pcourse em { font-style: normal; color: var(--muted); font-size: .84rem; white-space: nowrap; }
 .pdl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 8px 16px; margin: 0; font-size: .9rem; }
 .pdl dt { color: var(--muted); } .pdl dd { margin: 0; }
 @media (max-width: 1100px) { .ws, .ws.slim { grid-template-columns: minmax(0, 1fr); } .subnav { position: static; } .notices, .pcols, .ovgrid { grid-template-columns: minmax(0, 1fr); } }
-@media (max-width: 760px) { .phead { grid-template-columns: minmax(0, 1fr); } .pclass { grid-template-columns: minmax(0, 1fr) auto; } .pwhen { grid-column: 1 / -1; text-align: left; } }
+@media (max-width: 760px) { .phead { grid-template-columns: minmax(0, 1fr); } .pcourse { grid-template-columns: minmax(0, 1fr) auto; } .pcourse span { grid-column: 1 / -1; grid-row: 2; } }
 
 /* ----- responsive: desktop first (1440), usable on tablets ----- */
 @media (max-width: 1360px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bottom { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bottom > :first-child { grid-column: 1 / -1; } }
@@ -628,6 +631,11 @@ function listen() {
     savedAt.teachers = latest(all);
     rebuild(); render();
   }, () => offline());
+  store.collection("profiles").onSnapshot((s) => {
+    specs = {};
+    s.docs.forEach((d) => { const x = d.data(); if (x?.teacher && DATA.teachers[x.teacher]) specs[x.teacher] = x.specialization || ""; });
+    render();
+  }, () => {});
   store.collection("status").onSnapshot((s) => {
     pubStatus = null;
     s.docs.forEach((d) => { const x = d.data(); if (x && x.sem === DATA.semester) pubStatus = x; });
@@ -647,6 +655,7 @@ let geLists = {};            // GE course -> departments that may teach it (host
 let geRows = [];             // the ge_teachers rows, for the Settings page
 Object.entries(DATA.geTeachers || {}).forEach(([code, depts]) => (geLists[code] = depts.slice()));
 let staffList = [];
+let specs = {};              // teacher key -> specialization, typed on the Faculty Profiles page
 const isAdmin = () => me.role === "registrar" || me.role === "dean";
 const progDept = (section) => DATA.programs[DATA.sections[section].program].dept;
 const chairDept = () => (BACKEND && me.role === "chair" ? me.department : null);
@@ -749,6 +758,10 @@ function askable(cls, opt) {
 let sb = null;
 async function sbAll(q) { const { data, error } = await q; if (error) throw error; return data || []; }
 const sbLoad = {
+  faculty: async () => {
+    specs = {};
+    (await sbAll(sb.from("faculty").select("key, specialization"))).forEach((r) => { if (r.specialization) specs[r.key] = r.specialization; });
+  },
   bookings: async () => {
     const rows = await sbAll(sb.from("bookings").select("*").eq("sem", DATA.semester).range(0, 9999));
     bookings = {};
@@ -830,7 +843,7 @@ async function enter(session) {
   rebuild(); render();
   if (!window._sbChannel) {
     window._sbChannel = sb.channel("schedule");
-    ["bookings", "teacher_changes", "ge_requests", "ge_decisions", "ge_teachers", "settings", "staff", "submissions", "instructor_requests"].forEach((t) =>
+    ["bookings", "teacher_changes", "ge_requests", "ge_decisions", "ge_teachers", "settings", "staff", "submissions", "instructor_requests", "faculty"].forEach((t) =>
       window._sbChannel.on("postgres_changes", { event: "*", schema: "public", table: t }, () => sbRefresh(t)));
     window._sbChannel.subscribe();
   }
@@ -863,6 +876,8 @@ function showLogin(mode, email = "") {
   el.querySelector("input")?.focus();
 }
 document.addEventListener("submit", async (ev) => {
+  const sf = ev.target.closest("[data-specform]");
+  if (sf) { ev.preventDefault(); sf.querySelector("button[type=submit]").disabled = true; await saveSpec(sf.dataset.specform, $("specInput").value); return; }
   const id = ev.target.id;
   if (id === "geAddForm") {
     ev.preventDefault();
@@ -1521,7 +1536,7 @@ function loadTable(keys, limit) {
     const t = DATA.teachers[k], L = loads[k];
     const p = Math.min(100, (100 * L.lu) / t.max);
     return `<tr class="clickable" data-goteacher="${k}" title="${esc(`${t.name} · ${t.role || "Faculty"}`)}"><td>${esc(t.name)}<div class="small muted">${esc(t.dept)}</div></td>
-      <td class="num" title="Loading plan: ${t.lu} LU">${L.lu}/${t.max}${t.lu !== L.lu ? `<div class="small muted">plan ${t.lu}</div>` : ""}<div class="bar ${L.status}"><i style="width:${p}%"></i></div></td>
+      <td class="num">${L.lu}/${t.max}<div class="bar ${L.status}"><i style="width:${p}%"></i></div></td>
       <td class="num">${L.cap != null ? `${L.capped}/${L.cap}` : "—"}</td><td class="num">${L.total}/5</td><td>${STATUS_CHIP[L.status]}</td></tr>`;
   }).join("");
   return `<table class="loads"><thead><tr><th>Faculty · department</th><th class="num">LU</th><th class="num" title="Preparations, not counting intro and GE courses">Preps</th><th class="num" title="Different courses, counting intro and GE">All</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>`;
@@ -1882,7 +1897,7 @@ function classRow(c, other) {
   return `<div class="cls${state.pick?.cls === c.id ? " on" : ""}">
     <div class="t"><b>${esc(c.course)}${other ? ` · ${esc(c.section)}` : ""}</b><span>${course.credits} cr · ${course.lab ? `Lec ${course.lec} + Lab ${course.lab}` : `${course.lec} h`}</span></div>
     <div class="title">${esc(course.title)}</div>
-    <div class="muted small">${esc(teacherName(t))}${assigned[c.id] && !isGE(c.course) ? " · changed from plan" : ""}${!t && c.planTeacher ? ` · loading plan: ${esc(DATA.teachers[c.planTeacher].name)}` : ""}</div>
+    <div class="muted small">${esc(teacherName(t))}</div>
     ${field}<div class="parts">${parts}</div></div>`;
 }
 function editor(cls, part) {
@@ -1931,12 +1946,11 @@ function editor(cls, part) {
     const dept = t?.key ? DATA.teachers[t.key].dept : "";
     const usual = (course.usual || "").replace(/^GE Department$/, "General Education");
     const near = ft.filter((x) => { const td = DATA.teachers[x.key].dept; return td === dept || (usual && usual.includes(td)); });
-    const ftSorted = ft.slice().sort((x, y) => (y.key === cls.planTeacher) - (x.key === cls.planTeacher));
-    teacherChoices = { free: ftSorted.map((x) => ({ key: x.key, text: `${DATA.teachers[x.key].name} · ${DATA.teachers[x.key].dept} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}${x.key === cls.planTeacher && isGE(cls.course) ? " · loading plan" : ""}` })),
+    teacherChoices = { free: ft.map((x) => ({ key: x.key, text: `${DATA.teachers[x.key].name} · ${DATA.teachers[x.key].dept} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}` })),
                        busy: teacherKey && !ft.some((x) => x.key === teacherKey) ? teacherKey : null, selected: teacherKey };
     const teacherSel = borrowed && tRight ? "" : tRight ? `<div style="display:grid;gap:4px"><span class="fieldlabel">Teacher</span>
-      <div class="readonly">${esc(borrowed && (!teacherKey || DATA.teachers[teacherKey].dept !== d.askDept) ? "Not yet chosen" : teacherKey ? DATA.teachers[teacherKey].name : "Not yet chosen")}${!borrowed && teacherKey && t?.key === cls.teacher ? " (loading plan)" : ""}${tRight !== right ? `<br><span class="small muted">${esc(tRight.replace(/^View only: /, ""))}</span>` : ""}</div></div>`
-      : `<div style="display:grid;gap:4px"><label for="teacherSel">Teacher (from the loading plan${t?.key ? `: ${esc(DATA.teachers[t.key].name)}` : ": none"})</label>
+      <div class="readonly">${esc(borrowed && (!teacherKey || DATA.teachers[teacherKey].dept !== d.askDept) ? "Not yet chosen" : teacherKey ? DATA.teachers[teacherKey].name : "Not yet chosen")}${tRight !== right ? `<br><span class="small muted">${esc(tRight.replace(/^View only: /, ""))}</span>` : ""}</div></div>`
+      : `<div style="display:grid;gap:4px"><label for="teacherSel">Teacher${t?.key ? "" : " (no teacher yet)"}</label>
       <input id="teacherSearch" type="search" placeholder="Search teachers by name or department" value="${esc(teacherQuery)}" aria-label="Search teachers">
       <select id="teacherSel">${teacherOptions()}</select>
       <span class="small muted" id="teacherCount"></span></div>`;
@@ -1956,7 +1970,7 @@ function editor(cls, part) {
         <select id="askSel"${right ? " disabled" : ""}><option value="">Choose an instructor</option>${list.map((x) => !x.submitted
           ? `<optgroup label="${esc(x.dept)} (${esc(x.college)}): not submitted yet"></optgroup>`
           : `<optgroup label="${esc(x.dept)} (${esc(x.college)})${x.free.length ? "" : ": nobody free then"}">${x.free.map((k) =>
-              `<option value="${esc(x.dept)}|${k}"${`${x.dept}|${k}` === val ? " selected" : ""}${full(k) ? " disabled" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${full(k) ? " · full load" : ""}${k === cls.planTeacher ? " · loading plan" : ""}</option>`).join("")}</optgroup>`).join("")}
+              `<option value="${esc(x.dept)}|${k}"${`${x.dept}|${k}` === val ? " selected" : ""}${full(k) ? " disabled" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${full(k) ? " · full load" : ""}</option>`).join("")}</optgroup>`).join("")}
           ${openReq ? `<optgroup label="Nobody is available at any time">${openReq}</optgroup>` : ""}</select></label>`;
       const pick = list.find((x) => x.dept === d.askDept);
       if (!list.some((x) => x.submitted)) checks.push(["bad", `No department that teaches ${cls.course} has submitted yet, so it cannot be booked. Submit your own part; the bell tells you when one submits.`]);
@@ -2046,7 +2060,7 @@ function renderFaculty(page) {
   const perDay = {};
   mine.forEach((s) => { if (s.kind !== "nstp") perDay[s.day] = (perDay[s.day] || 0) + (s.end - s.start) / 60; });
   const counts = { over: keys.filter((x) => loads[x].status === "over").length, near: keys.filter((x) => loads[x].status === "near").length };
-  page.innerHTML = `${head("Faculty Loads", `${keys.length} faculty in ${esc(scopeName())} · ${counts.over} over limit · ${counts.near} near limit. Loads follow the loading plans and any teacher changes made here.`)}
+  page.innerHTML = `${head("Faculty Loads", `${keys.length} faculty in ${esc(scopeName())} · ${counts.over} over limit · ${counts.near} near limit. Loads count the classes assigned to each teacher here.`)}
     <div class="split">
       <div class="card"><div class="list">${depts.map((dp) => `<div class="listgrp">${esc(dp)}</div>` + keys.filter((x) => DATA.teachers[x].dept === dp)
         .sort((a, b) => DATA.teachers[a].name.localeCompare(DATA.teachers[b].name)).map((x) =>
@@ -2056,7 +2070,7 @@ function renderFaculty(page) {
         ${ring(L.lu, t.max, "Teaching Load", `${L.lu} LU`, `of ${t.max} LU allowed${L.status === "over" ? " · over the limit" : ""}`, { small: true, bad: L.status === "over" })}
         <dl class="about"><dt>Department</dt><dd>${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}</dd>
           <dt>Office</dt><dd>${esc(t.office || "—")}</dd>
-          <dt>Teaching load</dt><dd><b>${L.lu}</b> of ${t.max} LU this semester${t.lu !== L.lu ? ` · loading plan: ${t.lu} LU (${t.lu - L.lu > 0 ? `${t.lu - L.lu} LU of GE classes not yet given` : `${L.lu - t.lu} LU more than planned`})` : ""}</dd>
+          <dt>Teaching load</dt><dd><b>${L.lu}</b> of ${t.max} LU this semester</dd>
           <dt>Preparations</dt><dd>${L.cap != null ? `<b>${L.capped}</b> of ${L.cap} (not counting intro and GE) · ` : ""}<b>${L.total}</b> of 5 different courses</dd>
           <dt>Hours by day</dt><dd>${DAYS.filter((d) => perDay[d]).map((d) => `${d} ${perDay[d].toFixed(1)} h`).join(" · ") || "Nothing scheduled yet"}</dd></dl>
         <div class="scroll"><table><thead><tr><th>Course</th><th>Section</th><th class="num">LU</th><th>Schedule</th></tr></thead><tbody>
@@ -2073,14 +2087,21 @@ function profileCards() {
   const q = (state.profQuery || "").trim().toLowerCase();
   const keys = Object.keys(DATA.teachers).filter(teacherInScope).filter((k) => {
     const t = DATA.teachers[k];
-    return (!state.profDept || t.dept === state.profDept) && (!q || `${t.name} ${t.rank} ${t.role} ${t.dept}`.toLowerCase().includes(q));
+    return (!state.profDept || t.dept === state.profDept) && (!q || `${t.name} ${t.rank} ${t.role} ${t.dept} ${specs[k] || ""}`.toLowerCase().includes(q));
   }).sort((a, b) => DATA.teachers[a].dept.localeCompare(DATA.teachers[b].dept) || DATA.teachers[a].name.localeCompare(DATA.teachers[b].name));
   if (!keys.length) return `<p class="empty">No faculty match.</p>`;
   return keys.map((k) => {
     const t = DATA.teachers[k];
     return `<button type="button" class="pcard" data-profile="${k}"><span class="pav">${esc(initials(t.name))}</span>
-      <span class="pinfo"><b>${esc(t.name)}</b><span>${esc(t.rank)}</span><em>${esc(duties(t).join(" · "))}</em><small>${esc(t.dept)} · ${esc(t.college)}</small></span></button>`;
+      <span class="pinfo"><b>${esc(t.name)}</b><span>${esc(t.rank)}</span><em>${esc(duties(t).join(" · "))}</em>${specs[k] ? `<i>${esc(specs[k])}</i>` : ""}<small>${esc(t.dept)} · ${esc(t.college)}</small></span></button>`;
   }).join("");
+}
+// Who may type a specialization: the Registrar or the Dean (anyone with write access on claude.ai).
+const canEditSpec = () => (BACKEND ? isAdmin() : canWrite && shared);
+// The courses a teacher has on the schedule: assigned and with at least one meeting booked. Once per course.
+function scheduledCourses(k) {
+  const codes = new Set(loads[k].classes.filter((c) => c.meetings.some((m) => bookings[`${c.id}|${m.part}`])).map((c) => c.course));
+  return [...codes].sort();
 }
 function renderProfiles(page) {
   const k = state.profile && DATA.teachers[state.profile] && teacherInScope(state.profile) ? state.profile : null;
@@ -2089,37 +2110,49 @@ function renderProfiles(page) {
     const depts = [...new Set(keys.map((x) => DATA.teachers[x].dept))].sort();
     if (state.profDept && !depts.includes(state.profDept)) state.profDept = "";
     page.innerHTML = `${head("Faculty Profiles", `${keys.length} faculty in ${esc(scopeName())}`)}
-      <div class="profbar"><input class="inp" id="profSearch" type="search" placeholder="Search by name, rank or duty" value="${esc(state.profQuery || "")}" aria-label="Search faculty">
+      <div class="profbar"><input class="inp" id="profSearch" type="search" placeholder="Search by name, rank, duty or specialization" value="${esc(state.profQuery || "")}" aria-label="Search faculty">
         ${depts.length > 1 ? `<select class="inp" id="profDept" aria-label="Department"><option value="">All departments</option>${depts.map((d) => `<option${d === state.profDept ? " selected" : ""}>${esc(d)}</option>`).join("")}</select>` : ""}</div>
       <div class="pgrid" id="profGrid">${profileCards()}</div>`;
     return;
   }
   const t = DATA.teachers[k], L = loads[k];
-  const classes = L.classes.slice().sort((a, b) => a.course.localeCompare(b.course) || numSort(a.section, b.section));
-  const rows = classes.map((c) => {
-    const when = c.meetings.map((m) => { const b = bookings[`${c.id}|${m.part}`]; return b ? `${m.part === "Lec" ? "" : `${PART[m.part]} `}${b.pattern}${b.room ? ` · ${b.room}` : ""}` : null; });
-    const booked = when.filter(Boolean);
-    return `<div class="pclass"><div><b>${esc(c.course)}</b> · ${esc(c.section)}<span>${esc(DATA.courses[c.course].title)}</span></div>
-      <div class="pwhen">${booked.length ? booked.map((w) => `<span>${esc(w)}</span>`).join("") : `<span class="muted">Not yet scheduled</span>`}</div><em>${c.lu} LU</em></div>`;
-  }).join("");
+  const codes = scheduledCourses(k);
+  const editing = state.specEdit === k;
+  const spec = specs[k] || "";
+  const specHtml = editing
+    ? `<form class="specform" data-specform="${k}"><input class="inp" id="specInput" value="${esc(spec)}" placeholder="e.g. Clinical Psychology; Statistics" maxlength="160" aria-label="Specialization">
+        <button type="submit" class="btn primary">Save</button><button type="button" class="btn" data-specedit="">Cancel</button><span class="msg" id="specMsg"></span></form>`
+    : `<p class="pspec"><span>Specialization</span> ${spec ? `<b>${esc(spec)}</b>` : `<em>Not set yet</em>`}${canEditSpec() ? ` <button type="button" class="btn link" data-specedit="${k}">${spec ? "Edit" : "Add"}</button>` : ""}</p>`;
   page.innerHTML = `<button type="button" class="backlink" data-profile="">${svg('<path d="M15 6l-6 6 6 6"/>', 18)} All faculty</button>
     <section class="phead"><span class="pav big">${esc(initials(t.name))}</span>
       <div class="pwho"><h1>${esc(t.name)}</h1><p>${esc(t.rank)}</p><div class="pduties">${duties(t).map((d) => `<span class="chip info">${esc(d)}</span>`).join("")}</div>
+        ${specHtml}
         <p class="small muted">Department of ${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}${t.office ? ` · Office ${esc(t.office)}` : ""}</p></div>
       ${ring(L.lu, t.max, "Teaching Load", `${L.lu} LU`, `of ${t.max} LU allowed`, { small: true, bad: L.status === "over" })}</section>
     <div class="pcols">
-      <section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON.schedule}</span><div><h3>1st Semester</h3><p>SY ${esc(printCfg.ay)} · ${classes.length} class${classes.length === 1 ? "" : "es"} · ${L.lu} LU</p></div><span class="chip good">Current</span></div>
-        <div class="ovbody">${rows || `<p class="empty">No classes assigned this semester.</p>`}</div>
+      <section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON.schedule}</span><div><h3>1st Semester</h3><p>SY ${esc(printCfg.ay)} · ${codes.length} course${codes.length === 1 ? "" : "s"} scheduled</p></div><span class="chip good">Current</span></div>
+        <div class="ovbody">${codes.length ? codes.map((code) => { const c = DATA.courses[code];
+            return `<div class="pcourse"><b>${esc(code)}</b><span>${esc(c.title)}</span><em>${c.credits} unit${c.credits === 1 ? "" : "s"}</em></div>`; }).join("")
+          : `<p class="empty">No courses scheduled yet. A course shows here once it is assigned to ${esc(greetName(t.name))} and given a time.</p>`}</div>
         <div class="ovfoot"><button type="button" class="ovlink" data-goteacher="${k}">Open weekly schedule</button></div></section>
       <div class="pside">
         <section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON.schedule}</span><div><h3>2nd Semester</h3><p>SY ${esc(printCfg.ay)}</p></div><span class="chip warn">Coming up</span></div>
-          <div class="ovbody"><p class="empty">Not scheduled yet. Classes show here once the 2nd semester is set up.</p></div></section>
-        <section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON.faculty}</span><div><h3>Details</h3><p>From the loading plan</p></div></div>
+          <div class="ovbody"><p class="empty">Not scheduled yet. Courses show here once the 2nd semester is set up.</p></div></section>
+        <section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON.faculty}</span><div><h3>Details</h3><p>Rank and load</p></div></div>
           <div class="ovbody"><dl class="pdl"><dt>Rank</dt><dd>${esc(t.rank)}</dd><dt>Designation</dt><dd>${esc(t.role || "Faculty")}</dd>
-            <dt>Load limit</dt><dd>${t.max} LU</dd><dt>Loading plan</dt><dd>${t.lu} LU</dd>
-            <dt>Preparations</dt><dd>${L.cap != null ? `${L.capped} of ${L.cap} · ` : ""}${L.total} of 5 courses</dd></dl></div></section>
+            <dt>Specialization</dt><dd>${esc(spec || "Not set yet")}</dd><dt>Load limit</dt><dd>${t.max} LU</dd><dt>Assigned</dt><dd>${L.lu} LU</dd></dl></div></section>
       </div>
     </div>`;
+  if (editing) $("specInput")?.focus();
+}
+async function saveSpec(k, value) {
+  const v = value.trim(), m = $("specMsg");
+  try {
+    if (sb) { const { error } = await sb.from("faculty").update({ specialization: v || null }).eq("key", k); if (error) throw error; }
+    else if (shared) await store.collection("profiles").doc(docId("spec", k)).set({ teacher: k, specialization: v, at: new Date().toISOString() });
+    if (v) specs[k] = v; else delete specs[k];
+    state.specEdit = null; render(); toast(v ? "Specialization saved." : "Specialization cleared.");
+  } catch (e) { if (m) { m.textContent = sbMessage(e); m.className = "msg bad"; } }
 }
 
 // ===== Rooms =====
@@ -2168,7 +2201,7 @@ function renderCourses(page) {
   if (!progs.includes(state.program)) state.program = progs[0];
   const prog = DATA.programs[state.program];
   const years = [...new Set(prog.sections.map((s) => DATA.sections[s].year))];
-  page.innerHTML = `${head("Courses", "Courses each year level takes in the 1st semester, with the teacher from the loading plan and what is scheduled.")}
+  page.innerHTML = `${head("Courses", "Courses each year level takes in the 1st semester, with the assigned teacher and what is scheduled.")}
     <div class="card" style="gap:8px"><div class="row"><span class="navlabel">Program</span><div class="pills">${progs.map((p) =>
       `<button type="button" class="pill" data-program="${esc(p)}" aria-pressed="${state.program === p}" title="${esc(DATA.programs[p].name)}">${esc(p)}<small>${progress(p)}</small></button>`).join("")}</div></div></div>
     <div class="card"><div><h2>${esc(prog.name)}</h2><p class="sub">Department of ${esc(prog.dept)} · ${esc(DATA.colleges[prog.college])}</p></div>
@@ -2221,9 +2254,9 @@ function approverTeacherSelect(c, a) {
   const sessionsOf = sessions.filter((x) => x.cls === c);
   const free = (k) => sessionsOf.every((x) => !teacherBusy(k, x, c.id).length);
   const list = Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].dept === a.dept)
-    .sort((x, y) => (y === c.planTeacher) - (x === c.planTeacher) || free(y) - free(x) || DATA.teachers[x].name.localeCompare(DATA.teachers[y].name));
+    .sort((x, y) => free(y) - free(x) || DATA.teachers[x].name.localeCompare(DATA.teachers[y].name));
   return `<select class="inp" id="apT-${c.id}" aria-label="Teacher for ${esc(c.course)} ${esc(c.section)}">
-    <option value="">Choose a teacher</option>${list.map((k) => `<option value="${k}"${k === a.teacher ? " selected" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${k === c.planTeacher ? " · loading plan" : ""}${free(k) ? "" : " · busy then"}</option>`).join("")}</select>`;
+    <option value="">Choose a teacher</option>${list.map((k) => `<option value="${k}"${k === a.teacher ? " selected" : ""}>${esc(DATA.teachers[k].name)} · ${luFor(k)}/${DATA.teachers[k].max} LU${free(k) ? "" : " · busy then"}</option>`).join("")}</select>`;
 }
 function renderApprovals(page) {
   const all = approvalList();
@@ -2430,7 +2463,7 @@ async function save() {
   if (sb) {
     try {
       if ((d.teacher || "") !== (teacherOf(cls)?.key || "")) {
-        const r = (d.teacher || "") === (cls.teacher || "")
+        const r = !d.teacher
           ? await sb.from("teacher_changes").delete().eq("class_id", cls.id)
           : await sb.from("teacher_changes").upsert({ class_id: cls.id, sem: DATA.semester, teacher: d.teacher || null });
         if (r.error) throw r.error;
@@ -2450,7 +2483,7 @@ async function save() {
   }
   const me = user ? await user.id() : null;
   try {
-    const plan = cls.teacher || "";
+    const plan = "";                       // every class starts with no teacher
     if ((d.teacher || "") !== (teacherOf(cls)?.key || "")) {
       if ((d.teacher || "") === plan) await store.collection("teachers").doc(docId(DATA.semester, cls.id)).delete();
       else await store.collection("teachers").doc(docId(DATA.semester, cls.id)).set({ sem: DATA.semester, class: cls.id, course: cls.course, section: cls.section, teacher: d.teacher || null, by: me, at: new Date().toISOString() });
@@ -2568,7 +2601,8 @@ document.addEventListener("click", async (ev) => {
     return;
   }
   if (ds.dashcollapse) { state.dashNavHidden = ds.dashcollapse === "1"; render(); return; }
-  if (ds.profile !== undefined) { state.view = "profiles"; state.profile = ds.profile || null; render(); return; }
+  if (ds.specedit !== undefined) { state.specEdit = ds.specedit || null; render(); return; }
+  if (ds.profile !== undefined) { state.specEdit = null;  state.view = "profiles"; state.profile = ds.profile || null; render(); return; }
   if (ds.subfilter) { state.subFilter = ds.subfilter; render(); return; }
   if (ds.subcollege !== undefined) { state.subCollege = ds.subcollege; render(); return; }
   if (ds.submit) { openSubmit(ds.submit); return; }
@@ -2740,10 +2774,10 @@ async function exportExcel() {
       hmap(o.iv[0][1]), hmap(o.iv[0][2]), b.room || (m.kind === "nstp" ? "Grounds" : ""), teacherName(teacherOf(c)).replace("No teacher yet", "TBA")]);
   });
   add("Class schedule", sched, [8, 10, 11, 10, 40, 12, 12, 12, 10, 10, 12, 30]);
-  const loadRows = [["Faculty", "Department", "College", "Designation", "LU", "Loading plan LU", "Max LU", "Preparations", "Prep limit", "Different courses", "Status", "Courses"]];
+  const loadRows = [["Faculty", "Department", "College", "Designation", "Specialization", "LU", "Max LU", "Preparations", "Prep limit", "Different courses", "Status", "Courses"]];
   Object.keys(DATA.teachers).sort((a, b) => DATA.teachers[a].name.localeCompare(DATA.teachers[b].name)).forEach((k) => {
     const t = DATA.teachers[k], L = loads[k];
-    loadRows.push([t.name, t.dept, t.college, t.role || "Faculty", L.lu, t.lu, t.max, L.capped, L.cap ?? "", L.total, { over: "Over", near: "Near limit", ok: "OK" }[L.status], [...L.courses].join(", ")]);
+    loadRows.push([t.name, t.dept, t.college, t.role || "Faculty", specs[k] || "", L.lu, t.max, L.capped, L.cap ?? "", L.total, { over: "Over", near: "Near limit", ok: "OK" }[L.status], [...L.courses].join(", ")]);
   });
   add("Faculty loads", loadRows, [32, 24, 8, 20, 6, 10, 8, 12, 10, 10, 11, 50]);
   const un = [["Year", "Section", "Course", "Title", "Part", "Needs", "Hours/week", "Faculty"]];

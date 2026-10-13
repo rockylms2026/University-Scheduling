@@ -29,6 +29,8 @@ create table if not exists public.faculty (
   designation text,
   max_lu     int not null default 24
 );
+-- What each instructor specializes in, typed on the Faculty Profiles page by the Registrar or the Dean.
+alter table public.faculty add column if not exists specialization text;
 
 create table if not exists public.classes (
   id           text primary key,     -- e.g. S1-0646
@@ -514,6 +516,8 @@ alter table public.instructor_requests enable row level security;
 
 drop policy if exists read_faculty on public.faculty;
 create policy read_faculty on public.faculty for select to authenticated using (public.has_role());
+drop policy if exists edit_faculty on public.faculty;
+create policy edit_faculty on public.faculty for update to authenticated using (public.is_admin()) with check (public.is_admin());
 drop policy if exists read_classes on public.classes;
 create policy read_classes on public.classes for select to authenticated using (public.has_role());
 
@@ -568,6 +572,8 @@ drop policy if exists admin_settings on public.settings;
 create policy admin_settings on public.settings for update to authenticated using (public.is_admin()) with check (public.is_admin());
 
 grant usage on schema public to authenticated;
+revoke update on public.faculty from authenticated;
+grant update (specialization) on public.faculty to authenticated;
 grant select on public.faculty, public.classes, public.ge_requests, public.ge_decisions, public.submissions, public.instructor_requests to authenticated;
 grant select, insert, update, delete on public.staff, public.bookings, public.teacher_changes, public.ge_teachers to authenticated;
 grant select, update on public.settings to authenticated;
@@ -600,4 +606,5 @@ do $$ begin
   begin alter publication supabase_realtime add table public.submissions; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.instructor_requests; exception when duplicate_object then null; end;
   begin alter publication supabase_realtime add table public.staff; exception when duplicate_object then null; end;
+  begin alter publication supabase_realtime add table public.faculty; exception when duplicate_object then null; end;
 end $$;

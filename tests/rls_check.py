@@ -189,6 +189,12 @@ expect("registrar publishes", True, "select publish_schedule()", ADMIN)
 expect("chair cannot add staff", False, "insert into staff (email, role) values ('x@u.edu','dean')", "chair.psy@u.edu")
 expect("chair cannot raise own role", True, "update staff set role='dean' where email='chair.psy@u.edu'; select role from staff where email='chair.psy@u.edu'",
        "chair.psy@u.edu", contains="chair")
+# Specializations: typed by the Registrar or the Dean only, and nothing else of a faculty row.
+fac = one("select key from faculty where department = 'Psychology' order by key limit 1")
+expect("registrar types a specialization", True, f"update faculty set specialization = 'Clinical Psychology' where key = '{fac}' returning key", ADMIN, contains=fac)
+expect("chair cannot type a specialization", True, f"update faculty set specialization = 'X' where key = '{fac}' returning key", "chair.psy@u.edu")
+expect("the chair's change did not apply", True, f"select specialization from faculty where key = '{fac}'", contains="Clinical Psychology")
+expect("nobody renames faculty from the page", False, f"update faculty set name = 'X' where key = '{fac}'", ADMIN)
 expect("registrar adds staff", True, "insert into staff (email, full_name, role) values ('new@u.edu','New','dean') on conflict do nothing", ADMIN)
 
 print(f"\n{len(failures)} failed" if failures else "\nAll access rules behave as intended.")

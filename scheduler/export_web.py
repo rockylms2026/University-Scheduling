@@ -67,23 +67,18 @@ delete from public.ge_requests where requested_by = 'setup';
 
 
 def import_sql(semester: int) -> str:
+    """Bookings made in the claude.ai version. Teachers are not carried over: every class starts with none."""
     if not IMPORT_PATH.exists():
         return ""
     raw = json.loads(IMPORT_PATH.read_text())
     out = ["-- Bookings made in the claude.ai version (kept only where nothing is booked yet).",
-           "alter table public.bookings disable trigger stamp_bookings;",
-           "alter table public.teacher_changes disable trigger stamp_teacher_changes;"]
+           "alter table public.bookings disable trigger stamp_bookings;"]
     for b in raw["bookings"]:
         if b["sem"] == semester:
             out.append(f"insert into public.bookings (class_id, part, sem, pattern, room, updated_by, updated_at) values "
                        f"({q(b['class'])}, {q(b['part'])}, {semester}, {q(b['pattern'])}, {q(b['room'])}, 'claude.ai', {q(b['at'])}) "
                        "on conflict do nothing;")
-    for t in raw["teachers"]:
-        if t["sem"] == semester:
-            out.append(f"insert into public.teacher_changes (class_id, sem, teacher, updated_by, updated_at) values "
-                       f"({q(t['class'])}, {semester}, {q(t['teacher'])}, 'claude.ai', {q(t['at'])}) on conflict do nothing;")
-    out += ["alter table public.bookings enable trigger stamp_bookings;",
-            "alter table public.teacher_changes enable trigger stamp_teacher_changes;"]
+    out.append("alter table public.bookings enable trigger stamp_bookings;")
     return "\n".join(out) + "\n"
 
 
