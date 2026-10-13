@@ -27,7 +27,7 @@ The scheduling page in `web/index.html` signs people in with Supabase and limits
 
 Every class starts with **No teacher yet**: the loading plans no longer assign anyone. The Registrar (or the Dean) assigns teachers, and chairs assign their own faculty to their department's classes.
 
-To clear teachers already saved in the database, open **SQL Editor → New query**, paste all of `supabase/clear_teachers.sql`, and click **Run** once. It keeps the instructors of borrowed GE classes booked through a department request, because the request and its approval depend on them.
+To clear teachers already saved in the database, open **SQL Editor → New query**, paste all of `supabase/clear_teachers.sql`, and click **Run** once. It also removes the bookings, requests and answers of borrowed GE classes, so each is booked again with a free instructor of a department that teaches the course. Times and rooms of all other classes stay.
 
 Each faculty profile has a **Specialization**, typed on the Faculty Profiles page by the Registrar or the Dean (**Add** or **Edit** next to it). Nobody else can change it.
 
