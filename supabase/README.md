@@ -17,7 +17,7 @@ The scheduling page in `web/index.html` signs people in with Supabase and limits
 
 ## One-time setup
 
-1. **Database.** In Supabase, open **SQL Editor → New query**, paste all of `supabase/setup.sql`, and click **Run**. This creates the tables and rules, loads the faculty and classes, gives the Registrar's email full access, and copies the 49 bookings made in the claude.ai version. It is safe to run again.
+1. **Database.** In Supabase, open **SQL Editor → New query**, paste all of `supabase/setup.sql`, and click **Run**. This creates the tables and rules, loads the faculty and classes, gives the Registrar's email full access. It is safe to run again.
 2. **Your login.** Open **Authentication → Users → Add user → Create new user**. Enter the Registrar's email and a password, and tick **Auto Confirm User**.
 3. **Close public sign-up** (recommended). Open **Authentication → Sign In / Providers** and turn off **Allow new users to sign up**. Accounts are then created only by you. An account with no role can sign in but sees nothing either way.
 4. **Host the page.** On [Vercel](https://vercel.com), choose **Add New → Project**, import `rockylms2026/university-scheduling`, and click **Deploy**. Leave **Root Directory** empty and the framework as **Other**: `vercel.json` tells Vercel to serve the `web` folder as it is, with nothing to install or build.
@@ -27,7 +27,7 @@ The scheduling page in `web/index.html` signs people in with Supabase and limits
 
 Every class starts with **No teacher yet**: the loading plans no longer assign anyone. The Registrar (or the Dean) assigns teachers, and chairs assign their own faculty to their department's classes.
 
-To clear teachers already saved in the database, open **SQL Editor → New query**, paste all of `supabase/clear_teachers.sql`, and click **Run** once. It also removes the bookings, requests and answers of borrowed GE classes, so each is booked again with a free instructor of a department that teaches the course. Times and rooms of all other classes stay.
+To start the schedule over, open **SQL Editor → New query**, paste all of `supabase/clear_schedule.sql`, and click **Run** once. It removes every booking, every teacher chosen so far, all borrowed-GE requests and answers, and the department submissions, and sets the schedule back to unpublished. Faculty, classes, staff accounts, the GE teaching lists and specializations stay.
 
 Each faculty profile has a **Specialization**, typed on the Faculty Profiles page by the Registrar or the Dean (**Add** or **Edit** next to it). Nobody else can change it.
 

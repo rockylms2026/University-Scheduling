@@ -2,7 +2,7 @@
 
   web/index.html           the page (static; host it on Vercel, Netlify, or GitHub Pages)
   supabase/seed.sql        faculty and classes of the semester, from the data files
-  supabase/setup.sql       schema.sql + seed.sql + first admin + bookings moved from claude.ai;
+  supabase/setup.sql       schema.sql + seed.sql + first admin;
                            paste it once into the Supabase SQL Editor
 """
 
@@ -12,14 +12,13 @@ import json
 from pathlib import Path
 
 from .export_planner import TEMPLATE_PATH, planner_data, seal_data_url
-from .model import DATA_DIR, University
+from .model import University
 
 ROOT = Path(__file__).resolve().parent.parent
 WEB_DIR = ROOT / "web"
 SUPABASE_DIR = ROOT / "supabase"
 SUPABASE_JS = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"
 CONFIG_PATH = SUPABASE_DIR / "config.json"
-IMPORT_PATH = DATA_DIR / "claude_bookings_sem1.json"
 
 
 def q(v) -> str:
@@ -66,22 +65,6 @@ delete from public.ge_requests where requested_by = 'setup';
 """
 
 
-def import_sql(semester: int) -> str:
-    """Bookings made in the claude.ai version. Teachers are not carried over: every class starts with none."""
-    if not IMPORT_PATH.exists():
-        return ""
-    raw = json.loads(IMPORT_PATH.read_text())
-    out = ["-- Bookings made in the claude.ai version (kept only where nothing is booked yet).",
-           "alter table public.bookings disable trigger stamp_bookings;"]
-    for b in raw["bookings"]:
-        if b["sem"] == semester:
-            out.append(f"insert into public.bookings (class_id, part, sem, pattern, room, updated_by, updated_at) values "
-                       f"({q(b['class'])}, {q(b['part'])}, {semester}, {q(b['pattern'])}, {q(b['room'])}, 'claude.ai', {q(b['at'])}) "
-                       "on conflict do nothing;")
-    out.append("alter table public.bookings enable trigger stamp_bookings;")
-    return "\n".join(out) + "\n"
-
-
 def build_label() -> str:
     """Date of the build, e.g. "Oct 12, 07:40", so people can tell which version they have open."""
     from datetime import datetime, timezone
@@ -98,7 +81,7 @@ def write_web(uni: University, semester: int = 1) -> list[Path]:
              f"insert into public.staff (email, full_name, role) values ({q(admin['email'].lower())}, {q(admin.get('name', ''))}, 'registrar')\n"
              "on conflict (email) do nothing;\n") if admin else ""
     setup = "\n".join(["-- Class Scheduling: run this once in the Supabase SQL Editor (it is safe to run again).",
-                       (SUPABASE_DIR / "schema.sql").read_text(), seed, first, import_sql(semester), DEFAULT_REQUESTS])
+                       (SUPABASE_DIR / "schema.sql").read_text(), seed, first, DEFAULT_REQUESTS])
     (SUPABASE_DIR / "setup.sql").write_text(setup)
 
     data = json.dumps(planner_data(uni, semester), separators=(",", ":")).replace("</", "<\\/")
