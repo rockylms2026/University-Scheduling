@@ -255,6 +255,9 @@ dl.about dd { margin: 0; }
 .tchosen { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: .86rem; }
 .tchosen b { font-weight: 500; }
 @media (max-width: 760px) { .tpick { grid-template-columns: minmax(0, 1fr); } }
+.cgroup { display: grid; gap: 8px; }
+.cgroup + .cgroup { margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--line2); }
+.cghead { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
 .opts { display: grid; gap: 4px; max-height: 250px; overflow-y: auto; padding-right: 2px; }
 .optgrp { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; margin-top: 4px; }
 .opt { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; align-items: center; font: inherit; font-size: .82rem; text-align: left; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 6px; padding: 5px 8px; cursor: pointer; }
@@ -1949,13 +1952,25 @@ function sectionDesk() {
       <div><div class="headrow"><h2>${esc(state.section)}</h2><button type="button" class="btn" data-print="section" data-id="${esc(state.section)}">Print…</button></div>
         <div class="facts"><span>Year ${sec.year}${sec.track ? ` · ${esc(sec.track)} major group` : ""}</span><span><b>${hours.toFixed(1)}</b> h a week booked</span>
         ${sec.placement.length ? `<span>Placement: <b>${sec.placement.join(", ")}</b></span>` : ""}</div></div>
-      <div class="classes">${classes.map((c) => classRow(c, c.section !== state.section)).join("")}</div>
+      <div class="classes">${courseGroups(classes).map(([label, list]) => `<div class="cgroup"><div class="cghead">${esc(label)} · ${list.length}</div>${list.map((c) => classRow(c, c.section !== state.section)).join("")}</div>`).join("")}</div>
     </div>
     <div class="card">
       ${pickCls ? editor(pickCls, state.pick.part) : `<p class="muted" style="margin:0">Choose a part of a class (for example <b>Lecture</b> or <b>Laboratory</b>) on the left to schedule it. Every allowed time is listed with whether the students, the teacher, and a room are free.</p>`}
       <div class="scroll">${grid(mine, { offDays: sec.placement, dim: (s) => s.cls.section !== state.section, ghost, ghostBad, focus: { section: state.section } })}</div>
       ${legend()}
     </div></div>`;
+}
+// The section's classes in four groups: Major, Specialization (track or major courses), GE, and Others
+// (PE, CWTS, practicum). Empty groups are left out.
+function courseGroup(c) {
+  const k = DATA.courses[c.course].kind;
+  if (k === "pe" || k === "nstp" || k === "field") return "Others";
+  if (isGE(c.course)) return "GE courses";
+  return (DATA.programs[DATA.sections[c.section].program].specialization || []).includes(c.course) ? "Specialization courses" : "Major courses";
+}
+function courseGroups(classes) {
+  const order = ["Major courses", "Specialization courses", "GE courses", "Others"];
+  return order.map((g) => [g, classes.filter((c) => courseGroup(c) === g)]).filter(([, l]) => l.length);
 }
 function classRow(c, other) {
   const course = DATA.courses[c.course];

@@ -69,6 +69,21 @@ def ge_teaching_lists(uni: University, semester: int, dept_college: dict) -> dic
     return {code: sorted(depts) for code, depts in sorted(lists.items())}
 
 
+def specialization_courses(uni: University, code: str) -> list[str]:
+    """Courses of a program's tracks or majors: tagged with a track in its curriculum (e.g. "PSYC 351 @C"), or,
+    for majors kept as sibling programs (BSEd-E, BSEd-M, ...), courses that not every sibling takes."""
+    prog = uni.programs[code]
+    items = [it for lst in prog.curriculum.values() for it in lst]
+    spec = {c for c, tag in items if tag}
+    if "-" in code:
+        base = code.split("-")[0]
+        sibs = [p for k, p in uni.programs.items() if k.split("-")[0] == base and "-" in k]
+        if len(sibs) > 1:
+            shared = set.intersection(*({c for lst in p.curriculum.values() for c, _ in lst} for p in sibs))
+            spec |= {c for c, _ in items if c not in shared}
+    return sorted(c for c in spec if not uni.courses[c].is_core)
+
+
 def planner_data(uni: University, semester: int) -> dict:
     campus_raw = yaml.safe_load((DATA_DIR / "campus.yaml").read_text())
     offices = campus_raw.get("faculty_offices") or {}
@@ -77,7 +92,8 @@ def planner_data(uni: University, semester: int) -> dict:
     programs = {}
     for p in uni.programs.values():
         programs[p.code] = {"name": p.name, "college": p.college, "dept": p.department, "sections": [],
-                            "home": sorted(uni.campus.home_buildings(p.department))}
+                            "home": sorted(uni.campus.home_buildings(p.department)),
+                            "specialization": specialization_courses(uni, p.code)}
     sections = {}
     for s in uni.sections.values():
         placement = sorted({d for k in uni.classes_for(semester) if k.section.subcohorts & s.subcohorts
