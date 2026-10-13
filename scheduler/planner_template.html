@@ -576,12 +576,11 @@ button.oname { cursor: pointer; } button.oname:hover { text-decoration: underlin
 .item:hover { background: var(--bg); box-shadow: 0 2px 8px rgba(15,25,45,.08); transform: translateY(-1px); }
 .cls:hover { box-shadow: 0 3px 10px rgba(15,25,45,.07); border-color: #c9d0da; }
 .opt:active, .part:active, .qi:active, .pill:active, .item:active { transform: translateY(0); box-shadow: 0 1px 3px rgba(15,25,45,.1); }
-/* selected: navy outline, light fill and a check */
+/* selected: navy outline and light fill */
 .opt.on { border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 1px var(--accent); }
 .opt.on:hover { box-shadow: 0 0 0 1px var(--accent), 0 4px 12px rgba(15,25,45,.12); }
-.opt.on > .chip::before, .part.on::before, .item[aria-current="true"]::before { content: "✓"; font-weight: 700; margin-right: 4px; }
-.item[aria-current="true"] { justify-content: flex-start; }
-.item[aria-current="true"] small { margin-left: auto; }
+/* a time's status label stays on one line, so selecting a time never changes the height of a row */
+.opt > .chip { white-space: nowrap; }
 /* text links */
 .btn.link, .go, .ovlink, .backlink, .otrail button, summary, .oteam, button.oname, .hownote summary, .waitlist summary {
   text-decoration-line: underline; text-decoration-color: transparent; text-underline-offset: 3px; text-decoration-thickness: 1.5px; transition: text-decoration-color .16s ease, color .16s ease; }
@@ -2094,7 +2093,7 @@ function editor(cls, part) {
       <div class="tpick"><input id="teacherSearch" type="search" placeholder="Search by name or specialization" value="${esc(teacherQuery)}" aria-label="Search teachers">
         <select id="teacherSel" aria-label="Teacher">${teacherOptions()}</select></div>
       ${tk ? `<div class="tchosen"><b>${esc(tk.name)}</b> · ${luFor(teacherKey)} of ${tk.max} LU${specOf(teacherKey) ? `<span class="spills">${specPills(specAreas(specOf(teacherKey)), 4)}</span>` : ""}</div>` : ""}
-      <span class="small muted"><span id="teacherCount"></span>${!teacherKey ? ` · ${d.teacherLater ? `Deciding later: the class gets a time and shows “No teacher yet”.` : `<button type="button" class="btn link" data-act="later">Decide teacher later</button>`}` : ""}</span></div></div>`;
+      <span class="small muted"><span id="teacherCount">${esc(teacherChoices.count || "")}</span>${!teacherKey ? ` · ${d.teacherLater ? `Deciding later: the class gets a time and shows “No teacher yet”.` : `<button type="button" class="btn link" data-act="later">Decide teacher later</button>`}` : ""}</span></div></div>`;
   }
   const opt = d.pattern && findOpt(m.kind, d.pattern);
   let detail = "";
@@ -2115,7 +2114,7 @@ function editor(cls, part) {
       : `<div style="display:grid;gap:4px"><label for="teacherSel">Teacher${t?.key ? "" : " (no teacher yet)"}</label>
       <input id="teacherSearch" type="search" placeholder="Search teachers by name or department" value="${esc(teacherQuery)}" aria-label="Search teachers">
       <select id="teacherSel">${teacherOptions()}</select>
-      <span class="small muted" id="teacherCount"></span></div>`;
+      <span class="small muted" id="teacherCount">${esc(teacherChoices.count || "")}</span></div>`;
     const checks = evaluate(cls, m, opt, d.room || null, checkTeacher);
     let askSel = "";
     if (borrowed && tRight) {
@@ -2214,7 +2213,8 @@ function teacherOptions() {
       const shown = list.filter(hit); n += shown.filter((x) => x.key !== sel || !q).length; total += list.length;
       return shown.length ? `<optgroup label="${esc(label)}">${shown.map((x) => `<option value="${x.key}"${x.key === sel ? " selected" : ""}>${esc(x.text)}</option>`).join("")}</optgroup>` : "";
     }).join("");
-    setTimeout(() => { const c = $("teacherCount"); if (c) c.textContent = q ? `${n} of ${total} teachers match` : `${total} teachers · best specialization match first`; });
+    teacherChoices.count = q ? `${n} of ${total} teachers match` : `${total} teachers · best specialization match first`;
+    const c = $("teacherCount"); if (c) c.textContent = teacherChoices.count;      // while typing in the search box
     return html;
   }
   const match = (txt) => !q || txt.toLowerCase().includes(q);
@@ -2225,7 +2225,8 @@ function teacherOptions() {
     `<option value="${x.key}"${x.key === sel ? " selected" : ""}>${esc(x.text)}</option>`).join("")}</optgroup>`;
   if (teacherChoices.busy) html += `<optgroup label="Busy at this time"><option value="${teacherChoices.busy}" selected>${esc(DATA.teachers[teacherChoices.busy].name)}</option></optgroup>`;
   const count = teacherChoices.free.filter((x) => match(x.text)).length;
-  setTimeout(() => { const c = $("teacherCount"); if (c) c.textContent = q ? `${count} of ${teacherChoices.free.length} free teachers match` : `${teacherChoices.free.length} teachers free at this time`; });
+  teacherChoices.count = q ? `${count} of ${teacherChoices.free.length} free teachers match` : `${teacherChoices.free.length} teachers free at this time`;
+  const c = $("teacherCount"); if (c) c.textContent = teacherChoices.count;
   return html;
 }
 // GE Department: its classes sit in every program's sections.
