@@ -526,7 +526,6 @@ button.oname { cursor: pointer; } button.oname:hover { text-decoration: underlin
 .ocard:not(.tap):not(.focus) .oname { color: var(--ink); }
 .otitle { font-size: .78rem; color: var(--ink); line-height: 1.3; }
 .omuted { font-size: .72rem; color: var(--muted); overflow-wrap: anywhere; }
-.ocard em { font-style: normal; font-size: .66rem; font-weight: 500; color: var(--muted); background: var(--lunch); border-radius: 999px; padding: 1px 7px; cursor: help; }
 .okids { --w: 190px; position: relative; display: grid; grid-template-columns: repeat(var(--cols), var(--w)); justify-content: center; gap: 18px 14px; padding-top: 16px; }
 .okids::before { content: ""; position: absolute; top: 0; left: calc(var(--w) / 2); right: calc(var(--w) / 2); height: 2px; background: #b9c0cb; }
 .okids.one::before { display: none; }
@@ -2210,19 +2209,15 @@ async function saveSpec(k, value) {
 }
 
 // ===== Organizational chart: the Office of the VPAA, from data/organization.yaml and the faculty list =====
-const HOW = { B: ["Board", "Appointed by the Board on the President's nomination"], P: ["Appointed", "Appointed by the President after a search (fixed term)"],
-  E: ["Elected", "Elected by the department faculty, confirmed by the Dean and VPAA"], D: ["Designated", "Designated from existing faculty by the unit head"],
-  H: ["Hired", "Regular position filled through HR hiring"], C: ["Confidential", "Confidential, chosen by the office head, co-terminous"] };
 const orgEmail = (k) => (DATA.org?.faculty_emails?.[k] ? `${DATA.org.faculty_emails[k]}@laucv.edu` : "");
-// A faculty member as a chart entry; how = how the position is filled.
-function orgFac(k, title, how) {
+// A faculty member as a chart entry.
+function orgFac(k, title) {
   const t = DATA.teachers[k];
   if (!t) return null;
   const role = title || t.role || "Faculty";
-  return { key: k, name: t.name, title: role, rank: t.rank, email: orgEmail(k),
-           how: how || (/^Department Chair/.test(t.role) ? "E" : !t.role || t.role === "Faculty" ? "H" : "D") };
+  return { key: k, name: t.name, title: role, rank: t.rank, email: orgEmail(k) };
 }
-const orgStaff = (x) => (x.faculty ? { ...orgFac(x.faculty, x.title, x.how), note: DATA.teachers[x.faculty]?.dept } : { ...x, email: x.email ? `${x.email}@laucv.edu` : "" });
+const orgStaff = (x) => (x.faculty ? { ...orgFac(x.faculty, x.title), note: DATA.teachers[x.faculty]?.dept } : { ...x, email: x.email ? `${x.email}@laucv.edu` : "" });
 const orgHead = (x) => ({ ...x, email: x.email ? `${x.email}@laucv.edu` : "" });
 function orgDepts(college) {
   const keys = Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].college === college && DATA.teachers[k].role !== "Associate Dean");
@@ -2251,7 +2246,7 @@ function orgTree() {
   const root = add("vpaa", orgHead(O.vpaa), "Office of the Vice President for Academic Affairs", null);
   const dean = add("dean", orgHead(O.dean), "Office of the Dean", root);
   Object.entries(O.colleges).forEach(([c, u]) => {
-    const ad = add(`f:${u.associate_dean.faculty}`, { ...orgFac(u.associate_dean.faculty, "Associate Dean", "P"), credentials: u.associate_dean.credentials }, DATA.colleges[c], dean);
+    const ad = add(`f:${u.associate_dean.faculty}`, { ...orgFac(u.associate_dean.faculty, "Associate Dean"), credentials: u.associate_dean.credentials }, DATA.colleges[c], dean);
     if (!ad) return;
     orgDepts(c).forEach((d) => {
       const chair = d.chair ? add(pid(d.chair), d.chair, `Department of ${d.name}`, ad) : null;
@@ -2259,7 +2254,7 @@ function orgTree() {
     });
     u.staff.map(orgStaff).forEach((x) => staffNode(x, `${DATA.colleges[c]} office`, ad));
   });
-  const ge = add(`f:${O.ge.coordinator.faculty}`, { ...orgFac(O.ge.coordinator.faculty, "GE Coordinator", "P"), credentials: O.ge.coordinator.credentials }, DATA.colleges.GE, dean);
+  const ge = add(`f:${O.ge.coordinator.faculty}`, { ...orgFac(O.ge.coordinator.faculty, "GE Coordinator"), credentials: O.ge.coordinator.credentials }, DATA.colleges.GE, dean);
   O.ge.areas.forEach((a) => {
     const people = a.faculty.map((k) => orgFac(k)).filter(Boolean);
     const lead = /led by the GE Coordinator/i.test(a.note || "") ? null : people.find((x) => x.title !== "Faculty");
@@ -2288,7 +2283,6 @@ function orgCard(n, opts = {}) {
     <span class="otitle">${esc(n.title)}${focus && n.rank ? ` · ${esc(n.rank)}` : ""}</span>
     ${focus && n.credentials ? `<span class="omuted">${esc(n.credentials)}</span>` : ""}
     ${n.email ? `<span class="omuted">${esc(n.email)}</span>` : ""}
-    ${HOW[n.how] ? `<em title="${esc(HOW[n.how][1])}">${HOW[n.how][0]}</em>` : ""}
     ${kids && !focus ? `<span class="odown" aria-hidden="true">${svg('<path d="m6 9 6 6 6-6"/>', 18)}</span>` : ""}
   </article>`;
 }
@@ -2317,7 +2311,6 @@ function renderOrg(page) {
           ? `<span aria-current="true">${esc(n.name)} ${svg('<path d="M19 12H5m6-6-6 6 6 6"/>', 16)}</span>`
           : `<button type="button" data-orgfocus="${esc(n.id)}">${esc(n.name)}</button>`).join("")}</nav>
         <details class="hownote"><summary>Councils</summary>${council.map((c) => `<p><b>${esc(c.name)}</b> · ${esc(c.kind)}</p><ul>${c.lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>`).join("")}</details>
-        <details class="hownote"><summary>How positions are filled</summary><p>${Object.values(HOW).map(([s2, l]) => `<b>${s2}</b>: ${esc(l)}`).join("<br>")}</p></details>
       </aside>
     </div>`;
 }

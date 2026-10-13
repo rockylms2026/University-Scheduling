@@ -3,15 +3,12 @@
 # College of Social Sciences, GE Coordinator at marial@laucv.edu, no GE handler duties,
 # Associate Deans also teach. Faculty (names, ranks, departments, duties) come from the
 # college files; this file adds the offices, staff and reporting lines around them.
-# How a position is filled: B Board appointment, P President's appointment after a search,
-# E elected by the department faculty, D designated from the faculty, H hired, C confidential.
 vpaa:
   title: Vice President for Academic Affairs
   name: Dr. Victoria S. Almonte
   rank: Professor IV
   credentials: PhD Educational Leadership
   email: victoriaa
-  how: B
   note: Reports to the University President
 offices:
 - key: vpaa_office
@@ -20,32 +17,26 @@ offices:
   - title: Executive Assistant
     name: Ms. Clarisse D. Mendiola
     email: clarissem
-    how: C
   - title: Academic Programs Officer
     name: Mr. Arturo P. Lacanilao
     email: arturol
-    how: H
   - title: Administrative Assistant
     name: Ms. Jhoanna R. Pimentel
     email: jhoannap
-    how: H
 - key: dean_office
   name: Office of the Dean
   staff:
   - title: Executive Assistant to the Dean
     name: Ms. Patricia Mae C. Ronquillo
     email: patriciar
-    how: C
   - title: Administrative Assistant
     name: Mr. Vincent M. Abad
     email: vincenta
-    how: H
 dean:
   title: Dean
   name: Dr. Rocky Spencer A. Ricardo
   rank: Professor II
   email: rockyr
-  how: B
   note: Leads academic affairs of all five colleges and the GE Department; chairs the Council of Associate Deans.
 councils:
 - name: Academic Council
@@ -65,95 +56,75 @@ colleges:
     associate_dean:
       faculty: CSS-AD
       credentials: PhD Social Psychology
-      how: P
     staff:
     - title: College Secretary
       name: Ms. Joanne F. Pacis
       email: joannep
-      how: H
     - title: Media Laboratory Technician
       name: Mr. Bryan E. Soliman
       email: bryans
-      how: H
     - title: Psychology Laboratory Assistant
       name: Ms. Erika M. Dimaano
       email: erikad
-      how: H
   CISC:
     associate_dean:
       faculty: CISC-AD
       credentials: PhD Computer Science
-      how: P
     staff:
     - title: College Secretary
       name: Ms. Lovelyn T. Bernal
       email: lovelynb
-      how: H
     - title: Systems Administrator
       name: Mr. Raymond C. Dacuycuy
       email: raymondd
-      how: H
     - title: Computer Laboratory Technician
       name: Mr. Neil P. Ganzon
       email: neilg
-      how: H
     - title: Computer Laboratory Technician
       name: Ms. Aiza R. Malana
       email: aizam
-      how: H
   CBE:
     associate_dean:
       faculty: CBE-AD
       credentials: Doctor of Business Administration; CPA
-      how: P
     staff:
     - title: College Secretary
       name: Ms. Cristy M. Alonzo
       email: cristya
-      how: H
     - title: Hospitality Laboratory Supervisor
       name: Mr. Edgar L. Rivas
       email: edgarr
-      how: H
   COE:
     associate_dean:
       faculty: COE-AD
       credentials: PhD Educational Management; LPT
-      how: P
     staff:
     - title: College Secretary
       name: Ms. Rowena A. Lucas
       email: rowenal
-      how: H
     - title: Educational Technology Laboratory Technician
       name: Mr. Mark Anthony S. Garces
       email: markg
-      how: H
   CCJPS:
     associate_dean:
       faculty: CCJPS-AD
       credentials: PhD Criminal Justice; RCrim
-      how: P
     staff:
     - title: College Secretary
       name: Ms. Gemma P. Talosig
       email: gemmat
-      how: H
     - title: Crime Laboratory Technician
       name: Mr. Ronald V. Bagunu
       email: ronaldb
-      how: H
 ge:
   coordinator:
     faculty: GE-G1
     credentials: PhD Philosophy
-    how: P
   note: Reports to the Dean; housed in Lingkod Hall. Teaches Art Appreciation, Critical Thinking, Ethics, PE, Research and Professional Writing, and CWTS to all colleges.
   staff:
   - title: Administrative Assistant
     name: Ms. Herminia S. Lucban
     email: herminial
-    how: H
   areas:
   - name: Philosophy
     note: Led by the GE Coordinator
@@ -193,28 +164,22 @@ support_units:
     name: Ms. Marilyn T. Sagun
     credentials: MPA
     email: marilyns
-    how: P
   staff:
   - title: Assistant Registrar
     name: Mr. Jefferson R. Dulay
     email: jeffersond
-    how: H
   - title: Records Evaluator
     name: Ms. Rica Mae P. Aban
     email: ricaa
-    how: H
   - title: Records Evaluator
     name: Mr. Noel C. Tamondong
     email: noelt
-    how: H
   - title: Records Clerk
     name: Ms. Angelie B. Saguid
     email: angelies
-    how: H
   - title: Student Information System Officer
     name: Mr. Kenneth A. Lomboy
     email: kennethl
-    how: H
 - key: library
   short: Library
   name: University Library and Learning Resource Center
@@ -223,16 +188,13 @@ support_units:
     name: Ms. Evelyn R. Tabora
     credentials: MLIS, Registered Librarian
     email: evelynt
-    how: P
   staff:
   - title: Library Assistant
     name: Mr. Jomar T. Pulido
     email: jomarp
-    how: H
   - title: Library Assistant
     name: Ms. Kristine D. Acosta
     email: kristinea
-    how: H
 - key: cte
   short: Teaching Excellence
   name: Center for Teaching Excellence
@@ -241,16 +203,13 @@ support_units:
     name: Dr. Ruth E. Manguerra
     credentials: PhD Curriculum and Instruction
     email: ruthm
-    how: P
   staff:
   - title: Instructional Designer
     name: Mr. Paolo G. Saldivar
     email: paolos
-    how: H
   - title: Administrative Assistant
     name: Ms. Wena L. Dinglasan
     email: wenad
-    how: H
 - key: commons
   short: Commons
   name: Academic Commons
@@ -259,20 +218,15 @@ support_units:
     name: Dr. Analiza C. Bermudez
     credentials: PhD Language Education
     email: analizab
-    how: P
   staff:
   - title: Writing Center Coordinator
     faculty: GE-G8
-    how: D
   - title: Math and Statistics Center Coordinator
     faculty: CISC-C5
-    how: D
   - title: Administrative Assistant
     name: Ms. Lourdes P. Navales
     email: lourdesn
-    how: H
   - title: Student Writing Tutors and Math and Statistics Tutors
-    how: H
 - key: language
   short: Language
   name: Language Center
@@ -281,18 +235,14 @@ support_units:
     name: Dr. Simeon A. Robledo
     credentials: PhD Applied Linguistics
     email: simeonr
-    how: P
   staff:
   - title: Testing Coordinator
     name: Ms. Arlene C. Quitoriano
     email: arleneq
-    how: H
   - title: Administrative Assistant
     name: Mr. Jerwin M. Caspe
     email: jerwinc
-    how: H
   - title: Part-time Language Instructors
-    how: H
 - key: online
   short: Online
   name: Center for Online and Digital Learning
@@ -301,20 +251,16 @@ support_units:
     name: Dr. Ma. Elena V. Sevilla
     credentials: PhD Educational Technology
     email: elenas
-    how: P
   staff:
   - title: LMS Administrator
     name: Mr. Darwin T. Guiang
     email: darwing
-    how: H
   - title: Instructional Designer
     name: Ms. Nicole A. Bacud
     email: nicoleb
-    how: H
   - title: Multimedia Developer
     name: Mr. Ralph Justin E. Ordonio
     email: ralpho
-    how: H
 - key: internship
   short: Internship
   name: Internship and Cooperative Education Office
@@ -323,16 +269,13 @@ support_units:
     name: Mr. Ferdinand B. Galicia
     credentials: MBA
     email: ferdinandg
-    how: P
   staff:
   - title: Placement Coordinator
     name: Ms. Sheila M. Baylon
     email: sheilab
-    how: H
   - title: Placement Coordinator
     name: Mr. Carlo J. Tumamao
     email: carlot
-    how: H
 faculty_emails:
   CBE-A1: leonorav
   CBE-A2: ronaldom
