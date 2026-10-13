@@ -1,0 +1,451 @@
+# Office of the Vice President for Academic Affairs: organizational chart.
+# Source: VPAA Organizational Chart (revised), with the Registrar's corrections:
+# College of Social Sciences, GE Coordinator at marial@laucv.edu, no GE handler duties,
+# Associate Deans also teach. Faculty (names, ranks, departments, duties) come from the
+# college files; this file adds the offices, staff and reporting lines around them.
+# How a position is filled: B Board appointment, P President's appointment after a search,
+# E elected by the department faculty, D designated from the faculty, H hired, C confidential.
+vpaa:
+  title: Vice President for Academic Affairs
+  name: Dr. Victoria S. Almonte
+  rank: Professor IV
+  credentials: PhD Educational Leadership
+  email: victoriaa
+  how: B
+  note: Reports to the University President
+offices:
+- key: vpaa_office
+  name: VPAA Office
+  staff:
+  - title: Executive Assistant
+    name: Ms. Clarisse D. Mendiola
+    email: clarissem
+    how: C
+  - title: Academic Programs Officer
+    name: Mr. Arturo P. Lacanilao
+    email: arturol
+    how: H
+  - title: Administrative Assistant
+    name: Ms. Jhoanna R. Pimentel
+    email: jhoannap
+    how: H
+- key: dean_office
+  name: Office of the Dean
+  staff:
+  - title: Executive Assistant to the Dean
+    name: Ms. Patricia Mae C. Ronquillo
+    email: patriciar
+    how: C
+  - title: Administrative Assistant
+    name: Mr. Vincent M. Abad
+    email: vincenta
+    how: H
+dean:
+  title: Dean
+  name: Dr. Rocky Spencer A. Ricardo
+  rank: Professor II
+  email: rockyr
+  how: B
+  note: Leads academic affairs of all five colleges and the GE Department; chairs the Council of Associate Deans.
+councils:
+- name: Academic Council
+  kind: Governing body, not an office
+  lines:
+  - 'Chair: the University President; vice chair: the VPAA'
+  - 'Members: the Dean, the five Associate Deans, the GE Coordinator, the University Registrar, and the University Librarian'
+  - Elected faculty representatives, 1 to 2 per college
+  - 'Secretary: the University Secretary'
+- name: Council of Associate Deans
+  kind: Coordinating body
+  lines:
+  - 'Chair: the Dean; members: the five Associate Deans and the GE Coordinator'
+  - Meets twice a month on scheduling, loading, and curriculum
+colleges:
+  CSS:
+    associate_dean:
+      faculty: CSS-AD
+      credentials: PhD Social Psychology
+      how: P
+    staff:
+    - title: College Secretary
+      name: Ms. Joanne F. Pacis
+      email: joannep
+      how: H
+    - title: Media Laboratory Technician
+      name: Mr. Bryan E. Soliman
+      email: bryans
+      how: H
+    - title: Psychology Laboratory Assistant
+      name: Ms. Erika M. Dimaano
+      email: erikad
+      how: H
+  CISC:
+    associate_dean:
+      faculty: CISC-AD
+      credentials: PhD Computer Science
+      how: P
+    staff:
+    - title: College Secretary
+      name: Ms. Lovelyn T. Bernal
+      email: lovelynb
+      how: H
+    - title: Systems Administrator
+      name: Mr. Raymond C. Dacuycuy
+      email: raymondd
+      how: H
+    - title: Computer Laboratory Technician
+      name: Mr. Neil P. Ganzon
+      email: neilg
+      how: H
+    - title: Computer Laboratory Technician
+      name: Ms. Aiza R. Malana
+      email: aizam
+      how: H
+  CBE:
+    associate_dean:
+      faculty: CBE-AD
+      credentials: Doctor of Business Administration; CPA
+      how: P
+    staff:
+    - title: College Secretary
+      name: Ms. Cristy M. Alonzo
+      email: cristya
+      how: H
+    - title: Hospitality Laboratory Supervisor
+      name: Mr. Edgar L. Rivas
+      email: edgarr
+      how: H
+  COE:
+    associate_dean:
+      faculty: COE-AD
+      credentials: PhD Educational Management; LPT
+      how: P
+    staff:
+    - title: College Secretary
+      name: Ms. Rowena A. Lucas
+      email: rowenal
+      how: H
+    - title: Educational Technology Laboratory Technician
+      name: Mr. Mark Anthony S. Garces
+      email: markg
+      how: H
+  CCJPS:
+    associate_dean:
+      faculty: CCJPS-AD
+      credentials: PhD Criminal Justice; RCrim
+      how: P
+    staff:
+    - title: College Secretary
+      name: Ms. Gemma P. Talosig
+      email: gemmat
+      how: H
+    - title: Crime Laboratory Technician
+      name: Mr. Ronald V. Bagunu
+      email: ronaldb
+      how: H
+ge:
+  coordinator:
+    faculty: GE-G1
+    credentials: PhD Philosophy
+    how: P
+  note: Reports to the Dean; housed in Lingkod Hall. Teaches Art Appreciation, Critical Thinking, Ethics, PE, Research and Professional Writing, and CWTS to all colleges.
+  staff:
+  - title: Administrative Assistant
+    name: Ms. Herminia S. Lucban
+    email: herminial
+    how: H
+  areas:
+  - name: Philosophy
+    note: Led by the GE Coordinator
+    faculty:
+    - GE-G2
+    - GE-G3
+    - GE-G4
+  - name: Humanities
+    faculty:
+    - GE-G5
+    - GE-G6
+    - GE-G7
+  - name: Writing
+    faculty:
+    - GE-G8
+    - GE-G9
+    - GE-G10
+    - GE-G11
+  - name: Physical Education
+    faculty:
+    - GE-G12
+    - GE-G13
+    - GE-G14
+    - GE-G15
+    - GE-G16
+    - GE-G18
+  - name: NSTP Office (CWTS)
+    faculty:
+    - GE-G17
+    - GE-G19
+support_units:
+- key: registrar
+  short: Registrar
+  name: Office of the University Registrar
+  head:
+    title: University Registrar
+    name: Ms. Marilyn T. Sagun
+    credentials: MPA
+    email: marilyns
+    how: P
+  staff:
+  - title: Assistant Registrar
+    name: Mr. Jefferson R. Dulay
+    email: jeffersond
+    how: H
+  - title: Records Evaluator
+    name: Ms. Rica Mae P. Aban
+    email: ricaa
+    how: H
+  - title: Records Evaluator
+    name: Mr. Noel C. Tamondong
+    email: noelt
+    how: H
+  - title: Records Clerk
+    name: Ms. Angelie B. Saguid
+    email: angelies
+    how: H
+  - title: Student Information System Officer
+    name: Mr. Kenneth A. Lomboy
+    email: kennethl
+    how: H
+- key: library
+  short: Library
+  name: University Library and Learning Resource Center
+  head:
+    title: University Librarian
+    name: Ms. Evelyn R. Tabora
+    credentials: MLIS, Registered Librarian
+    email: evelynt
+    how: P
+  staff:
+  - title: Library Assistant
+    name: Mr. Jomar T. Pulido
+    email: jomarp
+    how: H
+  - title: Library Assistant
+    name: Ms. Kristine D. Acosta
+    email: kristinea
+    how: H
+- key: cte
+  short: Teaching Excellence
+  name: Center for Teaching Excellence
+  head:
+    title: Director
+    name: Dr. Ruth E. Manguerra
+    credentials: PhD Curriculum and Instruction
+    email: ruthm
+    how: P
+  staff:
+  - title: Instructional Designer
+    name: Mr. Paolo G. Saldivar
+    email: paolos
+    how: H
+  - title: Administrative Assistant
+    name: Ms. Wena L. Dinglasan
+    email: wenad
+    how: H
+- key: commons
+  short: Commons
+  name: Academic Commons
+  head:
+    title: Director
+    name: Dr. Analiza C. Bermudez
+    credentials: PhD Language Education
+    email: analizab
+    how: P
+  staff:
+  - title: Writing Center Coordinator
+    faculty: GE-G8
+    how: D
+  - title: Math and Statistics Center Coordinator
+    faculty: CISC-C5
+    how: D
+  - title: Administrative Assistant
+    name: Ms. Lourdes P. Navales
+    email: lourdesn
+    how: H
+  - title: Student Writing Tutors and Math and Statistics Tutors
+    how: H
+- key: language
+  short: Language
+  name: Language Center
+  head:
+    title: Director
+    name: Dr. Simeon A. Robledo
+    credentials: PhD Applied Linguistics
+    email: simeonr
+    how: P
+  staff:
+  - title: Testing Coordinator
+    name: Ms. Arlene C. Quitoriano
+    email: arleneq
+    how: H
+  - title: Administrative Assistant
+    name: Mr. Jerwin M. Caspe
+    email: jerwinc
+    how: H
+  - title: Part-time Language Instructors
+    how: H
+- key: online
+  short: Online
+  name: Center for Online and Digital Learning
+  head:
+    title: Director
+    name: Dr. Ma. Elena V. Sevilla
+    credentials: PhD Educational Technology
+    email: elenas
+    how: P
+  staff:
+  - title: LMS Administrator
+    name: Mr. Darwin T. Guiang
+    email: darwing
+    how: H
+  - title: Instructional Designer
+    name: Ms. Nicole A. Bacud
+    email: nicoleb
+    how: H
+  - title: Multimedia Developer
+    name: Mr. Ralph Justin E. Ordonio
+    email: ralpho
+    how: H
+- key: internship
+  short: Internship
+  name: Internship and Cooperative Education Office
+  head:
+    title: Director
+    name: Mr. Ferdinand B. Galicia
+    credentials: MBA
+    email: ferdinandg
+    how: P
+  staff:
+  - title: Placement Coordinator
+    name: Ms. Sheila M. Baylon
+    email: sheilab
+    how: H
+  - title: Placement Coordinator
+    name: Mr. Carlo J. Tumamao
+    email: carlot
+    how: H
+faculty_emails:
+  CBE-A1: leonorav
+  CBE-A2: ronaldom
+  CBE-A3: charmaineu
+  CBE-A4: jericov
+  CBE-A5: abigailf
+  CBE-AD: fernandof
+  CBE-B1: estelat
+  CBE-B2: rodelm
+  CBE-B3: liezlc
+  CBE-B4: adrianr
+  CBE-B5: josephiner
+  CBE-B6: francisg
+  CBE-H1: mariloup
+  CBE-H2: paolog
+  CBE-H3: trishas
+  CBE-H4: lorenzob
+  CBE-H5: jasmins
+  CBE-N1: ramilg
+  CBE-N2: kristelr
+  CBE-N3: joela
+  CBE-N4: aileenj
+  CCJPS-AD: ianb
+  CCJPS-D1: reynaldov
+  CCJPS-D2: lornaf
+  CCJPS-D3: joelm
+  CCJPS-D4: kristiner
+  CCJPS-R1: nestora
+  CCJPS-R2: celester
+  CCJPS-R3: herminiob
+  CCJPS-R4: janinec
+  CCJPS-R5: rodrigos
+  CCJPS-R6: marjoriep
+  CCJPS-W1: evangelines
+  CCJPS-W2: rheag
+  CCJPS-W3: emmanueld
+  CCJPS-W4: charissel
+  CISC-AD: doloresc
+  CISC-B1: evelynl
+  CISC-B2: rosalindg
+  CISC-B3: paulineg
+  CISC-B4: arvint
+  CISC-B5: graceb
+  CISC-C1: arnelm
+  CISC-C2: carlos
+  CISC-C3: jasminel
+  CISC-C4: noelf
+  CISC-C5: rheac
+  CISC-C6: kevind
+  CISC-T1: marivicp
+  CISC-T2: ramonv
+  CISC-T3: dianec
+  CISC-T4: francisi
+  CISC-T5: jennifers
+  CISC-T6: antoniom
+  COE-AD: hillaryr
+  COE-E1: remediost
+  COE-E2: analynv
+  COE-E3: virgilioq
+  COE-E4: josefinao
+  COE-E5: arielb
+  COE-S1: teresae
+  COE-S10: divinam
+  COE-S11: amadon
+  COE-S12: liwayways
+  COE-S13: emilioa
+  COE-S14: rosariog
+  COE-S15: biancav
+  COE-S16: jonathanb
+  COE-S2: manuelf
+  COE-S4: juliusn
+  COE-S5: rebeccam
+  COE-S6: nathanielo
+  COE-S7: rodolfou
+  COE-S8: kimberlys
+  COE-S9: rogeliol
+  CSS-AD: marissap
+  CSS-E1: florantem
+  CSS-E2: imeldac
+  CSS-E3: ronnels
+  CSS-E4: katrinal
+  CSS-E5: joses
+  CSS-L1: ernestod
+  CSS-L2: mariela
+  CSS-L3: rafaelb
+  CSS-L4: paoloi
+  CSS-L5: lizas
+  CSS-M1: teresitav
+  CSS-M2: gabrielo
+  CSS-M3: danielr
+  CSS-M4: patriciay
+  CSS-M5: camillen
+  CSS-P1: rowenad
+  CSS-P2: kristinel
+  CSS-P3: joaquine
+  CSS-P4: benedictm
+  CSS-P5: angelicat
+  GE-G1: marial
+  GE-G10: kathleenr
+  GE-G11: danicas
+  GE-G12: dennisc
+  GE-G13: rowenam
+  GE-G14: markt
+  GE-G15: irenem
+  GE-G16: paulos
+  GE-G17: maricarb
+  GE-G18: ramone
+  GE-G19: liezelc
+  GE-G2: bernardoa
+  GE-G3: francist
+  GE-G4: angelicas
+  GE-G5: hannaha
+  GE-G6: lorenzog
+  GE-G7: bean
+  GE-G8: rosemariea
+  GE-G9: joshuac

@@ -55,3 +55,22 @@ def test_every_class_has_meetings():
         for k in UNI.classes_for(sem):
             if k.course.kind != "field" or k.faculty:
                 assert k.id in ids, (k.course.code, k.section.name)
+
+
+def test_organization_chart_matches_faculty():
+    """data/organization.yaml points only at real faculty, every college has its Associate Dean, and every GE
+    Department teacher sits in one area."""
+    import yaml
+    from scheduler.model import DATA_DIR
+    org = yaml.safe_load((DATA_DIR / "organization.yaml").read_text())
+    keys = set(UNI.faculty)
+    for code, unit in org["colleges"].items():
+        f = UNI.faculty[unit["associate_dean"]["faculty"]]
+        assert f.college == code and f.designation == "Associate Dean"
+    assert UNI.faculty[org["ge"]["coordinator"]["faculty"]].college == "GE"
+    in_areas = [k for a in org["ge"]["areas"] for k in a["faculty"]]
+    ge = {k for k, f in UNI.faculty.items() if f.college == "GE"} - {org["ge"]["coordinator"]["faculty"]}
+    assert sorted(in_areas) == sorted(ge)
+    referenced = [s["faculty"] for u in org["support_units"] for s in u["staff"] if "faculty" in s]
+    assert set(referenced) <= keys and set(org["faculty_emails"]) == keys
+    assert "123456" not in (DATA_DIR / "organization.yaml").read_text()   # no passwords in the chart

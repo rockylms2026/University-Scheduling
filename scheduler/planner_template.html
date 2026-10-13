@@ -500,6 +500,58 @@ dl.about dd { margin: 0; }
 @media (max-width: 1100px) { .ws, .ws.slim { grid-template-columns: minmax(0, 1fr); } .subnav { position: static; } .notices, .pcols, .ovgrid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .phead { grid-template-columns: minmax(0, 1fr); } .pcourse { grid-template-columns: minmax(0, 1fr) auto; } .pcourse span { grid-column: 1 / -1; grid-row: 2; } }
 
+/* ----- organizational chart ----- */
+.orgsearch { position: relative; width: min(340px, 100%); }
+.orgsearch input { width: 100%; }
+.orgsearch .results { right: 0; left: auto; width: min(420px, 90vw); }
+.orgsearch .results em { font-style: normal; }
+.orgtree { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px 24px 28px; display: grid; justify-items: center; }
+.orow { display: grid; grid-template-columns: minmax(0, 1fr) 36px minmax(250px, 320px) 36px minmax(0, 1fr); align-items: center; width: 100%; max-width: 1100px; }
+.orow .hl { display: block; height: 2px; background: var(--line); }
+.vl { display: block; width: 2px; height: 22px; background: var(--line); }
+.onode { font: inherit; text-align: center; border-radius: 12px; padding: 12px 16px; display: grid; gap: 2px; cursor: pointer; border: 1px solid transparent; }
+.onode b { font-weight: 500; font-size: .98rem; }
+.onode span { font-size: .86rem; }
+.onode small { font-size: .78rem; opacity: .8; }
+.onode.dark { background: var(--navy); color: #fff; }
+.onode.dark:hover, .onode.dark[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--accent-soft), 0 4px 14px rgba(15,25,45,.18); }
+.onode.soft { background: var(--accent-soft); color: var(--navy); border-color: #cdd7e8; }
+.onode.soft:hover, .onode.soft[aria-pressed="true"] { border-color: var(--accent); }
+.onode.side-l { justify-self: stretch; } .onode.side-r { justify-self: stretch; }
+.obranch { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; width: 100%; padding-top: 18px; }
+.obranch::before { content: ""; position: absolute; top: 0; left: calc((100% - 70px) / 12); right: calc((100% - 70px) / 12); height: 2px; background: var(--line); }
+.ounit { position: relative; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 10px; display: grid; justify-items: center; gap: 3px; text-align: center; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease; }
+.ounit::before { content: ""; position: absolute; top: -19px; left: 50%; width: 2px; height: 18px; background: var(--line); }
+.ounit:hover { border-color: #c4cbd6; box-shadow: 0 3px 12px rgba(15,25,45,.07); }
+.ounit[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.ounit .pav { margin-bottom: 4px; }
+.ounit b { font-weight: 500; font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.ounit span { font-weight: 500; font-size: .92rem; }
+.ounit em { font-style: normal; font-size: .8rem; color: var(--accent); }
+.ounit small { font-size: .76rem; color: var(--muted); }
+.orgpanel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: grid; gap: 18px; }
+.orgpanel.enter { animation: page-in .24s var(--ease); }
+.ophead h2 { font-size: 1.3rem; font-weight: 500; }
+.ophead p { margin: 4px 0 0; color: var(--muted); max-width: 80ch; }
+.ogrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+.ogroup { border: 1px solid var(--line2); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; align-content: start; }
+.ogroup h3 { font-size: .95rem; font-weight: 500; }
+.ogroup ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--ink); font-size: .9rem; }
+.operson { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; border-radius: 10px; transition: background-color .3s ease; }
+.operson.lead { border: 1px solid var(--line); padding: 14px 16px; border-radius: 12px; }
+.operson.flash { background: var(--warn-soft); }
+.operson b { display: block; font-weight: 500; }
+.operson b .btn.link { font-weight: 500; color: var(--ink); text-align: left; }
+.operson b .btn.link:hover { color: var(--accent); text-decoration: underline; }
+.operson > div > span { display: block; font-size: .86rem; color: var(--muted); }
+.operson > div > small { display: block; font-size: .8rem; color: var(--muted); }
+.operson em { display: inline-block; margin-top: 4px; font-style: normal; font-size: .72rem; font-weight: 500; color: var(--muted); background: var(--lunch); border-radius: 999px; padding: 2px 8px; white-space: nowrap; cursor: help; }
+.pav.sm { width: 34px; height: 34px; font-size: .78rem; }
+@media (max-width: 1100px) {
+  .orow { grid-template-columns: minmax(0, 1fr); gap: 8px; } .orow .hl, .orow > span:empty { display: none; }
+  .obranch { grid-template-columns: repeat(2, minmax(0, 1fr)); } .obranch::before, .ounit::before { display: none; }
+}
+
 /* ----- responsive: desktop first (1440), usable on tablets ----- */
 @media (max-width: 1360px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bottom { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bottom > :first-child { grid-column: 1 / -1; } }
 @media (max-width: 1100px) {
@@ -569,7 +621,7 @@ const PART = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Superv
 const COLLEGE_KEYS = ["CSS", "CISC", "CBE", "COE", "CCJPS"];
 const SCOPES = [["ALL", "All colleges"], ["CSS", "CSS"], ["CISC", "CISC"], ["CBE", "CBE"], ["COE", "COE"], ["CCJPS", "CCJPS"], ["GE", "GE Department"]];
 const VIEWS = [["home", "Home"], ["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["profiles", "Faculty Profiles"], ["rooms", "Rooms"], ["sections", "Sections"],
-               ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["availability", "GE Availability"], ["submissions", "Submissions"], ["reports", "Reports"], ["settings", "Settings"]];
+               ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["availability", "GE Availability"], ["submissions", "Submissions"], ["reports", "Reports"], ["org", "Organization"], ["settings", "Settings"]];
 const ROLE_NAME = { registrar: "Registrar", dean: "Dean", associate_dean: "Associate Dean", chair: "Department Chair", ge_coordinator: "GE Coordinator" };
 const TYPE_LABEL = { lec: "Lecture (major)", lab: "Laboratory block (3 h)", ge: "General education", pe: "PE", cwts: "CWTS (Saturday)", prac: "Practicum supervision" };
 const INTRO = new Set(DATA.intro || []);
@@ -1192,6 +1244,7 @@ const ICON = {
   faculty: svg('<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-6 6.5-6s5.9 2.4 6.5 6M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.3c2 .8 3.2 2.8 3.5 5.7"/>'),
   rooms: svg('<path d="M4 21V5.5L12 3v18M12 7l8 2v12M2.5 21h19M7 8h2M7 12h2M7 16h2M15 12h2M15 16h2"/>'),
   review: svg('<path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1z"/><path d="M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2"/><path d="m9 13.5 2 2 4-4.5"/>'),
+  org: svg('<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="2.5" y="16" width="6" height="5" rx="1"/><rect x="9" y="16" width="6" height="5" rx="1"/><rect x="15.5" y="16" width="6" height="5" rx="1"/><path d="M12 8v8M5.5 16v-3.5h13V16"/>'),
   reports: svg('<path d="M4 20.5h16M7 16.5v-5M12 16.5V6.5M17 16.5v-8"/>'),
   settings: svg('<path d="M4 6.5h9M17 6.5h3M4 12h3M11 12h9M4 17.5h11M19 17.5h1"/><circle cx="15" cy="6.5" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17.5" r="2"/>'),
   clock: svg('<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/><path d="M3 5.5 5.5 3M21 5.5 18.5 3"/>', 44),
@@ -1210,7 +1263,7 @@ function navGroups() {
   return [g("home", "Home", "home", ["home"]), g("dashboard", "Dashboard", "dashboard", ["dashboard"]),
     g("schedule", "Scheduling", "schedule", ["timetable", "sections", "courses"]), g("faculty", "Faculty", "faculty", ["profiles", "faculty", "availability"]),
     g("rooms", "Rooms", "rooms", ["rooms"]), g("review", "Review", "review", ["conflicts", "approvals", "submissions"]),
-    g("reports", "Reports", "reports", ["reports"]), g("settings", "Settings", "settings", ["settings"], true)].filter((x) => x.views.length);
+    g("reports", "Reports", "reports", ["reports"]), g("org", "Organization", "org", ["org"]), g("settings", "Settings", "settings", ["settings"], true)].filter((x) => x.views.length);
 }
 const VIEW_NOTE = { timetable: "Book times, rooms and teachers", sections: "Each section's week", courses: "Every class of a course",
   faculty: "Teaching load of each instructor", profiles: "Rank, duties and classes", availability: "Free instructors for borrowed GE", conflicts: "Clashes and broken rules",
@@ -1314,7 +1367,7 @@ function render() {
   const where = `${state.view}|${state.view === "dashboard" ? state.dashTab : ""}|${state.view === "profiles" ? state.profile || "" : ""}`;
   const moved = render.where !== where, sameView = render.where?.split("|")[0] === state.view;
   const fn = { home: renderHome, dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, profiles: renderProfiles, rooms: renderRooms, sections: renderSections,
-               courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, settings: renderSettings }[state.view] || renderHome;
+               courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, org: renderOrg, settings: renderSettings }[state.view] || renderHome;
   const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
   fn(page);
   if (moved) {             // a new page or section: fade it in and start at the top
@@ -2131,7 +2184,7 @@ function renderProfiles(page) {
     <section class="phead"><span class="pav big">${esc(initials(t.name))}</span>
       <div class="pwho"><h1>${esc(t.name)}</h1><p>${esc(t.rank)}</p><div class="pduties">${duties(t).map((d) => `<span class="chip info">${esc(d)}</span>`).join("")}</div>
         ${specHtml}
-        <p class="small muted">Department of ${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}${t.office ? ` · Office ${esc(t.office)}` : ""}</p></div>
+        <p class="small muted">Department of ${esc(t.dept)} · ${esc(DATA.colleges[t.college] || t.college)}${t.office ? ` · Office ${esc(t.office)}` : ""}${orgEmail(k) ? ` · ${esc(orgEmail(k))}` : ""}</p></div>
       ${ring(L.lu, t.max, "Teaching Load", `${L.lu} LU`, `of ${t.max} LU allowed`, { small: true, bad: L.status === "over" })}</section>
     <div class="pcols">
       <section class="ovcard"><div class="ovhead"><span class="ovicon">${ICON.schedule}</span><div><h3>1st Semester</h3><p>SY ${esc(printCfg.ay)} · ${codes.length} course${codes.length === 1 ? "" : "s"} scheduled</p></div><span class="chip good">Current</span></div>
@@ -2157,6 +2210,121 @@ async function saveSpec(k, value) {
     if (v) specs[k] = v; else delete specs[k];
     state.specEdit = null; render(); toast(v ? "Specialization saved." : "Specialization cleared.");
   } catch (e) { if (m) { m.textContent = sbMessage(e); m.className = "msg bad"; } }
+}
+
+// ===== Organizational chart: the Office of the VPAA, from data/organization.yaml and the faculty list =====
+const HOW = { B: ["Board", "Appointed by the Board on the President's nomination"], P: ["Appointed", "Appointed by the President after a search (fixed term)"],
+  E: ["Elected", "Elected by the department faculty, confirmed by the Dean and VPAA"], D: ["Designated", "Designated from existing faculty by the unit head"],
+  H: ["Hired", "Regular position filled through HR hiring"], C: ["Confidential", "Confidential, chosen by the office head, co-terminous"] };
+const orgEmail = (k) => (DATA.org?.faculty_emails?.[k] ? `${DATA.org.faculty_emails[k]}@laucv.edu` : "");
+// A faculty member as a chart entry; how = how the position is filled.
+function orgFac(k, title, how) {
+  const t = DATA.teachers[k];
+  if (!t) return null;
+  const role = title || t.role || "Faculty";
+  return { key: k, name: t.name, title: role, rank: t.rank, email: orgEmail(k),
+           how: how || (/^Department Chair/.test(t.role) ? "E" : !t.role || t.role === "Faculty" ? "H" : "D") };
+}
+const orgStaff = (x) => (x.faculty ? { ...orgFac(x.faculty, x.title, x.how), note: DATA.teachers[x.faculty]?.dept } : { ...x, email: x.email ? `${x.email}@laucv.edu` : "" });
+const orgHead = (x) => ({ ...x, email: x.email ? `${x.email}@laucv.edu` : "" });
+function orgDepts(college) {
+  const keys = Object.keys(DATA.teachers).filter((k) => DATA.teachers[k].college === college && DATA.teachers[k].role !== "Associate Dean");
+  const depts = [...new Set(keys.map((k) => DATA.teachers[k].dept))].sort();
+  return depts.map((d) => {
+    const ks = keys.filter((k) => DATA.teachers[k].dept === d);
+    const chair = ks.find((k) => /^Department Chair/.test(DATA.teachers[k].role));
+    const rest = ks.filter((k) => k !== chair).sort((a, b) => (DATA.teachers[a].role === "Faculty") - (DATA.teachers[b].role === "Faculty") || DATA.teachers[a].name.localeCompare(DATA.teachers[b].name));
+    return { name: d, chair: chair && orgFac(chair), people: rest.map((k) => orgFac(k)) };
+  });
+}
+// Everyone in the chart, for the search box: [unit, person].
+function orgIndex() {
+  const O = DATA.org, out = [];
+  out.push(["vpaa", orgHead(O.vpaa)]); O.offices[0].staff.forEach((x) => out.push(["vpaa", orgStaff(x)]));
+  out.push(["dean", orgHead(O.dean)]); O.offices[1].staff.forEach((x) => out.push(["dean", orgStaff(x)]));
+  Object.entries(O.colleges).forEach(([c, u]) => {
+    out.push([c, orgFac(u.associate_dean.faculty, "Associate Dean", "P")]);
+    u.staff.forEach((x) => out.push([c, orgStaff(x)]));
+    orgDepts(c).forEach((d) => [d.chair, ...d.people].filter(Boolean).forEach((x) => out.push([c, { ...x, note: d.name }])));
+  });
+  out.push(["GE", orgFac(O.ge.coordinator.faculty, "GE Coordinator", "P")]);
+  O.ge.staff.forEach((x) => out.push(["GE", orgStaff(x)]));
+  O.ge.areas.forEach((a) => a.faculty.forEach((k) => out.push(["GE", { ...orgFac(k), note: a.name }])));
+  O.support_units.forEach((u) => { out.push(["support", { ...orgHead(u.head), note: u.name }]); u.staff.filter((x) => x.name || x.faculty).forEach((x) => out.push(["support", { ...orgStaff(x), note: u.name }])); });
+  return out.filter(([, x]) => x && x.name);
+}
+const orgPid = (x) => x.key || x.email || x.name;
+function orgPerson(x, opts = {}) {
+  if (!x) return "";
+  const how = HOW[x.how];
+  return `<div class="operson${opts.lead ? " lead" : ""}" data-person="${esc(orgPid(x))}"><span class="pav${opts.lead ? "" : " sm"}">${esc(initials(x.name))}</span>
+    <div><b>${x.key ? `<button type="button" class="btn link" data-profile="${x.key}">${esc(x.name)}</button>` : esc(x.name)}</b>
+      <span>${esc(x.title)}${x.rank ? ` · ${esc(x.rank)}` : ""}${x.credentials ? ` · ${esc(x.credentials)}` : ""}</span>
+      ${x.email ? `<small>${esc(x.email)}</small>` : ""}${x.note && opts.note ? `<small>${esc(x.note)}</small>` : ""}
+      ${how ? `<em title="${esc(how[1])}">${how[0]}</em>` : ""}</div></div>`;
+}
+function orgPanel(unit) {
+  const O = DATA.org;
+  const list = (items, note) => items.map((x) => orgPerson(x, { note })).join("");
+  if (unit === "vpaa") return `<div class="ophead"><h2>Office of the Vice President for Academic Affairs</h2><p>${esc(O.vpaa.note)}</p></div>
+    ${orgPerson(orgHead(O.vpaa), { lead: true })}<div class="ogroup"><h3>VPAA Office · ${O.offices[0].staff.length} staff</h3>${list(O.offices[0].staff.map(orgStaff))}</div>`;
+  if (unit === "dean") return `<div class="ophead"><h2>Office of the Dean</h2><p>${esc(O.dean.note)}</p></div>
+    ${orgPerson(orgHead(O.dean), { lead: true })}<div class="ogroup"><h3>Office of the Dean · ${O.offices[1].staff.length} staff</h3>${list(O.offices[1].staff.map(orgStaff))}</div>
+    ${O.councils.filter((c) => /Associate Deans/.test(c.name)).map((c) => `<div class="ogroup"><h3>${esc(c.name)} · ${esc(c.kind)}</h3><ul>${c.lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul></div>`).join("")}`;
+  if (unit === "council") return `<div class="ophead"><h2>Councils</h2><p>Governing and coordinating bodies, not offices.</p></div>
+    <div class="ogrid">${O.councils.map((c) => `<div class="ogroup"><h3>${esc(c.name)} · ${esc(c.kind)}</h3><ul>${c.lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul></div>`).join("")}</div>`;
+  if (unit === "support") return `<div class="ophead"><h2>Academic Support Units</h2><p>${O.support_units.length} units reporting to the VPAA.</p></div>
+    <div class="ogrid">${O.support_units.map((u) => `<div class="ogroup"><h3>${esc(u.name)}</h3>${orgPerson(orgHead(u.head))}
+      ${u.staff.map((x) => x.name || x.faculty ? orgPerson(orgStaff(x), { note: true }) : `<p class="small muted" style="margin:4px 0 0">${esc(x.title)}</p>`).join("")}</div>`).join("")}</div>`;
+  if (unit === "GE") return `<div class="ophead"><h2>${esc(DATA.colleges.GE)}</h2><p>${esc(O.ge.note)}</p></div>
+    ${orgPerson({ ...orgFac(O.ge.coordinator.faculty, "GE Coordinator", "P"), credentials: O.ge.coordinator.credentials }, { lead: true })}
+    <div class="ogroup"><h3>Office</h3>${list(O.ge.staff.map(orgStaff))}</div>
+    <div class="ogrid">${O.ge.areas.map((a) => `<div class="ogroup"><h3>${esc(a.name)}${a.note ? ` · <span class="muted">${esc(a.note)}</span>` : ""}</h3>${list(a.faculty.map((k) => orgFac(k)).filter(Boolean))}</div>`).join("")}</div>`;
+  const u = O.colleges[unit];
+  if (!u) return "";
+  const depts = orgDepts(unit);
+  return `<div class="ophead"><h2>${esc(DATA.colleges[unit])}</h2><p>Associate Dean, ${u.staff.length} staff, ${depts.length} department chairs, and ${depts.reduce((a, d) => a + d.people.length, 0)} faculty.</p></div>
+    ${orgPerson({ ...orgFac(u.associate_dean.faculty, "Associate Dean", "P"), credentials: u.associate_dean.credentials }, { lead: true })}
+    <div class="ogroup"><h3>College office</h3>${list(u.staff.map(orgStaff))}</div>
+    <div class="ogrid">${depts.map((d) => `<div class="ogroup"><h3>Department of ${esc(d.name)}</h3>${orgPerson(d.chair)}${list(d.people)}</div>`).join("")}</div>`;
+}
+function renderOrg(page) {
+  const O = DATA.org;
+  if (!O) { page.innerHTML = `${head("Organization", "No organizational chart is loaded.")}`; return; }
+  const units = [...Object.keys(O.colleges), "GE"];
+  if (!state.orgUnit) state.orgUnit = (me.college && units.includes(me.college)) ? me.college : "vpaa";
+  const sel = state.orgUnit;
+  const node = (unit, cls, title, name, sub) => `<button type="button" class="onode ${cls}" data-orgunit="${unit}" aria-pressed="${sel === unit}"><b>${esc(title)}</b>${name ? `<span>${esc(name)}</span>` : ""}${sub ? `<small>${esc(sub)}</small>` : ""}</button>`;
+  const card = (unit) => {
+    const ge = unit === "GE", u = ge ? O.ge.coordinator : O.colleges[unit].associate_dean, t = DATA.teachers[u.faculty];
+    const n = ge ? `${O.ge.areas.length} areas · ${O.ge.areas.reduce((a, x) => a + x.faculty.length, 0)} faculty`
+      : (() => { const d = orgDepts(unit); return `${d.length} departments · ${d.reduce((a, x) => a + x.people.length + (x.chair ? 1 : 0), 0)} faculty`; })();
+    return `<button type="button" class="ounit" data-orgunit="${unit}" aria-pressed="${sel === unit}"><span class="pav">${esc(initials(t?.name || "?"))}</span>
+      <b>${ge ? "GE Coordinator" : "Associate Dean"}</b><span>${esc(t?.name || "Vacant")}</span><em>${esc(ge ? "GE Department" : DATA.colleges[unit])}</em><small>${n}</small></button>`;
+  };
+  page.innerHTML = `${head("Organizational Chart", "Office of the Vice President for Academic Affairs · click a box to see its people",
+      `<div class="orgsearch"><input class="inp" id="orgSearch" type="search" placeholder="Find a person or position" value="${esc(state.orgQuery || "")}" autocomplete="off" aria-label="Find a person or position"><div class="results" id="orgHits" hidden></div></div>`)}
+    <section class="orgtree" aria-label="Reporting lines">
+      <div class="orow">${node("vpaa", "soft side-l", "VPAA Office", "", `${O.offices[0].staff.length} staff`)}<i class="hl"></i>
+        ${node("vpaa", "dark", O.vpaa.title, `${O.vpaa.name}, ${O.vpaa.rank}`, O.vpaa.note)}<i class="hl"></i>${node("council", "soft side-r", "Academic Council", "", "Governing body, not an office")}</div>
+      <i class="vl"></i>
+      <div class="orow"><span></span><span></span>${node("dean", "dark", O.dean.title, `${O.dean.name}, ${O.dean.rank}`, `Office of the Dean (${O.offices[1].staff.length} staff)`)}<i class="hl"></i>
+        ${node("support", "soft side-r", "Academic Support Units", "", O.support_units.map((u) => u.short || u.name).join(", "))}</div>
+      <i class="vl"></i>
+      <div class="obranch">${units.map(card).join("")}</div>
+    </section>
+    <section class="orgpanel" id="orgPanel">${orgPanel(sel)}</section>
+    <details class="hownote"><summary>How positions are filled</summary><p>${Object.values(HOW).map(([s, l]) => `<b>${s}</b>: ${esc(l)}`).join(" · ")}</p></details>`;
+}
+function orgFind(q) {
+  const box = $("orgHits");
+  q = q.trim().toLowerCase();
+  if (!q) { box.hidden = true; return; }
+  const UNIT = { vpaa: "VPAA Office", dean: "Office of the Dean", support: "Academic Support Units", GE: "GE Department", ...DATA.colleges };
+  const hits = orgIndex().filter(([, x]) => `${x.name} ${x.title} ${x.note || ""} ${x.email || ""}`.toLowerCase().includes(q)).slice(0, 10);
+  box.innerHTML = hits.length ? hits.map(([u, x]) => `<button type="button" data-orgfind="${esc(u)}" data-pid="${esc(orgPid(x))}"><small>${esc(u === "support" ? "Support" : u)}</small><span>${esc(x.name)}<em>${esc(x.title)} · ${esc(x.note || UNIT[u] || u)}</em></span></button>`).join("")
+    : `<p class="empty" style="padding:8px">Nobody matches.</p>`;
+  box.hidden = false;
 }
 
 // ===== Rooms =====
@@ -2574,6 +2742,7 @@ function goHit(i) { const h = searchHits[i]; if (!h) return; h.go(); if (!allowe
 document.addEventListener("click", async (ev) => {
   const t = ev.target.closest("button, tr[data-goteacher], tr[data-goroom]");
   if (!ev.target.closest(".search")) $("results").hidden = true;
+  if (!ev.target.closest(".orgsearch") && $("orgHits")) $("orgHits").hidden = true;
   if (!ev.target.closest("#exportMenu")) $("exportMenu")?.removeAttribute("open");
   if (flyKey && !ev.target.closest("#flyout, [data-flyout]")) setFly(null);
   if (userMenuOpen && !ev.target.closest("#userchip")) setUserMenu(false);
@@ -2605,6 +2774,15 @@ document.addEventListener("click", async (ev) => {
     return;
   }
   if (ds.dashcollapse) { state.dashNavHidden = ds.dashcollapse === "1"; render(); return; }
+  if (ds.orgunit) { state.orgUnit = ds.orgunit; document.querySelectorAll("[data-orgunit]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.orgunit === ds.orgunit)));
+    const panel = $("orgPanel"); panel.innerHTML = orgPanel(ds.orgunit); panel.classList.remove("enter"); void panel.offsetWidth; panel.classList.add("enter");
+    if (panel.getBoundingClientRect().top > innerHeight * .6) panel.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  if (ds.orgfind) {
+    state.orgUnit = ds.orgfind; $("orgHits").hidden = true; render();
+    const el = [...document.querySelectorAll("[data-person]")].find((e) => e.dataset.person === ds.pid);
+    if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1800); }
+    return;
+  }
   if (ds.specedit !== undefined) { state.specEdit = ds.specedit || null; render(); return; }
   if (ds.profile !== undefined) { state.specEdit = null;  state.view = "profiles"; state.profile = ds.profile || null; render(); return; }
   if (ds.subfilter) { state.subFilter = ds.subfilter; render(); return; }
@@ -2685,6 +2863,7 @@ if (canHover) document.addEventListener("mouseover", (ev) => {
 document.addEventListener("input", (ev) => {
   const id = ev.target.id;
   if (id === "teacherSearch") { teacherQuery = ev.target.value; const sel = $("teacherSel"); if (sel) sel.innerHTML = teacherOptions(); }   // keeps focus while typing
+  else if (id === "orgSearch") { state.orgQuery = ev.target.value; orgFind(ev.target.value); }
   else if (id === "profSearch") { state.profQuery = ev.target.value; $("profGrid").innerHTML = profileCards(); }
   else if (id === "queueSearch") { state.queueQuery = ev.target.value; $("queue").innerHTML = queueHtml(); }
   else if (id === "search") runSearch(ev.target.value);

@@ -133,7 +133,19 @@ def planner_data(uni: University, semester: int) -> dict:
             "intro": sorted(uni.intro_courses), "programs": programs, "sections": sections, "courses": courses, "classes": classes,
             "teachers": teachers, "rooms": rooms, "options": options, "labDays": lab_days,
             "geTeachers": ge_teaching_lists(uni, semester, dept_college), "deptCollege": dept_college,
-            "facPref": uni.timeframe.fac_pref_hours, "facMax": uni.timeframe.fac_max_hours}
+            "facPref": uni.timeframe.fac_pref_hours, "facMax": uni.timeframe.fac_max_hours,
+            "org": organization(teachers)}
+
+
+def organization(teachers: dict) -> dict | None:
+    """The VPAA organizational chart: offices, staff and units around the faculty (data/organization.yaml)."""
+    path = DATA_DIR / "organization.yaml"
+    if not path.exists():
+        return None
+    org = yaml.safe_load(path.read_text())
+    for key in [k for k in org.get("faculty_emails", {}) if k not in teachers]:
+        del org["faculty_emails"][key]          # people no longer on the faculty list
+    return org
 
 
 def write_planner(uni: University, semester: int = 1, path: Path | None = None) -> Path:
