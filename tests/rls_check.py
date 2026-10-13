@@ -189,6 +189,12 @@ expect("registrar publishes", True, "select publish_schedule()", ADMIN)
 expect("chair cannot add staff", False, "insert into staff (email, role) values ('x@u.edu','dean')", "chair.psy@u.edu")
 expect("chair cannot raise own role", True, "update staff set role='dean' where email='chair.psy@u.edu'; select role from staff where email='chair.psy@u.edu'",
        "chair.psy@u.edu", contains="chair")
+# Associate Deans teach too: their department chair may assign them, and so may they themselves.
+expect("Psychology chair assigns the CSS Associate Dean", True, tc(psy_major, "CSS-AD"), "chair.psy@u.edu")
+expect("CSS Associate Dean assigns their own class", True, tc(psy_major, "CSS-AD"), "adean.css@u.edu")
+expect("Economics chair cannot assign the CSS Associate Dean", False, tc(eco_major, "CSS-AD"), "chair.eco@u.edu")
+psql(f"delete from teacher_changes where class_id = '{psy_major}'")
+
 # Specializations: typed by the Registrar or the Dean only, and nothing else of a faculty row.
 fac = one("select key from faculty where department = 'Psychology' order by key limit 1")
 expect("registrar types a specialization", True, f"update faculty set specialization = 'Clinical Psychology' where key = '{fac}' returning key", ADMIN, contains=fac)
