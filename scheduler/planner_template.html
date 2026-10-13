@@ -2011,7 +2011,7 @@ function sectionDesk() {
         ${sec.placement.length ? `<span>Placement: <b>${sec.placement.join(", ")}</b></span>` : ""}</div></div>
       <div class="classes">${courseGroups(classes).map(([label, list]) => `<div class="cgroup"><div class="cghead">${esc(label)} · ${list.length}</div>${list.map((c) => classRow(c, c.section !== state.section)).join("")}</div>`).join("")}</div>
     </div>
-    <div class="card">
+    <div class="card" id="deskEditor">
       ${pickCls ? editor(pickCls, state.pick.part) : `<p class="muted" style="margin:0">Choose a part of a class (for example <b>Lecture</b> or <b>Laboratory</b>) on the left to schedule it. Every allowed time is listed with whether the students, the teacher, and a room are free.</p>`}
       <div class="scroll">${grid(mine, { offDays: sec.placement, dim: (s) => s.cls.section !== state.section, ghost, ghostBad, focus: { section: state.section } })}</div>
       ${legend()}
@@ -3057,9 +3057,21 @@ document.addEventListener("click", async (ev) => {
   }
   else return;
   const goingUp = ds.view || ds.opensection || ds.goconf || ds.pick || ds.goteacher || ds.goroom;
+  const stay = render.where;
   render();
-  if (goingUp && !ds.opt) window.scrollTo(0, 0);
+  if (ds.pick && render.where === stay) glideToEditor();   // same page: glide to the booking form
+  else if (goingUp && !ds.opt) window.scrollTo(0, 0);
 });
+// Bring the booking form into view with a smooth scroll instead of a jump.
+function glideToEditor() {
+  const card = $("deskEditor"); if (!card) return;
+  const bar = document.querySelector(".topbar"), stuck = bar && getComputedStyle(bar).position === "sticky";
+  let top = card.getBoundingClientRect().top + window.scrollY - (stuck ? bar.offsetHeight : 0) - 12;
+  if (top < 300) top = 0;                                       // the form sits near the top: show the page heading too
+  if (Math.abs(top - window.scrollY) < 4) return;
+  const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  window.scrollTo({ top, behavior: calm ? "auto" : "smooth" });
+}
 // The panel of a menu group sits beside its icon; close it when the page moves.
 ["resize", "scroll"].forEach((t) => window.addEventListener(t, () => { if (flyKey) setFly(null); }, { passive: true }));
 // With a mouse, a group's panel opens on hover and closes shortly after the pointer leaves it.
