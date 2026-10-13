@@ -568,7 +568,7 @@ button.oname { cursor: pointer; } button.oname:hover { text-decoration: underlin
 
 /* ----- hover and selection, everywhere ----- */
 /* boxes you can click: a soft shadow and a 1px lift; text links: an underline that slides in */
-.opt, .part, .qi, .pill, .item, .cls, .pcard, .ocard.tap, .ounit, .quick, .sugg, .kpi, .omore, .morebtn, .subrow, .orgsearch .results button, .results button {
+.opt, .part, .qi, .pill, .item, .cls, .pcard, .dcard, .ocard.tap, .ounit, .quick, .sugg, .kpi, .omore, .morebtn, .subrow, .orgsearch .results button, .results button {
   transition: box-shadow .16s ease, transform .16s ease, border-color .16s ease, background-color .16s ease, color .16s ease; }
 .opt:hover, .part:hover, .qi:hover, .pill:hover, .quick:hover, .omore:hover, .morebtn:hover, .ounit:hover {
   box-shadow: 0 4px 12px rgba(15,25,45,.12); transform: translateY(-1px); border-color: #b9c3d1; }
@@ -588,6 +588,36 @@ button.oname { cursor: pointer; } button.oname:hover { text-decoration: underlin
 .otrail button, .oteam, .go { text-decoration-color: currentColor; }
 .otrail button:hover, .go:hover { color: var(--navy); }
 tr.clickable td { transition: background-color .14s ease; }
+
+/* ----- faculty profiles drawn as a chart per department ----- */
+.dcharts { display: grid; gap: 18px; }
+.dchart { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px 22px; overflow-x: auto; }
+.dchart h2 { font-size: 1.05rem; font-weight: 500; margin: 0 0 6px; }
+.dchart h2 span { font-size: .8rem; font-weight: 400; color: var(--muted); margin-left: 6px; }
+.dtier { display: flex; flex-direction: column; align-items: center; }
+.dtier + .dtier { margin-top: 0; }
+.dtier + .dtier::before { content: ""; width: 2px; height: 18px; background: #b9c0cb; }
+.dlabel { font-size: .7rem; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); background: var(--panel); padding: 2px 8px; margin-bottom: 8px; }
+.dtier + .dtier .dlabel { margin-bottom: 0; }
+.drow { position: relative; display: grid; grid-template-columns: repeat(var(--cols), 236px); gap: 26px 14px; justify-content: center; }
+.dtier + .dtier .drow { padding-top: 14px; }
+.dtier + .dtier .drow:not(.many)::before { content: ""; position: absolute; top: 0; left: calc(50% - 1px); width: 2px; height: 14px; background: #b9c0cb; }
+.dtier + .dtier .drow.many::before { content: ""; position: absolute; top: 0; left: 118px; right: 118px; height: 2px; background: #b9c0cb; }
+.dtier + .dtier .drow.many > .dcard.top::before { content: ""; position: absolute; top: -15px; left: calc(50% - 1px); width: 2px; height: 14px; background: #b9c0cb; }
+.dcard { position: relative; width: 236px; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: 8px; padding: 10px 12px; cursor: pointer; box-shadow: 0 1px 3px rgba(15,25,45,.06); }
+.dcard:hover { box-shadow: 0 6px 18px rgba(15,25,45,.14); border-color: #c4cbd6; border-top-color: var(--accent); transform: translateY(-1px); }
+.dcard:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dcard .pav { width: 38px; height: 38px; font-size: .8rem; margin-bottom: 4px; }
+.dcard b { font-weight: 500; font-size: .88rem; line-height: 1.3; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dcard .drank { font-size: .76rem; color: var(--muted); white-space: nowrap; }
+.dcard em { font-style: normal; font-size: .76rem; color: var(--accent); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dcard .spills { justify-content: center; max-width: 100%; margin-top: 6px; }
+@media (max-width: 760px) {
+  .drow { grid-template-columns: minmax(0, 1fr); width: 100%; }
+  .dtier + .dtier .drow.many { padding-top: 0; }
+  .dtier + .dtier .drow.many::before, .dtier + .dtier .drow.many > .dcard.top::before { display: none; }
+  .dcard { width: 100%; }
+}
 
 /* ----- responsive: desktop first (1440), usable on tablets ----- */
 @media (max-width: 1360px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bottom { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bottom > :first-child { grid-column: 1 / -1; } }
@@ -2279,19 +2309,37 @@ const duties = (t) => (t.role || "Faculty").split(/;\s*/).map((d) => (d === "Fac
 const specAreas = (txt) => String(txt || "").split(/[,;]\s*/).map((x) => x.trim()).filter(Boolean).map((x) => x.charAt(0).toUpperCase() + x.slice(1));
 const specPills = (areas, max) => areas.slice(0, max || areas.length).map((a) => `<span class="spill">${esc(a)}</span>`).join("")
   + (max && areas.length > max ? `<span class="spill more" title="${esc(areas.slice(max).join(", "))}">+${areas.length - max}</span>` : "");
+// A department drawn as a small org chart: the Associate Dean and the chair on top,
+// then the coordinators, then the rest of the faculty, each level joined by a line.
+const PROF_TIERS = [["Associate Dean", (r) => /associate dean/i.test(r)],
+  ["Department Head", (r) => /chair|department coordinator|head/i.test(r)],
+  ["Coordinators", (r) => r && r !== "Faculty"], ["Faculty", () => true]];
+function profCard(k) {
+  const t = DATA.teachers[k], areas = specAreas(specOf(k));
+  const duty = duties(t).filter((d) => d !== "Teaching").join(" · ");
+  return `<button type="button" class="dcard" data-profile="${k}"><span class="pav">${esc(initials(t.name))}</span>
+    <b title="${esc(t.name)}">${esc(t.name)}</b><span class="drank">${esc(t.rank)}</span>${duty ? `<em title="${esc(duty)}">${esc(duty)}</em>` : ""}
+    ${areas.length ? `<span class="spills">${specPills(areas, 2)}</span>` : ""}</button>`;
+}
 function profileCards() {
   const q = (state.profQuery || "").trim().toLowerCase();
   const keys = Object.keys(DATA.teachers).filter(teacherInScope).filter((k) => {
     const t = DATA.teachers[k];
     return (!state.profDept || t.dept === state.profDept) && (!q || `${t.name} ${t.rank} ${t.role} ${t.dept} ${specOf(k)}`.toLowerCase().includes(q));
-  }).sort((a, b) => DATA.teachers[a].dept.localeCompare(DATA.teachers[b].dept) || DATA.teachers[a].name.localeCompare(DATA.teachers[b].name));
+  });
   if (!keys.length) return `<p class="empty">No faculty match.</p>`;
-  return keys.map((k) => {
-    const t = DATA.teachers[k], areas = specAreas(specOf(k));
-    const duty = duties(t).filter((d) => d !== "Teaching").join(" · ");
-    return `<button type="button" class="pcard" data-profile="${k}"><span class="pav">${esc(initials(t.name))}</span>
-      <span class="pinfo"><b>${esc(t.name)}</b><span>${esc(t.rank)}</span>${duty ? `<em>${esc(duty)}</em>` : ""}</span>
-      ${areas.length ? `<span class="spills">${specPills(areas, 3)}</span>` : ""}</button>`;
+  const depts = [...new Set(keys.map((k) => DATA.teachers[k].dept))].sort();
+  const byName = (a, b) => DATA.teachers[a].name.localeCompare(DATA.teachers[b].name);
+  return depts.map((dp) => {
+    let left = keys.filter((k) => DATA.teachers[k].dept === dp).sort(byName);
+    const tiers = PROF_TIERS.map(([label, test]) => {
+      const here = left.filter((k) => test(DATA.teachers[k].role || "Faculty")); left = left.filter((k) => !here.includes(k));
+      return [label, here];
+    }).filter(([, here]) => here.length);
+    const n = tiers.reduce((a, [, here]) => a + here.length, 0);
+    return `<section class="dchart"><h2>${esc(dp)} <span>${n} ${n === 1 ? "person" : "people"}</span></h2>
+      ${tiers.map(([label, here]) => `<div class="dtier"><div class="dlabel">${esc(label)}${here.length > 1 ? ` · ${here.length}` : ""}</div>
+        <div class="drow${here.length > 1 ? " many" : ""}" style="--cols:${Math.min(here.length, 5)}">${here.map((k, i) => profCard(k).replace('class="dcard"', `class="dcard${i < 5 ? " top" : ""}"`)).join("")}</div></div>`).join("")}</section>`;
   }).join("");
 }
 // Who may type a specialization: the Registrar or the Dean (anyone with write access on claude.ai).
@@ -2310,7 +2358,7 @@ function renderProfiles(page) {
     page.innerHTML = `${head("Faculty Profiles", `${keys.length} faculty in ${esc(scopeName())}`)}
       <div class="profbar"><input class="inp" id="profSearch" type="search" placeholder="Search by name, rank, duty or specialization" value="${esc(state.profQuery || "")}" aria-label="Search faculty">
         ${depts.length > 1 ? `<select class="inp" id="profDept" aria-label="Department"><option value="">All departments</option>${depts.map((d) => `<option${d === state.profDept ? " selected" : ""}>${esc(d)}</option>`).join("")}</select>` : ""}</div>
-      <div class="pgrid" id="profGrid">${profileCards()}</div>`;
+      <div class="dcharts" id="profGrid">${profileCards()}</div>`;
     return;
   }
   const t = DATA.teachers[k], L = loads[k];
