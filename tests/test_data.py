@@ -74,3 +74,11 @@ def test_organization_chart_matches_faculty():
     referenced = [s["faculty"] for u in org["support_units"] for s in u["staff"] if "faculty" in s]
     assert set(referenced) <= keys and set(org["faculty_emails"]) == keys
     assert "123456" not in (DATA_DIR / "organization.yaml").read_text()   # no passwords in the chart
+
+
+def test_faculty_degrees_and_specializations():
+    """Every faculty member has a highest degree; everyone from the loading plans also has a specialization."""
+    assert all(f.degree for f in UNI.faculty.values())
+    missing = [f.name for f in UNI.faculty.values() if not f.specialization and f.designation != "Associate Dean"]
+    assert not missing, missing
+    assert UNI.faculty["CCJPS-R4"].specialization == "Criminalistics, photography, ballistics, questioned documents"

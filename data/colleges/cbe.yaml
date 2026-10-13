@@ -175,27 +175,27 @@ programs:
       4-2: [THM 490]
 
 faculty:
-  AD: {name: Dr. Fernando E. Ferrer, rank: Professor I, department: Accountancy, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
-  A1: {name: Dr. Leonora B. Velasco, rank: Associate Professor I, department: Accountancy, designation: Department Chair, max_lu: 15}
-  A2: {name: Atty. Ronaldo P. Marquez, rank: Assistant Professor II, department: Accountancy, designation: Faculty}
-  A3: {name: Ms. Charmaine D. Uy, rank: Assistant Professor I, department: Accountancy, designation: Review Coordinator}
-  A4: {name: Mr. Jerico M. Valencia, rank: Assistant Professor I, department: Accountancy, designation: Internship Coordinator}
-  A5: {name: Ms. Abigail T. Flores, rank: Instructor III, department: Accountancy, designation: Faculty}
-  N1: {name: Dr. Ramil S. Gonzales, rank: Associate Professor I, department: Entrepreneurship, designation: Department Chair, max_lu: 15}
-  N2: {name: Ms. Kristel A. Rivera, rank: Assistant Professor I, department: Entrepreneurship, designation: Faculty}
-  N3: {name: Mr. Joel C. Aguilar, rank: Instructor III, department: Entrepreneurship, designation: Faculty}
-  N4: {name: Ms. Aileen R. Javier, rank: Instructor III, department: Entrepreneurship, designation: Incubation Coordinator}
-  B1: {name: Dr. Estela M. Torres, rank: Associate Professor I, department: Business Administration, designation: Department Chair, max_lu: 15}
-  B2: {name: Mr. Rodel P. Morales, rank: Assistant Professor I, department: Business Administration, designation: Financial Management Coordinator}
-  B3: {name: Ms. Liezl G. Castro, rank: Assistant Professor I, department: Business Administration, designation: Marketing Coordinator}
-  B4: {name: Mr. Adrian V. Ramirez, rank: Instructor III, department: Business Administration, designation: Business Analytics Coordinator}
-  B5: {name: Ms. Josephine L. Delos Reyes, rank: Instructor III, department: Business Administration, designation: Internship Coordinator}
-  B6: {name: Mr. Francis Noel D. Galang, rank: Instructor III, department: Business Administration, designation: Faculty}
-  H1: {name: Dr. Marilou C. Padilla, rank: Associate Professor I, department: Tourism and Hospitality Management, designation: Department Chair, max_lu: 15}
-  H2: {name: Mr. Paolo R. Gutierrez, rank: Instructor III, department: Tourism and Hospitality Management, designation: Kitchen Laboratory Coordinator}
-  H3: {name: Ms. Trisha M. Samonte, rank: Assistant Professor I, department: Tourism and Hospitality Management, designation: Faculty}
-  H4: {name: Mr. Lorenzo D. Buenaventura, rank: Assistant Professor I, department: Tourism and Hospitality Management, designation: Practicum Coordinator}
-  H5: {name: Ms. Jasmin L. Sarmiento, rank: Instructor II, department: Tourism and Hospitality Management, designation: Faculty}
+  AD: {name: Dr. Fernando E. Ferrer, rank: Professor I, department: Accountancy, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2, degree: "Doctor of Business Administration; CPA"}   # teaches at most two 3-unit classes of one course
+  A1: {name: Dr. Leonora B. Velasco, rank: Associate Professor I, department: Accountancy, designation: Department Chair, max_lu: 15, degree: "Doctor of Business Administration; CPA", specialization: "Accounting standards, research, governance"}
+  A2: {name: Atty. Ronaldo P. Marquez, rank: Assistant Professor II, department: Accountancy, designation: Faculty, degree: "JD; CPA; member of the Philippine Bar", specialization: "Business law, regulation, taxation"}
+  A3: {name: Ms. Charmaine D. Uy, rank: Assistant Professor I, department: Accountancy, designation: Review Coordinator, degree: "MS Accountancy; CPA", specialization: "Financial accounting and reporting"}
+  A4: {name: Mr. Jerico M. Valencia, rank: Assistant Professor I, department: Accountancy, designation: Internship Coordinator, degree: "MS Accountancy; CPA, CIA", specialization: "Auditing, assurance, information systems"}
+  A5: {name: Ms. Abigail T. Flores, rank: Instructor III, department: Accountancy, designation: Faculty, degree: "Master of Business Administration; CPA", specialization: "Cost and management accounting, finance, management science"}
+  N1: {name: Dr. Ramil S. Gonzales, rank: Associate Professor I, department: Entrepreneurship, designation: Department Chair, max_lu: 15, degree: "Doctor of Business Administration", specialization: "Business planning, strategy, operations"}
+  N2: {name: Ms. Kristel A. Rivera, rank: Assistant Professor I, department: Entrepreneurship, designation: Faculty, degree: "Master of Business Administration (Marketing)", specialization: "Market research, digital marketing, ideation"}
+  N3: {name: Mr. Joel C. Aguilar, rank: Instructor III, department: Entrepreneurship, designation: Faculty, degree: "Master of Business Administration; CPA", specialization: "Accounting, pricing, taxation, finance"}
+  N4: {name: Ms. Aileen R. Javier, rank: Instructor III, department: Entrepreneurship, designation: Incubation Coordinator, degree: "MS Entrepreneurship", specialization: "Innovation, social enterprise, SMEs"}
+  B1: {name: Dr. Estela M. Torres, rank: Associate Professor I, department: Business Administration, designation: Department Chair, max_lu: 15, degree: "Doctor of Business Administration", specialization: "Strategic and operations management, research"}
+  B2: {name: Mr. Rodel P. Morales, rank: Assistant Professor I, department: Business Administration, designation: Financial Management Coordinator, degree: "MBA (Financial Management); CPA", specialization: "Finance, accounting, taxation, business law"}
+  B3: {name: Ms. Liezl G. Castro, rank: Assistant Professor I, department: Business Administration, designation: Marketing Coordinator, degree: "MBA (Marketing)", specialization: "Marketing, consumer behavior, sales"}
+  B4: {name: Mr. Adrian V. Ramirez, rank: Instructor III, department: Business Administration, designation: Business Analytics Coordinator, degree: "MS Business Analytics", specialization: "Analytics, data management, information systems"}
+  B5: {name: Ms. Josephine L. Delos Reyes, rank: Instructor III, department: Business Administration, designation: Internship Coordinator, degree: "MBA (Human Resource Management); SHRM-CP", specialization: "HRM, governance, international business, careers"}
+  B6: {name: Mr. Francis Noel D. Galang, rank: Instructor III, department: Business Administration, designation: Faculty, degree: "MBA (Operations Management); MS Marketing Analytics", specialization: "Operations, marketing analytics, quantitative methods"}
+  H1: {name: Dr. Marilou C. Padilla, rank: Associate Professor I, department: Tourism and Hospitality Management, designation: Department Chair, max_lu: 15, degree: "PhD Hospitality Management", specialization: "Tourism and hospitality management, research"}
+  H2: {name: Mr. Paolo R. Gutierrez, rank: Instructor III, department: Tourism and Hospitality Management, designation: Kitchen Laboratory Coordinator, degree: "MS Hospitality Management; NC II Cookery and Bread and Pastry", specialization: "Culinary, food and beverage, bar operations"}
+  H3: {name: Ms. Trisha M. Samonte, rank: Assistant Professor I, department: Tourism and Hospitality Management, designation: Faculty, degree: "MS Tourism", specialization: "Tourism geography, tour operations, ecotourism"}
+  H4: {name: Mr. Lorenzo D. Buenaventura, rank: Assistant Professor I, department: Tourism and Hospitality Management, designation: Practicum Coordinator, degree: "MBA (Hospitality Management)", specialization: "Lodging, front office, hospitality marketing and law"}
+  H5: {name: Ms. Jasmin L. Sarmiento, rank: Instructor II, department: Tourism and Hospitality Management, designation: Faculty, degree: "MA Korean Studies; BS Tourism", specialization: "Korean language, events, multicultural workplaces"}
 
 loads:
   1:

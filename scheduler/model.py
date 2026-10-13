@@ -74,6 +74,8 @@ class Faculty:
     prep_cap: int | None = 4       # preparations, not counting intro and GE courses
     course_cap: int = 5            # different courses, counting intro and GE courses
     class_cap: int | None = None   # classes at most (an Associate Dean teaches two)
+    degree: str = ""               # highest degree and licenses, from the loading plan
+    specialization: str = ""       # from the loading plan; the Registrar can change it on the Faculty Profiles page
 
     @property
     def short(self) -> str:
@@ -343,7 +345,7 @@ def load_university(data_dir: Path = DATA_DIR) -> University:
             key = f"{college}-{fid}"
             faculty[key] = Faculty(key, fid, f["name"], f["rank"], f["department"], college,
                                    f.get("designation", ""), f.get("max_lu", 24), f.get("prep_cap", prep_cap),
-                                   f.get("course_cap", 5), f.get("class_cap"))
+                                   f.get("course_cap", 5), f.get("class_cap"), f.get("degree", ""), f.get("specialization", ""))
         for sem, per_fac in (raw.get("loads") or {}).items():
             for fid, entries in per_fac.items():
                 for entry in entries:

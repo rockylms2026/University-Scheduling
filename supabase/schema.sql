@@ -31,6 +31,8 @@ create table if not exists public.faculty (
 );
 -- What each instructor specializes in, typed on the Faculty Profiles page by the Registrar or the Dean.
 alter table public.faculty add column if not exists specialization text;
+-- Highest degree and licenses, from the loading plans.
+alter table public.faculty add column if not exists degree text;
 
 create table if not exists public.classes (
   id           text primary key,     -- e.g. S1-0646

@@ -192,27 +192,27 @@ programs:
       4-2: [ED 490]
 
 faculty:
-  AD: {name: Dr. Hillary Joy M. Rufino, rank: Professor I, department: Secondary Education, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
-  S1: {name: Dr. Teresa G. Evangelista, rank: Associate Professor II, department: Secondary Education, designation: Department Chair, max_lu: 15}
-  S2: {name: Dr. Manuel A. Francisco, rank: Associate Professor I, department: Secondary Education, designation: Field Study and Internship Coordinator}
-  S4: {name: Mr. Julius B. Natividad, rank: Instructor III, department: Secondary Education, designation: Faculty}
-  S5: {name: Dr. Rebecca L. Medina, rank: Assistant Professor II, department: Secondary Education, designation: English Major Coordinator}
-  S6: {name: Mr. Nathaniel C. Ortega, rank: Instructor III, department: Secondary Education, designation: Faculty}
-  S7: {name: Dr. Rodolfo M. Umali, rank: Assistant Professor II, department: Secondary Education, designation: Mathematics Major Coordinator}
-  S8: {name: Ms. Kimberly D. Saldana, rank: Instructor III, department: Secondary Education, designation: Faculty}
-  S9: {name: Mr. Rogelio O. Legaspi, rank: Assistant Professor I, department: Secondary Education, designation: Faculty}
-  S10: {name: Ms. Divina P. Magbanua, rank: Instructor III, department: Secondary Education, designation: Social Sciences Major Coordinator}
-  S11: {name: Dr. Amado T. Nepomuceno, rank: Assistant Professor II, department: Secondary Education, designation: Filipino Major Coordinator}
-  S12: {name: Ms. Liwayway C. Salvador, rank: Instructor III, department: Secondary Education, designation: Faculty}
-  S13: {name: Mr. Emilio D. Arceo, rank: Instructor II, department: Secondary Education, designation: Faculty}
-  S14: {name: Ms. Rosario F. Guevarra, rank: Instructor II, department: Secondary Education, designation: Faculty}
-  S15: {name: Ms. Bianca Mae T. Villanueva, rank: Instructor II, department: Secondary Education, designation: Faculty}
-  S16: {name: Mr. Jonathan R. Belmonte, rank: Instructor II, department: Secondary Education, designation: Faculty}
-  E1: {name: Dr. Remedios A. Tamayo, rank: Associate Professor I, department: Elementary Education, designation: Department Chair, max_lu: 15}
-  E2: {name: Ms. Analyn F. Vasquez, rank: Assistant Professor I, department: Elementary Education, designation: Faculty}
-  E3: {name: Mr. Virgilio S. Quijano, rank: Assistant Professor I, department: Elementary Education, designation: Field Study and Internship Coordinator}
-  E4: {name: Ms. Josefina R. Obispo, rank: Instructor III, department: Elementary Education, designation: Faculty}
-  E5: {name: Mr. Ariel M. Baltazar, rank: Instructor III, department: Elementary Education, designation: Faculty}
+  AD: {name: Dr. Hillary Joy M. Rufino, rank: Professor I, department: Secondary Education, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2, degree: "PhD Educational Management; LPT"}   # teaches at most two 3-unit classes of one course
+  S1: {name: Dr. Teresa G. Evangelista, rank: Associate Professor II, department: Secondary Education, designation: Department Chair, max_lu: 15, degree: "PhD Educational Management; LPT", specialization: "School leadership, curriculum, the teaching profession"}
+  S2: {name: Dr. Manuel A. Francisco, rank: Associate Professor I, department: Secondary Education, designation: Field Study and Internship Coordinator, degree: "EdD Curriculum and Instruction; LPT", specialization: "Learner-centered teaching, assessment, field study"}
+  S4: {name: Mr. Julius B. Natividad, rank: Instructor III, department: Secondary Education, designation: Faculty, degree: "MAEd Educational Technology; LPT", specialization: "Technology for teaching and learning"}
+  S5: {name: Dr. Rebecca L. Medina, rank: Assistant Professor II, department: Secondary Education, designation: English Major Coordinator, degree: "PhD English Language Education; LPT", specialization: "Linguistics, language teaching, research"}
+  S6: {name: Mr. Nathaniel C. Ortega, rank: Instructor III, department: Secondary Education, designation: Faculty, degree: "MA Literature; LPT", specialization: "Literature, speech and theater, journalism"}
+  S7: {name: Dr. Rodolfo M. Umali, rank: Assistant Professor II, department: Secondary Education, designation: Mathematics Major Coordinator, degree: "PhD Mathematics Education; LPT", specialization: "Mathematics education, analysis, algebra"}
+  S8: {name: Ms. Kimberly D. Saldana, rank: Instructor III, department: Secondary Education, designation: Faculty, degree: "MS Mathematics; LPT", specialization: "Geometry, statistics, applied mathematics"}
+  S9: {name: Mr. Rogelio O. Legaspi, rank: Assistant Professor I, department: Secondary Education, designation: Faculty, degree: "MA History; LPT", specialization: "Philippine and world history, heritage"}
+  S10: {name: Ms. Divina P. Magbanua, rank: Instructor III, department: Secondary Education, designation: Social Sciences Major Coordinator, degree: "MA Social Studies Education; LPT", specialization: "Social studies pedagogy, government, economics"}
+  S11: {name: Dr. Amado T. Nepomuceno, rank: Assistant Professor II, department: Secondary Education, designation: Filipino Major Coordinator, degree: "PhD Filipino; LPT", specialization: "Linggwistika, panitikan, pagsasaling-wika"}
+  S12: {name: Ms. Liwayway C. Salvador, rank: Instructor III, department: Secondary Education, designation: Faculty, degree: "MA Filipino; LPT", specialization: "Pagtuturo ng wika at panitikan"}
+  S13: {name: Mr. Emilio D. Arceo, rank: Instructor II, department: Secondary Education, designation: Faculty, degree: "MA Filipino; LPT", specialization: "Panitikan, malikhaing pagsulat, wika"}
+  S14: {name: Ms. Rosario F. Guevarra, rank: Instructor II, department: Secondary Education, designation: Faculty, degree: "MA History; LPT", specialization: "Philippine history, Rizal studies, heritage"}
+  S15: {name: Ms. Bianca Mae T. Villanueva, rank: Instructor II, department: Secondary Education, designation: Faculty, degree: "MA English Language Teaching; LPT", specialization: "Grammar, macroskills, purposive communication"}
+  S16: {name: Mr. Jonathan R. Belmonte, rank: Instructor II, department: Secondary Education, designation: Faculty, degree: "MS Mathematics Education; LPT", specialization: "Calculus, discrete mathematics, statistics"}
+  E1: {name: Dr. Remedios A. Tamayo, rank: Associate Professor I, department: Elementary Education, designation: Department Chair, max_lu: 15, degree: "PhD Elementary Education; LPT", specialization: "Curriculum, multigrade teaching, research"}
+  E2: {name: Ms. Analyn F. Vasquez, rank: Assistant Professor I, department: Elementary Education, designation: Faculty, degree: "MAEd Reading; LPT", specialization: "Reading, literacy, English language arts"}
+  E3: {name: Mr. Virgilio S. Quijano, rank: Assistant Professor I, department: Elementary Education, designation: Field Study and Internship Coordinator, degree: "MAEd Mathematics; LPT", specialization: "Mathematics and science teaching, assessment"}
+  E4: {name: Ms. Josefina R. Obispo, rank: Instructor III, department: Elementary Education, designation: Faculty, degree: "MA Filipino; LPT", specialization: "Filipino, social studies, values education"}
+  E5: {name: Mr. Ariel M. Baltazar, rank: Instructor III, department: Elementary Education, designation: Faculty, degree: "MAEd Music, Arts, Physical Education, and Health; LPT", specialization: "MAPEH, EPP, technology for teaching"}
 
 loads:
   1:

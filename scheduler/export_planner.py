@@ -108,7 +108,7 @@ def planner_data(uni: University, semester: int) -> dict:
     load = faculty_load_summary(uni, semester)
     teachers = {key: {"name": f.name, "rank": f.rank, "dept": f.department, "college": f.college,
                       "role": f.designation, "max": f.max_lu, "prepCap": f.prep_cap,
-                      "courseCap": f.course_cap, "classCap": f.class_cap,
+                      "courseCap": f.course_cap, "classCap": f.class_cap, "degree": f.degree, "spec": f.specialization,
                       "office": offices.get(key, "")}
                 for key, f in uni.faculty.items()}
 

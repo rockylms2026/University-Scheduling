@@ -146,21 +146,21 @@ programs:
       4-2: [SW 491]
 
 faculty:
-  AD: {name: Dr. Ian P. Bonilla, rank: Associate Professor IV, department: Criminology, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
-  R1: {name: Dr. Nestor B. Alcaraz, rank: Associate Professor I, department: Criminology, designation: Department Chair, max_lu: 15}
-  R2: {name: Atty. Celeste M. Rivera, rank: Assistant Professor II, department: Criminology, designation: Faculty}
-  R3: {name: Mr. Herminio D. Bagasbas, rank: Assistant Professor I, department: Criminology, designation: Internship Coordinator}
-  R4: {name: Ms. Janine F. Corpuz, rank: Instructor III, department: Criminology, designation: Crime Laboratory Coordinator}
-  R5: {name: Mr. Rodrigo P. Salvador, rank: Instructor III, department: Criminology, designation: Faculty}
-  R6: {name: Ms. Marjorie L. Pascual, rank: Instructor II, department: Criminology, designation: Faculty}
-  D1: {name: Dr. Reynaldo C. Villamor, rank: Associate Professor I, department: Public Administration, designation: Department Chair, max_lu: 15}
-  D2: {name: Ms. Lorna G. Fabian, rank: Assistant Professor I, department: Public Administration, designation: Faculty}
-  D3: {name: Mr. Joel R. Macapagal, rank: Instructor III, department: Public Administration, designation: Internship Coordinator}
-  D4: {name: Atty. Kristine D. Ramos, rank: Instructor III, department: Public Administration, designation: Faculty}
-  W1: {name: Dr. Evangeline P. Soriano, rank: Associate Professor I, department: Social Work, designation: Department Chair, max_lu: 15}
-  W2: {name: Ms. Rhea Lyn C. Galang, rank: Assistant Professor I, department: Social Work, designation: Field Instruction Coordinator}
-  W3: {name: Mr. Emmanuel T. Dacanay, rank: Instructor III, department: Social Work, designation: Faculty}
-  W4: {name: Ms. Charisse M. Lopez, rank: Instructor II, department: Social Work, designation: Faculty}
+  AD: {name: Dr. Ian P. Bonilla, rank: Associate Professor IV, department: Criminology, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2, degree: "PhD Criminal Justice; RCrim"}   # teaches at most two 3-unit classes of one course
+  R1: {name: Dr. Nestor B. Alcaraz, rank: Associate Professor I, department: Criminology, designation: Department Chair, max_lu: 15, degree: "PhD Criminal Justice; RCrim", specialization: "Criminological theory, research, juvenile justice"}
+  R2: {name: Atty. Celeste M. Rivera, rank: Assistant Professor II, department: Criminology, designation: Faculty, degree: "JD; RCrim; member of the Philippine Bar", specialization: "Criminal law, procedure, evidence, human rights"}
+  R3: {name: Mr. Herminio D. Bagasbas, rank: Assistant Professor I, department: Criminology, designation: Internship Coordinator, degree: "MS Criminology; RCrim; retired Police Lieutenant Colonel", specialization: "Police administration, patrol, intelligence, security"}
+  R4: {name: Ms. Janine F. Corpuz, rank: Instructor III, department: Criminology, designation: Crime Laboratory Coordinator, degree: "MS Forensic Science; RCrim", specialization: "Criminalistics, photography, ballistics, questioned documents"}
+  R5: {name: Mr. Rodrigo P. Salvador, rank: Instructor III, department: Criminology, designation: Faculty, degree: "MS Criminal Justice (Investigation); RCrim", specialization: "Criminal investigation, traffic, fire and arson, drugs"}
+  R6: {name: Ms. Marjorie L. Pascual, rank: Instructor II, department: Criminology, designation: Faculty, degree: "MA Psychology; RCrim; RPm", specialization: "Corrections, victimology, therapeutic modalities, lie detection"}
+  D1: {name: Dr. Reynaldo C. Villamor, rank: Associate Professor I, department: Public Administration, designation: Department Chair, max_lu: 15, degree: "Doctor of Public Administration", specialization: "Public policy, governance, research"}
+  D2: {name: Ms. Lorna G. Fabian, rank: Assistant Professor I, department: Public Administration, designation: Faculty, degree: "Master in Public Administration; CPA", specialization: "Fiscal administration, government accounting, procurement"}
+  D3: {name: Mr. Joel R. Macapagal, rank: Instructor III, department: Public Administration, designation: Internship Coordinator, degree: "Master in Public Administration", specialization: "Local governance, disaster management, civil society"}
+  D4: {name: Atty. Kristine D. Ramos, rank: Instructor III, department: Public Administration, designation: Faculty, degree: "JD; Master in Public Administration; member of the Philippine Bar", specialization: "Administrative law, personnel administration, ethics, gender"}
+  W1: {name: Dr. Evangeline P. Soriano, rank: Associate Professor I, department: Social Work, designation: Department Chair, max_lu: 15, degree: "PhD Social Work; RSW", specialization: "Social welfare policy, research, administration"}
+  W2: {name: Ms. Rhea Lyn C. Galang, rank: Assistant Professor I, department: Social Work, designation: Field Instruction Coordinator, degree: "MSW (Clinical); RSW", specialization: "Casework, families, mental health, counseling skills"}
+  W3: {name: Mr. Emmanuel T. Dacanay, rank: Instructor III, department: Social Work, designation: Faculty, degree: "MSW (Community Development); RSW", specialization: "Community organizing, groups, disaster response, projects"}
+  W4: {name: Ms. Charisse M. Lopez, rank: Instructor II, department: Social Work, designation: Faculty, degree: "MSW; RSW; MA Gender Studies", specialization: "Human behavior, gender and development, older persons, ethics"}
 
 # Teaching loads: faculty ID -> list of {course: sections}
 loads:

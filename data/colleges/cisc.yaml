@@ -120,24 +120,24 @@ programs:
       4-2: [LIS 420, LIS 490]
 
 faculty:
-  AD: {name: Dr. Dolores R. Cayaban, rank: Associate Professor V, department: Computer Science, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
-  C1: {name: Dr. Arnel P. Macaraeg, rank: Associate Professor I, department: Computer Science, designation: Department Chair, max_lu: 15}
-  C2: {name: Mr. Carlo Miguel D. Santiago, rank: Assistant Professor I, department: Computer Science, designation: Thesis and Practicum Coordinator}
-  C3: {name: Dr. Jasmine T. Lorenzo, rank: Assistant Professor II, department: Computer Science, designation: Research Coordinator}
-  C4: {name: Mr. Noel B. Ferrer, rank: Instructor III, department: Computer Science, designation: Laboratory Coordinator}
-  C5: {name: Ms. Rhea Anne L. Cruz, rank: Assistant Professor I, department: Computer Science, designation: Faculty}
-  C6: {name: Mr. Kevin S. Domingo, rank: Instructor II, department: Computer Science, designation: Faculty}
-  T1: {name: Dr. Marivic S. Pascual, rank: Associate Professor I, department: Information Technology, designation: Department Chair, max_lu: 15}
-  T2: {name: Mr. Ramon J. Villareal, rank: Assistant Professor I, department: Information Technology, designation: Laboratory Coordinator}
-  T3: {name: Ms. Diane Mae R. Caballero, rank: Instructor III, department: Information Technology, designation: Faculty}
-  T4: {name: Mr. Francis G. Ignacio, rank: Assistant Professor I, department: Information Technology, designation: Capstone and Practicum Coordinator}
-  T5: {name: Ms. Jennifer C. Salazar, rank: Instructor III, department: Information Technology, designation: Faculty}
-  T6: {name: Mr. Antonio L. Mendoza, rank: Instructor II, department: Information Technology, designation: Faculty}
-  B1: {name: Dr. Evelyn M. Lim, rank: Associate Professor I, department: Library and Information Science, designation: Department Chair, max_lu: 15}
-  B2: {name: Ms. Rosalind T. Garcia, rank: Assistant Professor I, department: Library and Information Science, designation: Faculty}
-  B3: {name: Ms. Pauline A. de Guzman, rank: Instructor III, department: Library and Information Science, designation: Faculty}
-  B4: {name: Mr. Arvin C. Tan, rank: Assistant Professor I, department: Library and Information Science, designation: Library Technology Coordinator}
-  B5: {name: Ms. Grace L. Bernardo, rank: Instructor III, department: Library and Information Science, designation: Practicum Coordinator}
+  AD: {name: Dr. Dolores R. Cayaban, rank: Associate Professor V, department: Computer Science, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2, degree: "PhD Computer Science"}   # teaches at most two 3-unit classes of one course
+  C1: {name: Dr. Arnel P. Macaraeg, rank: Associate Professor I, department: Computer Science, designation: Department Chair, max_lu: 15, degree: "PhD Computer Science", specialization: "Algorithms, theory of computation"}
+  C2: {name: Mr. Carlo Miguel D. Santiago, rank: Assistant Professor I, department: Computer Science, designation: Thesis and Practicum Coordinator, degree: "MS Computer Science (Software Engineering)", specialization: "Software engineering, programming"}
+  C3: {name: Dr. Jasmine T. Lorenzo, rank: Assistant Professor II, department: Computer Science, designation: Research Coordinator, degree: "PhD Computer Science (Machine Learning)", specialization: "Intelligent systems, machine learning, data"}
+  C4: {name: Mr. Noel B. Ferrer, rank: Instructor III, department: Computer Science, designation: Laboratory Coordinator, degree: "MS Computer Science (Systems)", specialization: "Architecture, operating systems, networks, security"}
+  C5: {name: Ms. Rhea Anne L. Cruz, rank: Assistant Professor I, department: Computer Science, designation: Faculty, degree: "MS Applied Mathematics", specialization: "Discrete mathematics, calculus, statistics"}
+  C6: {name: Mr. Kevin S. Domingo, rank: Instructor II, department: Computer Science, designation: Faculty, degree: "Master in Information Technology", specialization: "Programming, applications development, HCI"}
+  T1: {name: Dr. Marivic S. Pascual, rank: Associate Professor I, department: Information Technology, designation: Department Chair, max_lu: 15, degree: "Doctor in Information Technology", specialization: "Systems integration, IT management"}
+  T2: {name: Mr. Ramon J. Villareal, rank: Assistant Professor I, department: Information Technology, designation: Laboratory Coordinator, degree: "Master in Information Technology; Cisco-certified", specialization: "Networking, cloud, systems administration"}
+  T3: {name: Ms. Diane Mae R. Caballero, rank: Instructor III, department: Information Technology, designation: Faculty, degree: "Master in Information Technology", specialization: "Programming, web and mobile development, UX"}
+  T4: {name: Mr. Francis G. Ignacio, rank: Assistant Professor I, department: Information Technology, designation: Capstone and Practicum Coordinator, degree: "MS Information Security", specialization: "Information assurance and security"}
+  T5: {name: Ms. Jennifer C. Salazar, rank: Instructor III, department: Information Technology, designation: Faculty, degree: "Master in Information Technology", specialization: "Databases, data structures, integrative programming"}
+  T6: {name: Mr. Antonio L. Mendoza, rank: Instructor II, department: Information Technology, designation: Faculty, degree: "Master in Information Technology; BS Applied Physics", specialization: "Platform technologies, STS, quantitative methods"}
+  B1: {name: Dr. Evelyn M. Lim, rank: Associate Professor I, department: Library and Information Science, designation: Department Chair, max_lu: 15, degree: "PhD Library and Information Science; RL", specialization: "Library management, research, legislation"}
+  B2: {name: Ms. Rosalind T. Garcia, rank: Assistant Professor I, department: Library and Information Science, designation: Faculty, degree: "MLIS; RL", specialization: "Cataloging, classification, indexing"}
+  B3: {name: Ms. Pauline A. de Guzman, rank: Instructor III, department: Library and Information Science, designation: Faculty, degree: "MLIS; RL", specialization: "Reference services, information literacy"}
+  B4: {name: Mr. Arvin C. Tan, rank: Assistant Professor I, department: Library and Information Science, designation: Library Technology Coordinator, degree: "MLIS; RL", specialization: "Library automation, digital libraries, retrieval"}
+  B5: {name: Ms. Grace L. Bernardo, rank: Instructor III, department: Library and Information Science, designation: Practicum Coordinator, degree: "MLIS; RL", specialization: "Collections, archives, preservation"}
 
 loads:
   1:

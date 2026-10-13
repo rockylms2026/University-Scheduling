@@ -8,25 +8,25 @@ name: General Education Department
 prep_cap: null
 
 faculty:
-  G1: {name: Dr. Ma. Luisa T. Pangilinan, rank: Associate Professor I, department: General Education, designation: GE Department Coordinator, max_lu: 15}
-  G2: {name: Mr. Bernardo C. Aquino, rank: Instructor III, department: General Education, designation: Faculty}
-  G3: {name: Dr. Francis Xavier M. Tolentino, rank: Assistant Professor II, department: General Education, designation: Faculty}
-  G4: {name: Ms. Angelica R. Soriano, rank: Instructor III, department: General Education, designation: Faculty}
-  G5: {name: Ms. Hannah Grace V. Alvarez, rank: Instructor II, department: General Education, designation: Humanities Coordinator}
-  G6: {name: Mr. Lorenzo P. Galvez, rank: Instructor III, department: General Education, designation: Faculty}
-  G7: {name: Ms. Bea Katrina L. Navarro, rank: Instructor II, department: General Education, designation: Faculty}
-  G8: {name: Dr. Rosemarie D. Aguilar, rank: Assistant Professor I, department: General Education, designation: Writing Coordinator}
-  G9: {name: Mr. Joshua M. Cabanilla, rank: Instructor III, department: General Education, designation: Faculty}
-  G10: {name: Ms. Kathleen T. Robles, rank: Instructor III, department: General Education, designation: Faculty}
-  G11: {name: Ms. Danica F. Salvador, rank: Instructor II, department: General Education, designation: Faculty}
-  G12: {name: Mr. Dennis A. Cortez, rank: Instructor II, department: General Education, designation: PE Coordinator}
-  G13: {name: Ms. Rowena J. Manzano, rank: Instructor III, department: General Education, designation: Faculty}
-  G14: {name: Mr. Mark Joseph L. Tuazon, rank: Instructor II, department: General Education, designation: Faculty}
-  G15: {name: Ms. Irene C. Mallari, rank: Instructor II, department: General Education, designation: Faculty}
-  G16: {name: Mr. Paulo V. Sison, rank: Instructor II, department: General Education, designation: Faculty}
-  G17: {name: Ms. Maricar L. Bacani, rank: Instructor II, department: General Education, designation: NSTP Coordinator}
-  G18: {name: Mr. Ramon D. Esteban, rank: Instructor II, department: General Education, designation: Faculty}
-  G19: {name: Ms. Liezel P. Corpuz, rank: Instructor II, department: General Education, designation: Faculty}
+  G1: {name: Dr. Ma. Luisa T. Pangilinan, rank: Associate Professor I, department: General Education, designation: GE Department Coordinator, max_lu: 15, degree: "PhD Philosophy", specialization: "Logic, ethics, philosophy of religion"}
+  G2: {name: Mr. Bernardo C. Aquino, rank: Instructor III, department: General Education, designation: Faculty, degree: "MA Philosophy", specialization: "Critical thinking, ethics"}
+  G3: {name: Dr. Francis Xavier M. Tolentino, rank: Assistant Professor II, department: General Education, designation: Faculty, degree: "PhD Applied Ethics", specialization: "Ethics, bioethics, business ethics"}
+  G4: {name: Ms. Angelica R. Soriano, rank: Instructor III, department: General Education, designation: Faculty, degree: "MA Philosophy", specialization: "Logic, critical thinking"}
+  G5: {name: Ms. Hannah Grace V. Alvarez, rank: Instructor II, department: General Education, designation: Humanities Coordinator, degree: "MA Humanities", specialization: "Art appreciation, literature, religion and culture"}
+  G6: {name: Mr. Lorenzo P. Galvez, rank: Instructor III, department: General Education, designation: Faculty, degree: "MFA Visual Arts", specialization: "Art history, visual arts, Philippine arts"}
+  G7: {name: Ms. Bea Katrina L. Navarro, rank: Instructor II, department: General Education, designation: Faculty, degree: "MA Art Studies", specialization: "Philippine art, music, performing arts"}
+  G8: {name: Dr. Rosemarie D. Aguilar, rank: Assistant Professor I, department: General Education, designation: Writing Coordinator, degree: "PhD Literature", specialization: "Philippine and world literature"}
+  G9: {name: Mr. Joshua M. Cabanilla, rank: Instructor III, department: General Education, designation: Faculty, degree: "MA English Language Studies", specialization: "Professional and technical writing, editing"}
+  G10: {name: Ms. Kathleen T. Robles, rank: Instructor III, department: General Education, designation: Faculty, degree: "MA Literature", specialization: "Philippine literature, creative writing"}
+  G11: {name: Ms. Danica F. Salvador, rank: Instructor II, department: General Education, designation: Faculty, degree: "MA English (Technical Communication)", specialization: "Technical and workplace writing"}
+  G12: {name: Mr. Dennis A. Cortez, rank: Instructor II, department: General Education, designation: PE Coordinator, degree: "MS Physical Education", specialization: "Physical fitness, sports, dance"}
+  G13: {name: Ms. Rowena J. Manzano, rank: Instructor III, department: General Education, designation: Faculty, degree: "MS Physical Education", specialization: "Fitness, individual and dual sports"}
+  G14: {name: Mr. Mark Joseph L. Tuazon, rank: Instructor II, department: General Education, designation: Faculty, degree: "MA Physical Education; licensed coach", specialization: "Team sports, recreation"}
+  G15: {name: Ms. Irene C. Mallari, rank: Instructor II, department: General Education, designation: Faculty, degree: "MA Dance Education", specialization: "Dance, rhythmic activities"}
+  G16: {name: Mr. Paulo V. Sison, rank: Instructor II, department: General Education, designation: Faculty, degree: "MS Sports Science", specialization: "Fitness, wellness, team sports"}
+  G17: {name: Ms. Maricar L. Bacani, rank: Instructor II, department: General Education, designation: NSTP Coordinator, degree: "MA Community Development", specialization: "NSTP, civic welfare, community service"}
+  G18: {name: Mr. Ramon D. Esteban, rank: Instructor II, department: General Education, designation: Faculty, degree: "MS Physical Education", specialization: "Outdoor recreation, sports, NSTP"}
+  G19: {name: Ms. Liezel P. Corpuz, rank: Instructor II, department: General Education, designation: Faculty, degree: "MA Public Administration", specialization: "Civic education, volunteerism, local governance"}
 
 loads:
   1:

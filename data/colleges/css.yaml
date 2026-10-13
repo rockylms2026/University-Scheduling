@@ -164,27 +164,27 @@ programs:
       4-2: [ECON 420, ECON 490]
 
 faculty:
-  AD: {name: Dr. Marissa F. Prudencio, rank: Professor I, department: Psychology, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2}   # teaches at most two 3-unit classes of one course
-  P1: {name: Dr. Rowena C. Dalisay, rank: Associate Professor II, department: Psychology, designation: Department Chair, max_lu: 15}
-  P2: {name: Ms. Kristine Joy M. Lacsamana, rank: Assistant Professor I, department: Psychology, designation: Faculty}
-  P3: {name: Mr. Joaquin R. Esguerra, rank: Assistant Professor I, department: Psychology, designation: I-O Track Coordinator}
-  P4: {name: Dr. Benedict A. Manalastas, rank: Assistant Professor III, department: Psychology, designation: Research Coordinator}
-  P5: {name: Ms. Angelica P. Tolentino, rank: Instructor III, department: Psychology, designation: Faculty}
-  L1: {name: Dr. Ernesto V. Dimaculangan, rank: Associate Professor I, department: Political Science, designation: Department Chair, max_lu: 15}
-  L2: {name: Atty. Mariel S. Agustin, rank: Assistant Professor II, department: Political Science, designation: Legal Studies Coordinator}
-  L3: {name: Atty. Rafael T. Bautista, rank: Assistant Professor I, department: Political Science, designation: Internship Coordinator}
-  L4: {name: Mr. Paolo D. Ilagan, rank: Instructor III, department: Political Science, designation: Faculty}
-  L5: {name: Ms. Liza Marie G. Soriano, rank: Instructor III, department: Political Science, designation: Faculty}
-  M1: {name: Dr. Teresita L. Valdez, rank: Associate Professor I, department: Communication, designation: Department Chair, max_lu: 15}
-  M2: {name: Mr. Gabriel N. Ocampo, rank: Assistant Professor I, department: Communication, designation: Faculty}
-  M3: {name: Mr. Daniel F. Robles, rank: Instructor III, department: Communication, designation: Media Laboratory Coordinator}
-  M4: {name: Ms. Patricia Anne E. Yap, rank: Assistant Professor I, department: Communication, designation: Internship Coordinator}
-  M5: {name: Ms. Camille R. Navarro, rank: Instructor II, department: Communication, designation: Faculty}
-  E1: {name: Dr. Florante S. Mangubat, rank: Associate Professor I, department: Economics, designation: Department Chair, max_lu: 15}
-  E2: {name: Dr. Imelda R. Cabrera, rank: Assistant Professor III, department: Economics, designation: Research Coordinator}
-  E3: {name: Mr. Ronnel T. Salonga, rank: Assistant Professor I, department: Economics, designation: Faculty}
-  E4: {name: Ms. Katrina V. Lucero, rank: Instructor III, department: Economics, designation: Internship Coordinator}
-  E5: {name: Mr. Jose Emmanuel P. Sison, rank: Instructor II, department: Economics, designation: Faculty}
+  AD: {name: Dr. Marissa F. Prudencio, rank: Professor I, department: Psychology, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2, degree: "PhD Social Psychology"}   # teaches at most two 3-unit classes of one course
+  P1: {name: Dr. Rowena C. Dalisay, rank: Associate Professor II, department: Psychology, designation: Department Chair, max_lu: 15, degree: "PhD Counseling Psychology; RPsy, RGC", specialization: "Counseling, psychopathology"}
+  P2: {name: Ms. Kristine Joy M. Lacsamana, rank: Assistant Professor I, department: Psychology, designation: Faculty, degree: "MA Clinical Psychology; RPsy", specialization: "Assessment, clinical psychology"}
+  P3: {name: Mr. Joaquin R. Esguerra, rank: Assistant Professor I, department: Psychology, designation: I-O Track Coordinator, degree: "MA Industrial-Organizational Psychology; RPm", specialization: "I-O psychology, HR, cognition at work"}
+  P4: {name: Dr. Benedict A. Manalastas, rank: Assistant Professor III, department: Psychology, designation: Research Coordinator, degree: "PhD Psychology (Experimental); RPm", specialization: "Statistics, research methods, biological psychology"}
+  P5: {name: Ms. Angelica P. Tolentino, rank: Instructor III, department: Psychology, designation: Faculty, degree: "MA Developmental Psychology; RPm", specialization: "Self and identity, gender, development"}
+  L1: {name: Dr. Ernesto V. Dimaculangan, rank: Associate Professor I, department: Political Science, designation: Department Chair, max_lu: 15, degree: "PhD Political Science", specialization: "Political theory, Philippine politics"}
+  L2: {name: Atty. Mariel S. Agustin, rank: Assistant Professor II, department: Political Science, designation: Legal Studies Coordinator, degree: "JD; MA Political Science; member of the Philippine Bar", specialization: "Constitutional and public law"}
+  L3: {name: Atty. Rafael T. Bautista, rank: Assistant Professor I, department: Political Science, designation: Internship Coordinator, degree: "JD; member of the Philippine Bar", specialization: "Criminal law, civil law, advocacy"}
+  L4: {name: Mr. Paolo D. Ilagan, rank: Instructor III, department: Political Science, designation: Faculty, degree: "MA International Studies", specialization: "International relations, comparative politics"}
+  L5: {name: Ms. Liza Marie G. Soriano, rank: Instructor III, department: Political Science, designation: Faculty, degree: "Master in Public Administration", specialization: "Public administration, local governance, research"}
+  M1: {name: Dr. Teresita L. Valdez, rank: Associate Professor I, department: Communication, designation: Department Chair, max_lu: 15, degree: "PhD Development Communication", specialization: "Development communication, communication research"}
+  M2: {name: Mr. Gabriel N. Ocampo, rank: Assistant Professor I, department: Communication, designation: Faculty, degree: "MA Journalism", specialization: "Journalism, media law, media history"}
+  M3: {name: Mr. Daniel F. Robles, rank: Instructor III, department: Communication, designation: Media Laboratory Coordinator, degree: "MA Media Studies (Broadcast and Film)", specialization: "Audio, video, and digital production"}
+  M4: {name: Ms. Patricia Anne E. Yap, rank: Assistant Professor I, department: Communication, designation: Internship Coordinator, degree: "MA Communication (Strategic Communication)", specialization: "PR, advertising, organizational communication"}
+  M5: {name: Ms. Camille R. Navarro, rank: Instructor II, department: Communication, designation: Faculty, degree: "MA Speech Communication", specialization: "Purposive and speech communication"}
+  E1: {name: Dr. Florante S. Mangubat, rank: Associate Professor I, department: Economics, designation: Department Chair, max_lu: 15, degree: "PhD Economics", specialization: "Macroeconomics, development economics, Philippine economy"}
+  E2: {name: Dr. Imelda R. Cabrera, rank: Assistant Professor III, department: Economics, designation: Research Coordinator, degree: "PhD Economics", specialization: "Microeconomics, econometrics, labor economics"}
+  E3: {name: Mr. Ronnel T. Salonga, rank: Assistant Professor I, department: Economics, designation: Faculty, degree: "MA Economics", specialization: "Mathematical economics, public finance, industrial organization"}
+  E4: {name: Ms. Katrina V. Lucero, rank: Instructor III, department: Economics, designation: Internship Coordinator, degree: "MA Development Economics", specialization: "International and agricultural economics, globalization"}
+  E5: {name: Mr. Jose Emmanuel P. Sison, rank: Instructor II, department: Economics, designation: Faculty, degree: "MA Economics", specialization: "Money and banking, economic history, behavioral economics"}
 
 loads:
   1:
