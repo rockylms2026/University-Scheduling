@@ -503,27 +503,27 @@ dl.about dd { margin: 0; }
 /* ----- organizational chart: one person on top, their team below, drill down and up ----- */
 .orgview { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 24px; align-items: start; }
 .ochart { display: grid; justify-items: center; padding: 8px 0 24px; min-width: 0; }
-.ochart.in-down { animation: org-down .3s var(--ease); } .ochart.in-up { animation: org-up .3s var(--ease); }
-@keyframes org-down { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@keyframes org-up { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
 .oup, .odown { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; transition: background-color .15s ease, border-color .15s ease; }
 .oup:hover, .odown:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
-.odown { border-color: transparent; background: transparent; margin-top: auto; }
+.odown { border-color: transparent; background: transparent; margin-top: auto; color: var(--muted); }
 .otrunk { display: block; width: 2px; height: 28px; background: #b9c0cb; }
 .otrunk.short { height: 14px; }
 .ocard { position: relative; z-index: 1; width: 100%; max-width: 190px; min-height: 196px; background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: 6px; padding: 8px 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; box-shadow: 0 1px 3px rgba(15,25,45,.06); transition: box-shadow .16s ease, transform .16s ease, background-color .3s ease; }
-.ocard:hover { box-shadow: 0 6px 18px rgba(15,25,45,.12); transform: translateY(-1px); }
+.ocard.tap { cursor: pointer; }
+.ocard.tap:hover { box-shadow: 0 6px 18px rgba(15,25,45,.14); border-color: #c4cbd6; border-top-color: var(--accent); }
+.ocard.tap:hover .odown { background: var(--accent-soft); color: var(--accent); }
+.ocard.tap:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .ocard.focus { max-width: 250px; min-height: 0; padding: 10px 14px 14px; box-shadow: 0 6px 20px rgba(15,25,45,.12); }
 .ocard.open { border-top-color: var(--line); }
 .ocard.flash { background: var(--warn-soft); }
-.oteam { width: 100%; font: inherit; font-size: .74rem; font-weight: 500; color: #1a66d6; background: none; border: 0; padding: 0 0 4px; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
-.oteam:disabled { color: var(--muted); text-decoration: none; cursor: default; }
+.oteam { display: block; width: 100%; font-size: .74rem; font-weight: 500; color: #1a66d6; padding: 0 0 4px; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ocard.open .oteam, .ocard:not(.tap):not(.focus) .oteam { color: var(--muted); text-decoration: none; }
 .oav { position: relative; width: 52px; height: 52px; border-radius: 50%; background: var(--accent-soft); color: var(--navy); display: grid; place-items: center; font-weight: 500; font-size: 1rem; margin: 2px 0 4px; }
 .ocard.focus .oav { width: 64px; height: 64px; font-size: 1.2rem; background: var(--navy); color: #fff; }
 .oav b { position: absolute; right: -4px; bottom: -2px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: #1a66d6; color: #fff; font-size: .68rem; display: grid; place-items: center; border: 2px solid var(--panel); }
-.oname { font: inherit; font-size: .86rem; font-weight: 500; color: #1a66d6; background: none; border: 0; padding: 0; cursor: pointer; line-height: 1.25; }
-span.oname { color: var(--ink); cursor: default; }
-.oname:hover { text-decoration: underline; }
+.oname { font: inherit; font-size: .86rem; font-weight: 500; color: #1a66d6; background: none; border: 0; padding: 0; line-height: 1.25; }
+button.oname { cursor: pointer; } button.oname:hover { text-decoration: underline; }
+.ocard:not(.tap):not(.focus) .oname { color: var(--ink); }
 .otitle { font-size: .78rem; color: var(--ink); line-height: 1.3; }
 .omuted { font-size: .72rem; color: var(--muted); overflow-wrap: anywhere; }
 .ocard em { font-style: normal; font-size: .66rem; font-weight: 500; color: var(--muted); background: var(--lunch); border-radius: 999px; padding: 1px 7px; cursor: help; }
@@ -2277,16 +2277,19 @@ function orgTree() {
 }
 function orgPath(nodes, id) { const out = []; for (let n = nodes[id]; n; n = nodes[n.parent]) out.unshift(n); return out; }
 function orgCard(n, opts = {}) {
-  const kids = n.children.length;
-  return `<article class="ocard${opts.focus ? " focus" : ""}${n.open ? " open" : ""}" data-person="${esc(n.id)}">
-    <button type="button" class="oteam" ${kids ? `data-orgfocus="${esc(n.id)}"` : n.key ? `data-profile="${n.key}"` : "disabled"} title="${esc(`${n.unit} (${n.name})`)}">${esc(n.unit)}${kids ? ` (${esc(n.name.replace(/^(Dr|Mr|Ms|Mrs|Atty|Engr|Prof)\.\s*/, ""))})` : ""}</button>
+  const kids = n.children.length, focus = opts.focus;
+  // A card in the team row is one big button: it brings that person to the top (or opens their profile).
+  const act = focus ? "" : kids ? `data-orgfocus="${esc(n.id)}" tabindex="0" role="button" aria-label="Show the team of ${esc(n.name)}"`
+    : n.key ? `data-profile="${n.key}" tabindex="0" role="button" aria-label="Open the profile of ${esc(n.name)}"` : "";
+  return `<article class="ocard${focus ? " focus" : ""}${n.open ? " open" : ""}${act ? " tap" : ""}" data-person="${esc(n.id)}" ${act}>
+    <span class="oteam" title="${esc(`${n.unit} (${n.name})`)}">${esc(n.unit)}${kids ? ` (${esc(n.name.replace(/^(Dr|Mr|Ms|Mrs|Atty|Engr|Prof)\.\s*/, ""))})` : ""}</span>
     <span class="oav">${esc(n.open ? "+" : initials(n.name))}${kids ? `<b title="${kids} report${kids > 1 ? "s" : ""} to ${esc(n.name)}">${kids}</b>` : ""}</span>
-    ${n.key ? `<button type="button" class="oname" data-profile="${n.key}">${esc(n.name)}</button>` : `<span class="oname">${esc(n.name)}</span>`}
-    <span class="otitle">${esc(n.title)}${opts.focus && n.rank ? ` · ${esc(n.rank)}` : ""}</span>
-    ${opts.focus && n.credentials ? `<span class="omuted">${esc(n.credentials)}</span>` : ""}
+    ${focus && n.key ? `<button type="button" class="oname" data-profile="${n.key}" title="Open the faculty profile">${esc(n.name)}</button>` : `<span class="oname">${esc(n.name)}</span>`}
+    <span class="otitle">${esc(n.title)}${focus && n.rank ? ` · ${esc(n.rank)}` : ""}</span>
+    ${focus && n.credentials ? `<span class="omuted">${esc(n.credentials)}</span>` : ""}
     ${n.email ? `<span class="omuted">${esc(n.email)}</span>` : ""}
     ${HOW[n.how] ? `<em title="${esc(HOW[n.how][1])}">${HOW[n.how][0]}</em>` : ""}
-    ${kids && !opts.focus ? `<button type="button" class="odown" data-orgfocus="${esc(n.id)}" aria-label="Show the ${kids} who report to ${esc(n.name)}">${svg('<path d="m6 9 6 6 6-6"/>', 18)}</button>` : ""}
+    ${kids && !focus ? `<span class="odown" aria-hidden="true">${svg('<path d="m6 9 6 6 6-6"/>', 18)}</span>` : ""}
   </article>`;
 }
 function renderOrg(page) {
@@ -2319,14 +2322,32 @@ function renderOrg(page) {
     </div>`;
 }
 function orgGo(id, highlight) {
-  const dir = state.orgFocus && orgTree()[state.orgFocus]?.parent === id ? "up" : "down";
+  const old = state.orgFocus, nodes = orgTree();
+  const up = nodes[old]?.parent === id || orgPath(nodes, old).some((n) => n.id === id && n.id !== old);
+  const rectOf = (pid) => { const el = document.querySelector(`#orgChart [data-person="${CSS.escape(pid)}"]`); return el ? el.getBoundingClientRect() : null; };
+  const from = up ? rectOf(old) : rectOf(id);                 // where the moving card is now
   state.orgFocus = id; render();
   const chart = $("orgChart");
-  if (chart) { chart.classList.remove("in-up", "in-down"); void chart.offsetWidth; chart.classList.add(`in-${dir}`); }
-  if (chart && chart.getBoundingClientRect().top < 0) chart.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (!chart) return;
+  const top = chart.getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--top")) || 64) - 12;
+  if (Math.abs(scrollY - top) > 4 && (scrollY > top || chart.getBoundingClientRect().top > innerHeight * .5)) scrollTo({ top, behavior: "instant" });
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const mover = up ? document.querySelector(`#orgChart .okids [data-person="${CSS.escape(old)}"]`) : chart.querySelector(".ocard.focus");
+  if (!reduce && from && mover) {
+    const to = mover.getBoundingClientRect();
+    mover.animate([{ transform: `translate(${from.left - to.left + (from.width - to.width) / 2}px, ${from.top - to.top}px) scale(${from.width / to.width})`, zIndex: 5 },
+                   { transform: "none", zIndex: 5 }], { duration: 480, easing: "cubic-bezier(.2,.8,.2,1)" });
+  }
+  if (!reduce) {
+    [...chart.querySelectorAll(".otrunk, .okids > *, .okids")].filter((el) => el !== mover).forEach((el, i) => {
+      el.animate([{ opacity: 0, transform: el.classList.contains("okids") ? "none" : "translateY(-10px)" }, { opacity: 1, transform: "none" }],
+        { duration: 320, delay: 200 + Math.min(i, 12) * 30, easing: "ease-out", fill: "backwards" });
+    });
+    if (up && !mover) chart.querySelector(".ocard.focus")?.animate([{ opacity: 0, transform: "translateY(-12px)" }, { opacity: 1, transform: "none" }], { duration: 300, easing: "ease-out" });
+  }
   if (highlight) {
     const el = [...document.querySelectorAll(".okids [data-person]")].find((e) => e.dataset.person === highlight);
-    if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1800); }
+    if (el) { setTimeout(() => el.scrollIntoView({ behavior: "smooth", block: "center" }), 300); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 2000); }
   }
 }
 function orgFind(q) {
@@ -2752,7 +2773,7 @@ function goHit(i) { const h = searchHits[i]; if (!h) return; h.go(); if (!allowe
 
 // ---------- events ----------
 document.addEventListener("click", async (ev) => {
-  const t = ev.target.closest("button, tr[data-goteacher], tr[data-goroom]");
+  const t = ev.target.closest("button, tr[data-goteacher], tr[data-goroom], article[data-orgfocus], article[data-profile]");
   if (!ev.target.closest(".search")) $("results").hidden = true;
   if (!ev.target.closest(".orgsearch") && $("orgHits")) $("orgHits").hidden = true;
   if (!ev.target.closest("#exportMenu")) $("exportMenu")?.removeAttribute("open");
@@ -2889,6 +2910,7 @@ document.addEventListener("keydown", (ev) => {
     else if (ev.key === "Enter") { ev.preventDefault(); goHit(searchOn); }
     else if (ev.key === "Escape") $("results").hidden = true;
   }
+  if ((ev.key === "Enter" || ev.key === " ") && ev.target.matches?.("article.ocard.tap")) { ev.preventDefault(); ev.target.click(); return; }
   if (ev.key === "Escape" && (flyKey || userMenuOpen)) { const k = flyKey; setFly(null); setUserMenu(false); document.querySelector(k ? `[data-flyout="${k}"]` : ".avatar")?.focus(); }
   if (ev.key === "Escape") { if (printJob) { printJob = null; renderPrintPanel(); } $("publishPanel").hidden = true; $("submitPanel").hidden = true; }
 });
