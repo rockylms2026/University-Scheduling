@@ -500,57 +500,54 @@ dl.about dd { margin: 0; }
 @media (max-width: 1100px) { .ws, .ws.slim { grid-template-columns: minmax(0, 1fr); } .subnav { position: static; } .notices, .pcols, .ovgrid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 760px) { .phead { grid-template-columns: minmax(0, 1fr); } .pcourse { grid-template-columns: minmax(0, 1fr) auto; } .pcourse span { grid-column: 1 / -1; grid-row: 2; } }
 
-/* ----- organizational chart ----- */
-.orgsearch { position: relative; width: min(340px, 100%); }
+/* ----- organizational chart: one person on top, their team below, drill down and up ----- */
+.orgview { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: 24px; align-items: start; }
+.ochart { display: grid; justify-items: center; padding: 8px 0 24px; min-width: 0; }
+.ochart.in-down { animation: org-down .3s var(--ease); } .ochart.in-up { animation: org-up .3s var(--ease); }
+@keyframes org-down { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes org-up { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: none; } }
+.oup, .odown { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; transition: background-color .15s ease, border-color .15s ease; }
+.oup:hover, .odown:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.odown { border-color: transparent; background: transparent; margin-top: auto; }
+.otrunk { display: block; width: 2px; height: 28px; background: #b9c0cb; }
+.otrunk.short { height: 14px; }
+.ocard { position: relative; z-index: 1; width: 100%; max-width: 190px; min-height: 196px; background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: 6px; padding: 8px 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; box-shadow: 0 1px 3px rgba(15,25,45,.06); transition: box-shadow .16s ease, transform .16s ease, background-color .3s ease; }
+.ocard:hover { box-shadow: 0 6px 18px rgba(15,25,45,.12); transform: translateY(-1px); }
+.ocard.focus { max-width: 250px; min-height: 0; padding: 10px 14px 14px; box-shadow: 0 6px 20px rgba(15,25,45,.12); }
+.ocard.open { border-top-color: var(--line); }
+.ocard.flash { background: var(--warn-soft); }
+.oteam { width: 100%; font: inherit; font-size: .74rem; font-weight: 500; color: #1a66d6; background: none; border: 0; padding: 0 0 4px; text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.oteam:disabled { color: var(--muted); text-decoration: none; cursor: default; }
+.oav { position: relative; width: 52px; height: 52px; border-radius: 50%; background: var(--accent-soft); color: var(--navy); display: grid; place-items: center; font-weight: 500; font-size: 1rem; margin: 2px 0 4px; }
+.ocard.focus .oav { width: 64px; height: 64px; font-size: 1.2rem; background: var(--navy); color: #fff; }
+.oav b { position: absolute; right: -4px; bottom: -2px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: #1a66d6; color: #fff; font-size: .68rem; display: grid; place-items: center; border: 2px solid var(--panel); }
+.oname { font: inherit; font-size: .86rem; font-weight: 500; color: #1a66d6; background: none; border: 0; padding: 0; cursor: pointer; line-height: 1.25; }
+span.oname { color: var(--ink); cursor: default; }
+.oname:hover { text-decoration: underline; }
+.otitle { font-size: .78rem; color: var(--ink); line-height: 1.3; }
+.omuted { font-size: .72rem; color: var(--muted); overflow-wrap: anywhere; }
+.ocard em { font-style: normal; font-size: .66rem; font-weight: 500; color: var(--muted); background: var(--lunch); border-radius: 999px; padding: 1px 7px; cursor: help; }
+.okids { --w: 190px; position: relative; display: grid; grid-template-columns: repeat(var(--cols), var(--w)); justify-content: center; gap: 18px 14px; padding-top: 16px; }
+.okids::before { content: ""; position: absolute; top: 0; left: calc(var(--w) / 2); right: calc(var(--w) / 2); height: 2px; background: #b9c0cb; }
+.okids.one::before { display: none; }
+.okids > .ocard { max-width: none; }
+.okids > .ocard::before, .okids > .omore::before { content: ""; position: absolute; top: -19px; left: calc(50% - 1px); width: 2px; height: 16px; background: #b9c0cb; }
+.okids > :nth-child(n+6)::before { display: none; }
+.omore { position: relative; z-index: 1; font: inherit; font-weight: 500; color: #1a66d6; text-decoration: underline; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; min-height: 196px; display: grid; place-content: center; gap: 4px; cursor: pointer; }
+.omore small { color: var(--muted); text-decoration: none; font-weight: 400; }
+.oside { position: sticky; top: calc(var(--top) + 16px); display: grid; gap: 14px; }
+.otrail { display: grid; justify-items: end; gap: 6px; }
+.otrail button { font: inherit; font-size: .88rem; font-weight: 500; color: #1a66d6; background: none; border: 0; padding: 2px 4px; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; text-align: right; }
+.otrail span { display: inline-flex; align-items: center; gap: 6px; font-size: .88rem; font-weight: 500; background: var(--hover); border-radius: 6px; padding: 4px 8px; }
+.orgsearch { position: relative; }
 .orgsearch input { width: 100%; }
-.orgsearch .results { right: 0; left: auto; width: min(420px, 90vw); }
+.orgsearch .results { right: 0; left: auto; width: min(380px, 90vw); }
 .orgsearch .results em { font-style: normal; }
-.orgtree { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 26px 24px 28px; display: grid; justify-items: center; }
-.orow { display: grid; grid-template-columns: minmax(0, 1fr) 36px minmax(250px, 320px) 36px minmax(0, 1fr); align-items: center; width: 100%; max-width: 1100px; }
-.orow .hl { display: block; height: 2px; background: var(--line); }
-.vl { display: block; width: 2px; height: 22px; background: var(--line); }
-.onode { font: inherit; text-align: center; border-radius: 12px; padding: 12px 16px; display: grid; gap: 2px; cursor: pointer; border: 1px solid transparent; }
-.onode b { font-weight: 500; font-size: .98rem; }
-.onode span { font-size: .86rem; }
-.onode small { font-size: .78rem; opacity: .8; }
-.onode.dark { background: var(--navy); color: #fff; }
-.onode.dark:hover, .onode.dark[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--accent-soft), 0 4px 14px rgba(15,25,45,.18); }
-.onode.soft { background: var(--accent-soft); color: var(--navy); border-color: #cdd7e8; }
-.onode.soft:hover, .onode.soft[aria-pressed="true"] { border-color: var(--accent); }
-.onode.side-l { justify-self: stretch; } .onode.side-r { justify-self: stretch; }
-.obranch { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; width: 100%; padding-top: 18px; }
-.obranch::before { content: ""; position: absolute; top: 0; left: calc((100% - 70px) / 12); right: calc((100% - 70px) / 12); height: 2px; background: var(--line); }
-.ounit { position: relative; font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px 10px; display: grid; justify-items: center; gap: 3px; text-align: center; cursor: pointer; transition: border-color .16s ease, box-shadow .16s ease; }
-.ounit::before { content: ""; position: absolute; top: -19px; left: 50%; width: 2px; height: 18px; background: var(--line); }
-.ounit:hover { border-color: #c4cbd6; box-shadow: 0 3px 12px rgba(15,25,45,.07); }
-.ounit[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.ounit .pav { margin-bottom: 4px; }
-.ounit b { font-weight: 500; font-size: .82rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-.ounit span { font-weight: 500; font-size: .92rem; }
-.ounit em { font-style: normal; font-size: .8rem; color: var(--accent); }
-.ounit small { font-size: .76rem; color: var(--muted); }
-.orgpanel { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 24px; display: grid; gap: 18px; }
-.orgpanel.enter { animation: page-in .24s var(--ease); }
-.ophead h2 { font-size: 1.3rem; font-weight: 500; }
-.ophead p { margin: 4px 0 0; color: var(--muted); max-width: 80ch; }
-.ogrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; align-items: start; }
-.ogroup { border: 1px solid var(--line2); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; align-content: start; }
-.ogroup h3 { font-size: .95rem; font-weight: 500; }
-.ogroup ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--ink); font-size: .9rem; }
-.operson { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; border-radius: 10px; transition: background-color .3s ease; }
-.operson.lead { border: 1px solid var(--line); padding: 14px 16px; border-radius: 12px; }
-.operson.flash { background: var(--warn-soft); }
-.operson b { display: block; font-weight: 500; }
-.operson b .btn.link { font-weight: 500; color: var(--ink); text-align: left; }
-.operson b .btn.link:hover { color: var(--accent); text-decoration: underline; }
-.operson > div > span { display: block; font-size: .86rem; color: var(--muted); }
-.operson > div > small { display: block; font-size: .8rem; color: var(--muted); }
-.operson em { display: inline-block; margin-top: 4px; font-style: normal; font-size: .72rem; font-weight: 500; color: var(--muted); background: var(--lunch); border-radius: 999px; padding: 2px 8px; white-space: nowrap; cursor: help; }
-.pav.sm { width: 34px; height: 34px; font-size: .78rem; }
-@media (max-width: 1100px) {
-  .orow { grid-template-columns: minmax(0, 1fr); gap: 8px; } .orow .hl, .orow > span:empty { display: none; }
-  .obranch { grid-template-columns: repeat(2, minmax(0, 1fr)); } .obranch::before, .ounit::before { display: none; }
-}
+.oside .hownote ul { margin: 4px 0 8px; padding-left: 18px; }
+@media (max-width: 1360px) { .okids { --w: 172px; } }
+@media (max-width: 1100px) { .orgview { grid-template-columns: minmax(0, 1fr); } .oside { position: static; order: -1; } .otrail { justify-items: start; } .otrail button { text-align: left; } }
+@media (max-width: 1250px) { .okids { grid-template-columns: repeat(min(var(--cols), 4), var(--w)); } .okids > :nth-child(n+5)::before { display: none; } .okids:not(.one)::before { left: 14px; right: 14px; } }
+@media (max-width: 760px) { .okids { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; } .okids > :nth-child(n+3)::before { display: none; } }
 
 /* ----- responsive: desktop first (1440), usable on tablets ----- */
 @media (max-width: 1360px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bottom { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bottom > :first-child { grid-column: 1 / -1; } }
@@ -2237,92 +2234,107 @@ function orgDepts(college) {
     return { name: d, chair: chair && orgFac(chair), people: rest.map((k) => orgFac(k)) };
   });
 }
-// Everyone in the chart, for the search box: [unit, person].
-function orgIndex() {
-  const O = DATA.org, out = [];
-  out.push(["vpaa", orgHead(O.vpaa)]); O.offices[0].staff.forEach((x) => out.push(["vpaa", orgStaff(x)]));
-  out.push(["dean", orgHead(O.dean)]); O.offices[1].staff.forEach((x) => out.push(["dean", orgStaff(x)]));
+// The chart as a tree of people: each node is a person (or an open position) and the people who report to them.
+// VPAA -> Dean, support unit heads, VPAA Office; Dean -> Associate Deans, GE Coordinator, Office of the Dean;
+// Associate Dean -> department chairs, college office; chair -> department faculty; GE Coordinator -> Philosophy
+// faculty, area coordinators (-> their area), GE office; unit head -> unit staff.
+function orgTree() {
+  const O = DATA.org, nodes = {};
+  const add = (id, x, unit, parent) => {
+    if (!x) return null;
+    const n = { id, ...x, unit, parent: parent?.id || null, children: [] };
+    nodes[id] = n; if (parent) parent.children.push(n);
+    return n;
+  };
+  const pid = (x) => x.key ? `f:${x.key}` : `s:${x.email || x.name || x.title}`;
+  const staffNode = (x, unit, parent) => add(pid(x), x.name ? x : { ...x, name: x.title, title: "Positions", open: true }, unit, parent);
+  const root = add("vpaa", orgHead(O.vpaa), "Office of the Vice President for Academic Affairs", null);
+  const dean = add("dean", orgHead(O.dean), "Office of the Dean", root);
   Object.entries(O.colleges).forEach(([c, u]) => {
-    out.push([c, orgFac(u.associate_dean.faculty, "Associate Dean", "P")]);
-    u.staff.forEach((x) => out.push([c, orgStaff(x)]));
-    orgDepts(c).forEach((d) => [d.chair, ...d.people].filter(Boolean).forEach((x) => out.push([c, { ...x, note: d.name }])));
+    const ad = add(`f:${u.associate_dean.faculty}`, { ...orgFac(u.associate_dean.faculty, "Associate Dean", "P"), credentials: u.associate_dean.credentials }, DATA.colleges[c], dean);
+    if (!ad) return;
+    orgDepts(c).forEach((d) => {
+      const chair = d.chair ? add(pid(d.chair), d.chair, `Department of ${d.name}`, ad) : null;
+      d.people.forEach((x) => add(pid(x), x, `Department of ${d.name}`, chair || ad));
+    });
+    u.staff.map(orgStaff).forEach((x) => staffNode(x, `${DATA.colleges[c]} office`, ad));
   });
-  out.push(["GE", orgFac(O.ge.coordinator.faculty, "GE Coordinator", "P")]);
-  O.ge.staff.forEach((x) => out.push(["GE", orgStaff(x)]));
-  O.ge.areas.forEach((a) => a.faculty.forEach((k) => out.push(["GE", { ...orgFac(k), note: a.name }])));
-  O.support_units.forEach((u) => { out.push(["support", { ...orgHead(u.head), note: u.name }]); u.staff.filter((x) => x.name || x.faculty).forEach((x) => out.push(["support", { ...orgStaff(x), note: u.name }])); });
-  return out.filter(([, x]) => x && x.name);
+  const ge = add(`f:${O.ge.coordinator.faculty}`, { ...orgFac(O.ge.coordinator.faculty, "GE Coordinator", "P"), credentials: O.ge.coordinator.credentials }, DATA.colleges.GE, dean);
+  O.ge.areas.forEach((a) => {
+    const people = a.faculty.map((k) => orgFac(k)).filter(Boolean);
+    const lead = /led by the GE Coordinator/i.test(a.note || "") ? null : people.find((x) => x.title !== "Faculty");
+    const head = lead ? add(pid(lead), lead, a.name, ge) : ge;
+    people.filter((x) => x !== lead).forEach((x) => add(pid(x), x, a.name, head));
+  });
+  O.ge.staff.map(orgStaff).forEach((x) => staffNode(x, "GE Department office", ge));
+  O.offices[1].staff.map(orgStaff).forEach((x) => staffNode(x, "Office of the Dean", dean));
+  O.support_units.forEach((u) => {
+    const h = add(`u:${u.key}`, orgHead(u.head), u.name, root);
+    u.staff.forEach((x) => staffNode(x.faculty ? orgStaff(x) : orgStaff(x), u.name, h));
+  });
+  O.offices[0].staff.map(orgStaff).forEach((x) => staffNode(x, "VPAA Office", root));
+  return nodes;
 }
-const orgPid = (x) => x.key || x.email || x.name;
-function orgPerson(x, opts = {}) {
-  if (!x) return "";
-  const how = HOW[x.how];
-  return `<div class="operson${opts.lead ? " lead" : ""}" data-person="${esc(orgPid(x))}"><span class="pav${opts.lead ? "" : " sm"}">${esc(initials(x.name))}</span>
-    <div><b>${x.key ? `<button type="button" class="btn link" data-profile="${x.key}">${esc(x.name)}</button>` : esc(x.name)}</b>
-      <span>${esc(x.title)}${x.rank ? ` · ${esc(x.rank)}` : ""}${x.credentials ? ` · ${esc(x.credentials)}` : ""}</span>
-      ${x.email ? `<small>${esc(x.email)}</small>` : ""}${x.note && opts.note ? `<small>${esc(x.note)}</small>` : ""}
-      ${how ? `<em title="${esc(how[1])}">${how[0]}</em>` : ""}</div></div>`;
-}
-function orgPanel(unit) {
-  const O = DATA.org;
-  const list = (items, note) => items.map((x) => orgPerson(x, { note })).join("");
-  if (unit === "vpaa") return `<div class="ophead"><h2>Office of the Vice President for Academic Affairs</h2><p>${esc(O.vpaa.note)}</p></div>
-    ${orgPerson(orgHead(O.vpaa), { lead: true })}<div class="ogroup"><h3>VPAA Office · ${O.offices[0].staff.length} staff</h3>${list(O.offices[0].staff.map(orgStaff))}</div>`;
-  if (unit === "dean") return `<div class="ophead"><h2>Office of the Dean</h2><p>${esc(O.dean.note)}</p></div>
-    ${orgPerson(orgHead(O.dean), { lead: true })}<div class="ogroup"><h3>Office of the Dean · ${O.offices[1].staff.length} staff</h3>${list(O.offices[1].staff.map(orgStaff))}</div>
-    ${O.councils.filter((c) => /Associate Deans/.test(c.name)).map((c) => `<div class="ogroup"><h3>${esc(c.name)} · ${esc(c.kind)}</h3><ul>${c.lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul></div>`).join("")}`;
-  if (unit === "council") return `<div class="ophead"><h2>Councils</h2><p>Governing and coordinating bodies, not offices.</p></div>
-    <div class="ogrid">${O.councils.map((c) => `<div class="ogroup"><h3>${esc(c.name)} · ${esc(c.kind)}</h3><ul>${c.lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul></div>`).join("")}</div>`;
-  if (unit === "support") return `<div class="ophead"><h2>Academic Support Units</h2><p>${O.support_units.length} units reporting to the VPAA.</p></div>
-    <div class="ogrid">${O.support_units.map((u) => `<div class="ogroup"><h3>${esc(u.name)}</h3>${orgPerson(orgHead(u.head))}
-      ${u.staff.map((x) => x.name || x.faculty ? orgPerson(orgStaff(x), { note: true }) : `<p class="small muted" style="margin:4px 0 0">${esc(x.title)}</p>`).join("")}</div>`).join("")}</div>`;
-  if (unit === "GE") return `<div class="ophead"><h2>${esc(DATA.colleges.GE)}</h2><p>${esc(O.ge.note)}</p></div>
-    ${orgPerson({ ...orgFac(O.ge.coordinator.faculty, "GE Coordinator", "P"), credentials: O.ge.coordinator.credentials }, { lead: true })}
-    <div class="ogroup"><h3>Office</h3>${list(O.ge.staff.map(orgStaff))}</div>
-    <div class="ogrid">${O.ge.areas.map((a) => `<div class="ogroup"><h3>${esc(a.name)}${a.note ? ` · <span class="muted">${esc(a.note)}</span>` : ""}</h3>${list(a.faculty.map((k) => orgFac(k)).filter(Boolean))}</div>`).join("")}</div>`;
-  const u = O.colleges[unit];
-  if (!u) return "";
-  const depts = orgDepts(unit);
-  return `<div class="ophead"><h2>${esc(DATA.colleges[unit])}</h2><p>Associate Dean, ${u.staff.length} staff, ${depts.length} department chairs, and ${depts.reduce((a, d) => a + d.people.length, 0)} faculty.</p></div>
-    ${orgPerson({ ...orgFac(u.associate_dean.faculty, "Associate Dean", "P"), credentials: u.associate_dean.credentials }, { lead: true })}
-    <div class="ogroup"><h3>College office</h3>${list(u.staff.map(orgStaff))}</div>
-    <div class="ogrid">${depts.map((d) => `<div class="ogroup"><h3>Department of ${esc(d.name)}</h3>${orgPerson(d.chair)}${list(d.people)}</div>`).join("")}</div>`;
+function orgPath(nodes, id) { const out = []; for (let n = nodes[id]; n; n = nodes[n.parent]) out.unshift(n); return out; }
+function orgCard(n, opts = {}) {
+  const kids = n.children.length;
+  return `<article class="ocard${opts.focus ? " focus" : ""}${n.open ? " open" : ""}" data-person="${esc(n.id)}">
+    <button type="button" class="oteam" ${kids ? `data-orgfocus="${esc(n.id)}"` : n.key ? `data-profile="${n.key}"` : "disabled"} title="${esc(`${n.unit} (${n.name})`)}">${esc(n.unit)}${kids ? ` (${esc(n.name.replace(/^(Dr|Mr|Ms|Mrs|Atty|Engr|Prof)\.\s*/, ""))})` : ""}</button>
+    <span class="oav">${esc(n.open ? "+" : initials(n.name))}${kids ? `<b title="${kids} report${kids > 1 ? "s" : ""} to ${esc(n.name)}">${kids}</b>` : ""}</span>
+    ${n.key ? `<button type="button" class="oname" data-profile="${n.key}">${esc(n.name)}</button>` : `<span class="oname">${esc(n.name)}</span>`}
+    <span class="otitle">${esc(n.title)}${opts.focus && n.rank ? ` · ${esc(n.rank)}` : ""}</span>
+    ${opts.focus && n.credentials ? `<span class="omuted">${esc(n.credentials)}</span>` : ""}
+    ${n.email ? `<span class="omuted">${esc(n.email)}</span>` : ""}
+    ${HOW[n.how] ? `<em title="${esc(HOW[n.how][1])}">${HOW[n.how][0]}</em>` : ""}
+    ${kids && !opts.focus ? `<button type="button" class="odown" data-orgfocus="${esc(n.id)}" aria-label="Show the ${kids} who report to ${esc(n.name)}">${svg('<path d="m6 9 6 6 6-6"/>', 18)}</button>` : ""}
+  </article>`;
 }
 function renderOrg(page) {
-  const O = DATA.org;
-  if (!O) { page.innerHTML = `${head("Organization", "No organizational chart is loaded.")}`; return; }
-  const units = [...Object.keys(O.colleges), "GE"];
-  if (!state.orgUnit) state.orgUnit = (me.college && units.includes(me.college)) ? me.college : "vpaa";
-  const sel = state.orgUnit;
-  const node = (unit, cls, title, name, sub) => `<button type="button" class="onode ${cls}" data-orgunit="${unit}" aria-pressed="${sel === unit}"><b>${esc(title)}</b>${name ? `<span>${esc(name)}</span>` : ""}${sub ? `<small>${esc(sub)}</small>` : ""}</button>`;
-  const card = (unit) => {
-    const ge = unit === "GE", u = ge ? O.ge.coordinator : O.colleges[unit].associate_dean, t = DATA.teachers[u.faculty];
-    const n = ge ? `${O.ge.areas.length} areas · ${O.ge.areas.reduce((a, x) => a + x.faculty.length, 0)} faculty`
-      : (() => { const d = orgDepts(unit); return `${d.length} departments · ${d.reduce((a, x) => a + x.people.length + (x.chair ? 1 : 0), 0)} faculty`; })();
-    return `<button type="button" class="ounit" data-orgunit="${unit}" aria-pressed="${sel === unit}"><span class="pav">${esc(initials(t?.name || "?"))}</span>
-      <b>${ge ? "GE Coordinator" : "Associate Dean"}</b><span>${esc(t?.name || "Vacant")}</span><em>${esc(ge ? "GE Department" : DATA.colleges[unit])}</em><small>${n}</small></button>`;
-  };
-  page.innerHTML = `${head("Organizational Chart", "Office of the Vice President for Academic Affairs · click a box to see its people",
-      `<div class="orgsearch"><input class="inp" id="orgSearch" type="search" placeholder="Find a person or position" value="${esc(state.orgQuery || "")}" autocomplete="off" aria-label="Find a person or position"><div class="results" id="orgHits" hidden></div></div>`)}
-    <section class="orgtree" aria-label="Reporting lines">
-      <div class="orow">${node("vpaa", "soft side-l", "VPAA Office", "", `${O.offices[0].staff.length} staff`)}<i class="hl"></i>
-        ${node("vpaa", "dark", O.vpaa.title, `${O.vpaa.name}, ${O.vpaa.rank}`, O.vpaa.note)}<i class="hl"></i>${node("council", "soft side-r", "Academic Council", "", "Governing body, not an office")}</div>
-      <i class="vl"></i>
-      <div class="orow"><span></span><span></span>${node("dean", "dark", O.dean.title, `${O.dean.name}, ${O.dean.rank}`, `Office of the Dean (${O.offices[1].staff.length} staff)`)}<i class="hl"></i>
-        ${node("support", "soft side-r", "Academic Support Units", "", O.support_units.map((u) => u.short || u.name).join(", "))}</div>
-      <i class="vl"></i>
-      <div class="obranch">${units.map(card).join("")}</div>
-    </section>
-    <section class="orgpanel" id="orgPanel">${orgPanel(sel)}</section>
-    <details class="hownote"><summary>How positions are filled</summary><p>${Object.values(HOW).map(([s, l]) => `<b>${s}</b>: ${esc(l)}`).join(" · ")}</p></details>`;
+  if (!DATA.org) { page.innerHTML = `${head("Organization", "No organizational chart is loaded.")}`; return; }
+  const nodes = orgTree();
+  if (!nodes[state.orgFocus]) {
+    const mine = me.college && Object.values(nodes).find((n) => n.title === "Associate Dean" && DATA.teachers[n.key]?.college === me.college);
+    state.orgFocus = mine ? mine.id : "vpaa";
+  }
+  const f = nodes[state.orgFocus], path = orgPath(nodes, f.id);
+  const all = (state.orgAll || []).includes(f.id), kids = f.children, shown = all ? kids : kids.slice(0, 10);
+  const council = DATA.org.councils;
+  page.innerHTML = `${head("Organizational Chart", "Office of the Vice President for Academic Affairs")}
+    <div class="orgview">
+      <section class="ochart" id="orgChart">
+        ${f.parent ? `<button type="button" class="oup" data-orgfocus="${esc(f.parent)}" aria-label="Up to ${esc(nodes[f.parent].name)}" title="Up to ${esc(nodes[f.parent].name)}">${svg('<path d="m6 15 6-6 6 6"/>', 18)}</button><i class="otrunk short"></i>` : ""}
+        ${orgCard(f, { focus: true })}
+        ${kids.length ? `<i class="otrunk"></i><div class="okids${shown.length + (kids.length > shown.length ? 1 : 0) === 1 ? " one" : ""}" style="--cols:${Math.min(5, shown.length + (kids.length > shown.length ? 1 : 0))}">${shown.map((n) => orgCard(n)).join("")}
+          ${kids.length > shown.length ? `<button type="button" class="omore" data-orgall="${esc(f.id)}">Show More<small>${kids.length - shown.length} more</small></button>` : ""}</div>`
+          : `<p class="empty" style="text-align:center">Nobody reports to ${esc(f.name)}.</p>`}
+      </section>
+      <aside class="oside">
+        <div class="orgsearch"><input class="inp" id="orgSearch" type="search" placeholder="Find a person or position" value="${esc(state.orgQuery || "")}" autocomplete="off" aria-label="Find a person or position"><div class="results" id="orgHits" hidden></div></div>
+        <nav class="otrail" aria-label="Reporting line">${path.map((n) => n.id === f.id
+          ? `<span aria-current="true">${esc(n.name)} ${svg('<path d="M19 12H5m6-6-6 6 6 6"/>', 16)}</span>`
+          : `<button type="button" data-orgfocus="${esc(n.id)}">${esc(n.name)}</button>`).join("")}</nav>
+        <details class="hownote"><summary>Councils</summary>${council.map((c) => `<p><b>${esc(c.name)}</b> · ${esc(c.kind)}</p><ul>${c.lines.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>`).join("")}</details>
+        <details class="hownote"><summary>How positions are filled</summary><p>${Object.values(HOW).map(([s2, l]) => `<b>${s2}</b>: ${esc(l)}`).join("<br>")}</p></details>
+      </aside>
+    </div>`;
+}
+function orgGo(id, highlight) {
+  const dir = state.orgFocus && orgTree()[state.orgFocus]?.parent === id ? "up" : "down";
+  state.orgFocus = id; render();
+  const chart = $("orgChart");
+  if (chart) { chart.classList.remove("in-up", "in-down"); void chart.offsetWidth; chart.classList.add(`in-${dir}`); }
+  if (chart && chart.getBoundingClientRect().top < 0) chart.scrollIntoView({ behavior: "smooth", block: "start" });
+  if (highlight) {
+    const el = [...document.querySelectorAll(".okids [data-person]")].find((e) => e.dataset.person === highlight);
+    if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1800); }
+  }
 }
 function orgFind(q) {
   const box = $("orgHits");
   q = q.trim().toLowerCase();
   if (!q) { box.hidden = true; return; }
-  const UNIT = { vpaa: "VPAA Office", dean: "Office of the Dean", support: "Academic Support Units", GE: "GE Department", ...DATA.colleges };
-  const hits = orgIndex().filter(([, x]) => `${x.name} ${x.title} ${x.note || ""} ${x.email || ""}`.toLowerCase().includes(q)).slice(0, 10);
-  box.innerHTML = hits.length ? hits.map(([u, x]) => `<button type="button" data-orgfind="${esc(u)}" data-pid="${esc(orgPid(x))}"><small>${esc(u === "support" ? "Support" : u)}</small><span>${esc(x.name)}<em>${esc(x.title)} · ${esc(x.note || UNIT[u] || u)}</em></span></button>`).join("")
+  const hits = Object.values(orgTree()).filter((n) => `${n.name} ${n.title} ${n.unit} ${n.email || ""}`.toLowerCase().includes(q)).slice(0, 10);
+  box.innerHTML = hits.length ? hits.map((n) => `<button type="button" data-orgfind="${esc(n.id)}"><small>${esc(n.children.length ? "Team" : "Person")}</small><span>${esc(n.name)}<em>${esc(n.title)} · ${esc(n.unit)}</em></span></button>`).join("")
     : `<p class="empty" style="padding:8px">Nobody matches.</p>`;
   box.hidden = false;
 }
@@ -2774,14 +2786,16 @@ document.addEventListener("click", async (ev) => {
     return;
   }
   if (ds.dashcollapse) { state.dashNavHidden = ds.dashcollapse === "1"; render(); return; }
-  if (ds.orgunit) { state.orgUnit = ds.orgunit; document.querySelectorAll("[data-orgunit]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.orgunit === ds.orgunit)));
-    const panel = $("orgPanel"); panel.innerHTML = orgPanel(ds.orgunit); panel.classList.remove("enter"); void panel.offsetWidth; panel.classList.add("enter");
-    if (panel.getBoundingClientRect().top > innerHeight * .6) panel.scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  if (ds.orgfocus) { orgGo(ds.orgfocus); return; }
+  if (ds.orgall) { state.orgAll = [...(state.orgAll || []), ds.orgall]; render(); return; }
   if (ds.orgfind) {
-    state.orgUnit = ds.orgfind; $("orgHits").hidden = true; render();
-    const el = [...document.querySelectorAll("[data-person]")].find((e) => e.dataset.person === ds.pid);
-    if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 1800); }
-    return;
+    const nodes = orgTree(), n = nodes[ds.orgfind];
+    $("orgHits").hidden = true;
+    if (!n) return;
+    if (n.children.length) { orgGo(n.id); return; }
+    const parent = nodes[n.parent];
+    if (parent.children.indexOf(n) >= 10) state.orgAll = [...(state.orgAll || []), parent.id];
+    orgGo(parent.id, n.id); return;
   }
   if (ds.specedit !== undefined) { state.specEdit = ds.specedit || null; render(); return; }
   if (ds.profile !== undefined) { state.specEdit = null;  state.view = "profiles"; state.profile = ds.profile || null; render(); return; }
