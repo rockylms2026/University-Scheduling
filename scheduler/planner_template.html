@@ -246,6 +246,15 @@ dl.about dd { margin: 0; }
 .editor { border: 1px solid var(--accent); border-radius: 10px; padding: 12px; display: grid; gap: 12px; background: var(--panel); }
 .editor label, .fieldlabel { display: grid; gap: 3px; font-size: .78rem; color: var(--muted); font-weight: 500; }
 .editor select, .editor input[type=search] { font: inherit; font-size: .88rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; width: 100%; }
+.step { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start; }
+.step.plain { grid-template-columns: minmax(0, 1fr); }
+.stepn { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-size: .78rem; font-weight: 700; display: grid; place-items: center; margin-top: 1px; }
+.step.done .stepn { background: var(--good); }
+.stepbody { display: grid; gap: 6px; min-width: 0; }
+.tpick { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 8px; }
+.tchosen { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: .86rem; }
+.tchosen b { font-weight: 500; }
+@media (max-width: 760px) { .tpick { grid-template-columns: minmax(0, 1fr); } }
 .opts { display: grid; gap: 4px; max-height: 250px; overflow-y: auto; padding-right: 2px; }
 .optgrp { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 500; margin-top: 4px; }
 .opt { display: grid; grid-template-columns: 74px 1fr auto; gap: 8px; align-items: center; font: inherit; font-size: .82rem; text-align: left; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 6px; padding: 5px 8px; cursor: pointer; }
@@ -1974,8 +1983,13 @@ function editor(cls, part) {
   const tRight = teacherRight(cls);
   // The requesting chair names the instructor; conflicts are checked against that instructor.
   const checkTeacher = borrowed && tRight ? (d.askTeacher && d.askTeacher !== "*" ? d.askTeacher : null) : teacherKey || null;
+  // Teacher first: whoever may assign the teacher picks one (or decides later) before choosing a time,
+  // and the time list then shows only the times that teacher is free.
+  const teacherFirst = !tRight;
+  const step1 = !teacherFirst || !!teacherKey || !!d.teacherLater;
+  const tFree = (o) => !teacherKey || o.iv.every(([day, start, end]) => !teacherBusy(teacherKey, { day, start, end }, cls.id).length);
   // Status of every allowed time, checked against students, teacher, and rooms.
-  const rows = opts.map((o) => {
+  const rows = opts.filter((o) => !teacherFirst || tFree(o) || o.label === d.pattern).map((o) => {
     const ev = evaluate(cls, m, o, null, checkTeacher).filter(([l, txt]) => l !== "info" && txt !== "Choose a room");
     const rooms = m.pools.some((p) => p) ? freeRooms(cls, m, o).length : -1;
     const ask = borrowed ? askable(cls, o).filter((x) => x.submitted && x.free.some((k) => luFor(k) + cls.lu <= DATA.teachers[k].max)) : null;
@@ -1992,7 +2006,18 @@ function editor(cls, part) {
   });
   const groups = {};
   rows.forEach((r) => (groups[r.group] = groups[r.group] || []).push(r.html));
-  const optHtml = Object.entries(groups).map(([g, list]) => `<div class="optgrp">${esc(g)}</div>${list.join("")}`).join("");
+  const optHtml = Object.entries(groups).map(([g, list]) => `<div class="optgrp">${esc(g)}</div>${list.join("")}`).join("")
+    || `<p class="empty">${teacherKey ? `${esc(DATA.teachers[teacherKey].name)} has no free allowed time for this class. Choose another teacher.` : "No allowed time."}</p>`;
+  let pickTeacher = "";
+  if (teacherFirst) {
+    teacherChoices = { free: [], busy: null, selected: teacherKey, groups: teacherGroups(cls) };
+    const tk = teacherKey && DATA.teachers[teacherKey];
+    pickTeacher = `<div class="step${step1 ? " done" : ""}"><span class="stepn">1</span><div class="stepbody"><span class="fieldlabel">Teacher</span>
+      <div class="tpick"><input id="teacherSearch" type="search" placeholder="Search by name or specialization" value="${esc(teacherQuery)}" aria-label="Search teachers">
+        <select id="teacherSel" aria-label="Teacher">${teacherOptions()}</select></div>
+      ${tk ? `<div class="tchosen"><b>${esc(tk.name)}</b> · ${luFor(teacherKey)} of ${tk.max} LU${specOf(teacherKey) ? `<span class="spills">${specPills(specAreas(specOf(teacherKey)), 4)}</span>` : ""}</div>` : ""}
+      <span class="small muted"><span id="teacherCount"></span>${!teacherKey ? ` · ${d.teacherLater ? `Deciding later: the class gets a time and shows “No teacher yet”.` : `<button type="button" class="btn link" data-act="later">Decide teacher later</button>`}` : ""}</span></div></div>`;
+  }
   const opt = d.pattern && findOpt(m.kind, d.pattern);
   let detail = "";
   if (opt) {
@@ -2005,9 +2030,9 @@ function editor(cls, part) {
     const dept = t?.key ? DATA.teachers[t.key].dept : "";
     const usual = (course.usual || "").replace(/^GE Department$/, "General Education");
     const near = ft.filter((x) => { const td = DATA.teachers[x.key].dept; return td === dept || (usual && usual.includes(td)); });
-    teacherChoices = { free: ft.map((x) => ({ key: x.key, text: `${DATA.teachers[x.key].name} · ${DATA.teachers[x.key].dept} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}` })),
+    if (!teacherFirst) teacherChoices = { free: ft.map((x) => ({ key: x.key, text: `${DATA.teachers[x.key].name} · ${DATA.teachers[x.key].dept} · ${luFor(x.key)}/${DATA.teachers[x.key].max} LU${x.full ? " (at load)" : ""}` })),
                        busy: teacherKey && !ft.some((x) => x.key === teacherKey) ? teacherKey : null, selected: teacherKey };
-    const teacherSel = borrowed && tRight ? "" : tRight ? `<div style="display:grid;gap:4px"><span class="fieldlabel">Teacher</span>
+    const teacherSel = teacherFirst ? "" : borrowed && tRight ? "" : tRight ? `<div style="display:grid;gap:4px"><span class="fieldlabel">Teacher</span>
       <div class="readonly">${esc(borrowed && (!teacherKey || DATA.teachers[teacherKey].dept !== d.askDept) ? "Not yet chosen" : teacherKey ? DATA.teachers[teacherKey].name : "Not yet chosen")}${tRight !== right ? `<br><span class="small muted">${esc(tRight.replace(/^View only: /, ""))}</span>` : ""}</div></div>`
       : `<div style="display:grid;gap:4px"><label for="teacherSel">Teacher${t?.key ? "" : " (no teacher yet)"}</label>
       <input id="teacherSearch" type="search" placeholder="Search teachers by name or department" value="${esc(teacherQuery)}" aria-label="Search teachers">
@@ -2066,7 +2091,7 @@ function editor(cls, part) {
            : d.askTeacher === "*" ? "" : r ? " Saving books it again and asks for approval again." : " Saving books it and asks for approval.")]);
     }
     detail = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">${roomSel}${askSel}${teacherSel}</div>
-      ${borrowed && tRight ? "" : `<div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>
+      ${borrowed && tRight || teacherFirst ? "" : `<div><span class="fieldlabel">Teachers free at ${esc(opt.label)}${near.length ? " from the same department" : ""}</span>
         <div class="who-free" style="margin-top:4px">${(near.length ? near : ft).slice(0, 14).map((x) => `<span class="${x.full ? "full" : ""}">${esc(DATA.teachers[x.key].name)} · ${luFor(x.key)}/${DATA.teachers[x.key].max}</span>`).join("") || `<span class="full">Nobody in this department is free</span>`}
         ${(near.length ? near : ft).length > 14 ? `<span>+${(near.length ? near : ft).length - 14} more in the list</span>` : ""}</div></div>`}
       <ul class="checks">${checks.length ? checks.map(([l, txt]) => `<li class="${l}">${esc(txt)}</li>`).join("") : `<li class="good">No conflicts. Students, teacher, and room are all free.</li>`}</ul>
@@ -2077,15 +2102,43 @@ function editor(cls, part) {
   }
   return `<div class="editor"><div><h3>${esc(cls.course)} ${esc(PART[part])} · ${esc(cls.section)}</h3>
     <div class="facts"><span>${esc(course.title)}</span><span><b>${cls.lu}</b> LU</span>${b ? `<span>Booked: <b>${esc(b.pattern)}</b>${b.room ? ` in <b>${esc(b.room)}</b>` : ""}</span>` : ""}</div></div>
-    <div><span class="fieldlabel">Choose a time (allowed by the University Class Time Frame)</span><div class="opts" style="margin-top:4px">${optHtml}</div></div>
+    ${pickTeacher}
+    ${step1 ? `<div class="step${teacherFirst ? "" : " plain"}">${teacherFirst ? `<span class="stepn">2</span>` : ""}<div class="stepbody"><span class="fieldlabel">${teacherKey && teacherFirst ? `Times when ${esc(DATA.teachers[teacherKey].name)} is free` : "Choose a time"} (allowed by the University Class Time Frame)</span><div class="opts" style="margin-top:4px">${optHtml}</div></div></div>`
+      : `<p class="small muted" style="margin:0">Choose the teacher first. The times then show only when that teacher is free.</p>`}
     ${right ? `<div class="readonly">${esc(right)}</div>` : ""}
-    ${detail}</div>`;
+    ${step1 ? detail : ""}</div>`;
+}
+// Teachers for a class, best first: the class's department ordered by how well their specialization matches the
+// course title, then by load; other departments after (when this person may assign them).
+const STOP = new Set(["and", "the", "of", "in", "to", "for", "with", "on", "a", "an", "its", "1", "2", "3", "4", "introduction", "principles", "fundamentals", "theories", "theory"]);
+const words = (txt) => String(txt || "").toLowerCase().replace(/[^a-z\s-]/g, " ").split(/[\s-]+/).filter((w) => w.length > 2 && !STOP.has(w)).map((w) => w.replace(/(ies|es|s|al|ic|y)$/, ""));
+function teacherGroups(cls) {
+  const title = new Set(words(DATA.courses[cls.course].title));
+  const match = (k) => words(specOf(k)).filter((w) => title.has(w)).length;
+  const home = classKind(cls) === "gedept" ? "General Education" : progDept(cls.section);
+  const all = Object.keys(DATA.teachers).filter((k) => teacherAllowed(cls, k));
+  const item = (k) => { const t = DATA.teachers[k], full = luFor(k) + cls.lu > t.max;
+    return { key: k, score: match(k), full, text: `${t.name} · ${luFor(k)} of ${t.max} LU${full ? " · full" : ""}${t.dept === home ? "" : ` · ${t.dept}`}` }; };
+  const sort = (a, b) => b.score - a.score || a.full - b.full || luFor(a.key) - luFor(b.key) || DATA.teachers[a.key].name.localeCompare(DATA.teachers[b.key].name);
+  const mine = all.filter((k) => DATA.teachers[k].dept === home).map(item).sort(sort);
+  const others = all.filter((k) => DATA.teachers[k].dept !== home).map(item).sort(sort);
+  return [[`Department of ${home} · specialization match`, mine.filter((x) => x.score)], [`Department of ${home}`, mine.filter((x) => !x.score)], ["Other departments", others]];
 }
 // Teacher dropdown in the booking form, filtered by the search box.
-let teacherChoices = { free: [], busy: null, selected: "" };
+let teacherChoices = { free: [], busy: null, selected: "", groups: null };
 let teacherQuery = "";
 function teacherOptions() {
   const q = teacherQuery.trim().toLowerCase();
+  if (teacherChoices.groups) {                   // teacher-first form: everyone this person may assign, best first
+    const sel = teacherChoices.selected, hit = (x) => !q || x.text.toLowerCase().includes(q) || specOf(x.key).toLowerCase().includes(q) || x.key === sel;
+    let n = 0, total = 0;
+    const html = `<option value="">Choose a teacher</option>` + teacherChoices.groups.map(([label, list]) => {
+      const shown = list.filter(hit); n += shown.filter((x) => x.key !== sel || !q).length; total += list.length;
+      return shown.length ? `<optgroup label="${esc(label)}">${shown.map((x) => `<option value="${x.key}"${x.key === sel ? " selected" : ""}>${esc(x.text)}</option>`).join("")}</optgroup>` : "";
+    }).join("");
+    setTimeout(() => { const c = $("teacherCount"); if (c) c.textContent = q ? `${n} of ${total} teachers match` : `${total} teachers · best specialization match first`; });
+    return html;
+  }
   const match = (txt) => !q || txt.toLowerCase().includes(q);
   const sel = teacherChoices.selected;
   const free = teacherChoices.free.filter((x) => match(x.text) || x.key === sel);
@@ -2906,6 +2959,7 @@ document.addEventListener("click", async (ev) => {
   else if (ds.opt) { choosePattern(ds.opt); }
   else if (ds.print) { const k = ds.print; openPrint(k, ds.id); return; }
   else if (ds.report) { openPrint(ds.report, $(`rep-${ds.report}`).value); return; }
+  else if (ds.act === "later") { state.draft.teacherLater = true; state.draft.teacher = ""; }
   else if (ds.act === "close") { state.pick = null; state.draft = null; }
   else if (ds.act === "save") { t.disabled = true; await save(); return; }
   else if (ds.act === "remove") { await removeBooking(); return; }
@@ -2978,7 +3032,13 @@ document.addEventListener("change", async (ev) => {
   }
   if (!state.draft) return;
   if (id === "roomSel") { state.draft.room = ev.target.value; render(); }
-  if (id === "teacherSel") { state.draft.teacher = ev.target.value; render(); }
+  if (id === "teacherSel") {
+    state.draft.teacher = ev.target.value; if (ev.target.value) state.draft.teacherLater = false;
+    const cls = CLASS[state.pick.cls], m = cls.meetings.find((x) => x.part === state.pick.part), o = state.draft.pattern && findOpt(m.kind, state.draft.pattern);
+    // a time the new teacher is busy at is dropped, so the list and the choice agree
+    if (o && ev.target.value && o.iv.some(([day, start, end]) => teacherBusy(ev.target.value, { day, start, end }, cls.id).length)) { state.draft.pattern = null; state.draft.room = ""; }
+    render();
+  }
   if (id === "askSel") { const [dept, k] = ev.target.value.split("|"); state.draft.askDept = dept || ""; state.draft.askTeacher = k || ""; render(); }
 });
 // Drag from the unscheduled list onto the dashboard timetable.
