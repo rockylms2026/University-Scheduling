@@ -382,6 +382,28 @@ dl.about dd { margin: 0; }
 .news b { font-weight: 500; display: block; }
 .news span { color: var(--muted); font-size: .84rem; }
 
+/* ----- submissions ----- */
+.sublist { gap: 0; padding: 4px 18px; }
+.subrow { display: grid; grid-template-columns: minmax(170px, 1.1fr) minmax(0, 2fr) 150px 120px; gap: 6px 20px; align-items: center; padding: 14px 0; border-top: 1px solid var(--line2); }
+.subrow:first-child { border-top: 0; }
+.subdept b { display: block; font-weight: 500; font-size: .95rem; }
+.subdept span { font-size: .78rem; color: var(--muted); }
+.substat { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
+.subprog { display: flex; align-items: center; gap: 10px; font-size: .88rem; font-variant-numeric: tabular-nums; }
+.subprog small { display: block; color: var(--muted); font-size: .74rem; }
+.subact { justify-self: end; }
+.miniring { width: 34px; height: 34px; flex: none; }
+.miniring .track { fill: none; stroke: #ebedf0; stroke-width: 4; }
+.miniring .fill { fill: none; stroke: var(--navy); stroke-width: 4; stroke-linecap: round; }
+.miniring.full .fill { stroke: var(--good); }
+.waitlist { flex-basis: 100%; font-size: .84rem; color: var(--muted); }
+.waitlist summary { cursor: pointer; color: var(--accent); width: fit-content; }
+.waitlist ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 2px; }
+.hownote { font-size: .86rem; color: var(--muted); max-width: 75ch; }
+.hownote summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+.hownote p { margin: 8px 0 0; }
+@media (max-width: 900px) { .subrow { grid-template-columns: minmax(0, 1fr) auto; } .substat { grid-column: 1 / -1; grid-row: 2; } .subact { grid-column: 2; grid-row: 1; } .subprog { grid-row: 3; } }
+
 /* ----- responsive: desktop first (1440), usable on tablets ----- */
 @media (max-width: 1360px) { .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); } .bottom { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .bottom > :first-child { grid-column: 1 / -1; } }
 @media (max-width: 1100px) {
@@ -1502,23 +1524,47 @@ async function doSubmit(dept) {
 }
 function renderSubmissions(page) {
   try { localStorage.setItem(seenKey(), new Date().toISOString()); } catch (e) {}
-  const depts = [...new Set(Object.values(DATA.programs).map((p) => p.dept))].sort();
-  const rows = depts.map((dept) => {
-    const sub = submissions?.[dept], miss = missingFor(dept).length, wait = waitingFor(dept);
+  const all = [...new Set(Object.values(DATA.programs).map((p) => p.dept))].sort().map((dept) => {
+    const sub = submissions?.[dept], wait = sub ? waitingFor(dept) : [];
     const total = DATA.classes.filter((c) => progDept(c.section) === dept && ["major", "own"].includes(classKind(c)) && c.meetings.length).length;
-    const when = sub ? new Date(sub.submitted_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "";
-    const status = !sub ? `<span class="chip none">Not submitted</span>`
-      : `<span class="chip ${wait.length ? "info" : "good"}">${wait.length ? "Submitted" : "Fully complete"}</span>${changedSince(dept) ? ` <span class="chip warn">Changed since</span>` : ""}${
-          wait.length ? `<div class="small muted">${esc(waitingText(wait))}</div>` : ""}`;
-    return `<tr><td><b>${esc(dept)}</b><div class="small muted">${esc(DATA.deptCollege[dept])}</div></td><td>${status}</td>
-      <td class="small" style="white-space:nowrap">${esc(when)}${sub ? `<div class="muted">${esc((sub.submitted_by || "").split("@")[0])}</div>` : ""}</td>
-      <td class="num">${total - miss}/${total}<div class="bar"><i style="width:${total ? (100 * (total - miss)) / total : 0}%"></i></div></td>
-      <td>${canSubmit(dept) ? `<button type="button" class="btn${dept === myDept() ? " primary" : ""}" data-submit="${esc(dept)}">${sub ? "Submit again" : "Submit"}</button>` : ""}</td></tr>`;
+    const st = !sub ? "open" : changedSince(dept) ? "changed" : wait.length ? "waiting" : "complete";
+    return { dept, sub, wait, total, done: total - missingFor(dept).length, st, college: DATA.deptCollege[dept] };
+  });
+  const filters = [["all", "All", () => true], ["open", "Not submitted", (x) => x.st === "open"], ["waiting", "Waiting on borrowed GE", (x) => x.st === "waiting"],
+                   ["changed", "Changed since submitting", (x) => x.st === "changed"], ["complete", "Fully complete", (x) => x.st === "complete"]];
+  if (!filters.some(([k]) => k === state.subFilter)) state.subFilter = "all";
+  const colleges = COLLEGE_KEYS.filter((c) => all.some((x) => x.college === c));
+  if (state.subCollege && !colleges.includes(state.subCollege)) state.subCollege = "";
+  const inCollege = all.filter((x) => !state.subCollege || x.college === state.subCollege);
+  const shown = inCollege.filter(filters.find(([k]) => k === state.subFilter)[2]);
+  const when = (iso) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  const STATUS = { open: ["none", "Not submitted"], waiting: ["info", "Submitted"], changed: ["warn", "Changed since submitting"], complete: ["good", "Fully complete"] };
+  const rows = shown.map((x) => {
+    const [cls, label] = STATUS[x.st];
+    const waitList = x.wait.length ? `<details class="waitlist"><summary>${x.wait.length} borrowed GE class${x.wait.length > 1 ? "es" : ""} not yet approved</summary>
+      <ul>${waitingText(x.wait).split(", ").map((t) => `<li>${esc(t)}</li>`).join("")}</ul></details>` : "";
+    return `<div class="subrow">
+      <div class="subdept"><b>${esc(x.dept)}</b><span>${esc(x.college)}</span></div>
+      <div class="substat"><span class="chip ${cls}">${label}</span>${x.sub ? `<span class="small muted">${esc(when(x.sub.submitted_at))} · ${esc((x.sub.submitted_by || "").split("@")[0])}</span>` : ""}${waitList}</div>
+      <div class="subprog">${miniRing(x.done, x.total)}<span><b>${x.done}</b> of ${x.total}<small>own part done</small></span></div>
+      <div class="subact">${canSubmit(x.dept) && (x.dept === myDept() || x.done === x.total || x.st === "changed") ? `<button type="button" class="btn${x.dept === myDept() ? " primary" : ""}" data-submit="${esc(x.dept)}">${x.sub ? "Submit again" : "Submit"}</button>` : ""}</div></div>`;
   }).join("");
-  const n = depts.filter((d) => submissions?.[d]).length;
-  const full = depts.filter((d) => submissions?.[d] && !waitingFor(d).length).length;
-  page.innerHTML = `${head("Submissions", `${n} of ${depts.length} departments have submitted, ${full} fully complete. A department submits when its own part is done: every major class and every GE class it teaches has a time and a teacher. It is fully complete once its borrowed GE classes are booked with instructors of other departments and approved.`, submitButton())}
-    <div class="card"><div class="scroll"><table><thead><tr><th>Department</th><th>Status</th><th>Submitted</th><th class="num">Own part done</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  const n = all.filter((x) => x.sub).length, full = all.filter((x) => x.st === "complete").length;
+  page.innerHTML = `${head("Submissions", `${n} of ${all.length} departments have submitted · ${full} fully complete`, submitButton())}
+    <div class="card" style="gap:10px">
+      <div class="pills">${filters.map(([k, l, f]) => `<button type="button" class="pill" data-subfilter="${k}" aria-pressed="${state.subFilter === k}">${l}<small>${inCollege.filter(f).length}</small></button>`).join("")}</div>
+      ${colleges.length > 1 ? `<div class="row"><span class="navlabel">College</span><div class="pills">${[["", "All colleges"], ...colleges.map((c) => [c, c])].map(([k, l]) =>
+        `<button type="button" class="pill" data-subcollege="${k}" aria-pressed="${(state.subCollege || "") === k}">${l}</button>`).join("")}</div></div>` : ""}
+    </div>
+    <div class="card sublist">${rows || `<p class="empty">No department matches this filter.</p>`}</div>
+    <details class="hownote"><summary>How submitting works</summary>
+      <p>A department submits when its own part is done: every major class and every GE class it teaches has a time, a room where needed, and a teacher. Its free instructors then show to other departments on GE Availability.</p>
+      <p>It is fully complete once its borrowed GE classes are booked with instructors of other departments and approved. "Changed since submitting" means a class changed after the last submission; submit again so others see the latest.</p></details>`;
+}
+// A small ring for lists: the share done, no text inside.
+function miniRing(done, total) {
+  const share = total ? Math.min(1, done / total) : 0, r = 15, c = 2 * Math.PI * r;
+  return `<svg class="miniring${share === 1 ? " full" : ""}" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="${r}" class="track"/>${share > 0 ? `<circle cx="18" cy="18" r="${r}" class="fill" stroke-dasharray="${(share * c).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 18 18)"/>` : ""}</svg>`;
 }
 
 // ===== GE Availability: instructors of submitted departments, and when they are free =====
@@ -2291,6 +2337,8 @@ document.addEventListener("click", async (ev) => {
     await Promise.all([sbLoad.ge_decisions(), sbLoad.teacher_changes()]); rebuild(); render(); return;
   }
   if (ds.apprfilter) { state.apprFilter = ds.apprfilter; render(); return; }
+  if (ds.subfilter) { state.subFilter = ds.subfilter; render(); return; }
+  if (ds.subcollege !== undefined) { state.subCollege = ds.subcollege; render(); return; }
   if (ds.submit) { openSubmit(ds.submit); return; }
   if (ds.closeinstr) {
     const { error } = await sb.rpc("close_instructor_request", { cid: ds.closeinstr });
