@@ -888,6 +888,7 @@ function askable(cls, opt) {
 
 // ---------- hosted version: Supabase ----------
 let sb = null;
+let dbStale = false;         // the database still has the classes of an older version of this page
 async function sbAll(q) { const { data, error } = await q; if (error) throw error; return data || []; }
 const sbLoad = {
   faculty: async () => {
@@ -922,6 +923,10 @@ const sbLoad = {
     approvals = {};
     rows.forEach((r) => (approvals[r.class_id] = r));
   },
+  classes: async () => {      // does the database know this version's classes? (supabase/setup.sql run)
+    const ids = [DATA.classes[0], DATA.classes[DATA.classes.length - 1]].map((c) => c.id);
+    dbStale = (await sbAll(sb.from("classes").select("id").in("id", ids))).length < ids.length;
+  },
   settings: async () => {
     const s = (await sbAll(sb.from("settings").select("*")))[0] || {};
     settings = { geOpen: !!s.ge_open };
@@ -947,7 +952,8 @@ function sbRefresh(table) {
   clearTimeout(refreshTimers[table]);
   refreshTimers[table] = setTimeout(async () => { try { await sbLoad[table](); rebuild(); render(); } catch (e) { console.error(e); } }, 250);
 }
-const sbMessage = (e) => /row-level security|permission denied|not allowed/i.test(e?.message || "") ? "Your role can't change this class." : e?.message || "Could not save. Try again.";
+const STALE_MSG = "Not saved: the database has not been updated for this version of the page. The Registrar runs supabase/setup.sql in the Supabase SQL Editor, then reloads.";
+const sbMessage = (e) => dbStale ? STALE_MSG : /row-level security|permission denied|not allowed/i.test(e?.message || "") ? "Your role can't change this class." : e?.message || "Could not save. Try again.";
 async function startHosted() {
   sb = window.supabase.createClient(BACKEND.url, BACKEND.key);
   const recovering = /type=recovery/.test(location.hash);
@@ -1483,7 +1489,8 @@ function render() {
   const moved = render.where !== where, sameView = render.where?.split("|")[0] === state.view;
   const fn = { home: renderHome, dashboard: renderDashboard, timetable: renderTimetable, faculty: renderFaculty, profiles: renderProfiles, rooms: renderRooms, sections: renderSections,
                courses: renderCourses, conflicts: renderConflicts, approvals: renderApprovals, availability: renderAvailability, submissions: renderSubmissions, reports: renderReports, org: renderOrg, settings: renderSettings }[state.view] || renderHome;
-  const banner = shared ? "" : `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`;
+  const banner = !shared ? `<div class="banner">This copy is not connected to claude.ai, so bookings made here are not saved. Open the page on claude.ai to schedule.</div>`
+    : dbStale ? `<div class="banner">The database has not been updated for this version of the page, so bookings can't be saved yet. ${isAdmin() ? "Run supabase/setup.sql once in the Supabase SQL Editor, then reload this page." : "Ask the Registrar to update the database."}</div>` : "";
   const next = page.cloneNode(false);           // the new version, built off-screen
   fn(next);
   if (banner) (next.querySelector(".hero") || next).insertAdjacentHTML(next.querySelector(".hero") ? "afterend" : "afterbegin", banner);
@@ -2955,7 +2962,7 @@ async function removeBooking() {
   }
   if (sb) {
     const { data, error } = await sb.from("bookings").delete().eq("class_id", cls.id).eq("part", state.pick.part).select();
-    if (error || !data?.length) { const msg = $("msg"); if (msg) { msg.textContent = error ? sbMessage(error) : "Your role can't change this class."; msg.className = "msg bad"; } return; }
+    if (error || !data?.length) { const msg = $("msg"); if (msg) { msg.textContent = error ? sbMessage(error) : dbStale ? STALE_MSG : "Your role can't change this class."; msg.className = "msg bad"; } return; }
     await sbLoad.bookings(); state.draft.pattern = null; rebuild(); render(); return;
   }
   try { await store.collection("bookings").doc(docId(DATA.semester, cls.id, state.pick.part)).delete(); state.draft.pattern = null; render(); }
