@@ -176,6 +176,16 @@ expect("associate dean books own college major", True, bk(eco_major), "adean.css
 expect("associate dean cannot book other college", False, bk(cisc_major), "adean.css@u.edu")
 
 # GE Coordinator: GE Department courses, last
+# PHIL 190 is a GE Department course that Political Science may also teach to its own sections.
+pols_phil = cls("course = 'PHIL 190' and department = 'Political Science'")
+psy_phil = cls("course = 'PHIL 190' and department = 'Psychology'")
+expect("PHIL 190 of AB Political Science is its own class", True, f"select class_kind('{pols_phil}')", ADMIN, contains="own")
+expect("PHIL 190 of BS Psychology stays with the GE Department", True, f"select class_kind('{psy_phil}')", ADMIN, contains="gedept")
+psql("insert into staff (email, full_name, role, college, department) values ('chair.pols@u.edu','Chair Political Science','chair','CSBS','Political Science') on conflict do nothing")
+expect("Political Science chair books its PHIL 190 before GE opens", True, bk(pols_phil, "M5 MWF"), "chair.pols@u.edu")
+expect("GE Coordinator cannot book the Political Science PHIL 190", False, bk(pols_phil, "M6 MWF"), "ge@u.edu")
+expect("Political Science chair cannot book PHIL 190 of BS Psychology", False, bk(psy_phil, "M5 MWF"), "chair.pols@u.edu")
+psql(f"delete from bookings where class_id = '{pols_phil}'")
 rel = cls("course = 'REL 103A' and section = 'BSP 1A'")
 expect("REL 103A is a Religious Education class", True, f"select class_kind('{rel}')", ADMIN, contains="reldept")
 expect("Religious Education Coordinator blocked until opened", False, bk(rel), "re@u.edu")

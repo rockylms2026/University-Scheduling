@@ -33,6 +33,7 @@ class Course:
     college: str = "CORE"
     housed_by: str | None = None
     placement: tuple[str, ...] = ()   # field courses: days at the placement
+    also_taught_by: tuple[str, ...] = ()   # GE Department courses: departments that may also teach their own sections
 
     @property
     def is_core(self) -> bool:
@@ -228,6 +229,12 @@ def fmt_time(minutes: int) -> str:
 
 
 def _course_from_entry(code: str, entry, college: str) -> Course:
+    if isinstance(entry, dict) and "also_taught_by" in entry:
+        entry = dict(entry)
+        also = tuple(entry.pop("also_taught_by"))
+        course = _course_from_entry(code, entry, college)
+        course.also_taught_by = also
+        return course
     if isinstance(entry, str):
         return Course(code=code, title=entry, college=college)
     entry = dict(entry)

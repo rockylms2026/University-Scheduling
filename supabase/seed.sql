@@ -852,6 +852,7 @@ insert into public.ge_teachers (course, department, college) values
   ('HIST 201', 'Secondary Education', 'COE'),
   ('HIST 220', 'Secondary Education', 'COE'),
   ('MATH 180', 'Secondary Education', 'COE'),
+  ('PHIL 190', 'Political Science', 'CSBS'),
   ('PSYC 160', 'Psychology', 'CSBS'),
   ('PSYC 160', 'Secondary Education', 'COE'),
   ('PSYC 160', 'Social Work', 'CSBS'),

@@ -20,7 +20,8 @@ courses:
   # university by Secondary Education; Education students do not take it.
   MATH 350: {title: Foundations of Statistics, credits: 3, lec: 3, housed_by: Dept. of Secondary Education (COE)}
   GAD 171: {title: Gender and Society, credits: 3, lec: 3, housed_by: Dept. of Psychology (CSBS)}
-  PHIL 190: {title: Introduction to Critical Thinking, credits: 3, lec: 3, housed_by: GE Department}
+  # Political Science may also teach PHIL 190 to its own sections (Registrar, October 2026).
+  PHIL 190: {title: Introduction to Critical Thinking, credits: 3, lec: 3, housed_by: GE Department, also_taught_by: [Political Science]}
   ENGL 302: {title: Research and Professional Writing, credits: 3, lec: 3, housed_by: GE Department}
   FIL 207: {title: Kultura at Panitikang Pilipino, credits: 3, lec: 3, housed_by: Dept. of Secondary Education (COE)}
   UNI 103: {title: Navigating University Life, credits: 1, lec: 1, housed_by: Program's own department}

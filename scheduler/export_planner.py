@@ -65,6 +65,8 @@ def ge_teaching_lists(uni: University, semester: int, dept_college: dict) -> dic
             continue
         house = holder_department(k.course.housed_by, uni.programs[k.section.program].department)
         if house in ("General Education", "Religious Education"):
+            for d in k.course.also_taught_by:      # a department that may also teach a GE Department course
+                lists.setdefault(k.course.code, set()).add(d)
             continue
         lists.setdefault(k.course.code, set()).add(house)
         if k.faculty and k.faculty.department != "General Education":

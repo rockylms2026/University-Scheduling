@@ -111,6 +111,7 @@ def test_religion_and_one_section_programs():
     assert not any(c == "MATH 350" for p in UNI.programs.values() if p.college == "COE" for v in p.curriculum.values() for c, _ in v)
     assert UNI.faculty["CSBS-R1"].name == "Dr. Ian P. Bonilla" and UNI.faculty["CSBS-R1"].designation == "Department Chair"
     assert UNI.faculty["CILS-AD"].department == "Information Technology"
+    assert UNI.courses["PHIL 190"].also_taught_by == ("Political Science",)
     re = [f for f in UNI.faculty.values() if f.department == "Religious Education"]
     assert len(re) == 6 and UNI.faculty["RE-RE1"].max_lu == 15
     # class ids come from the semester, course and section, so they survive curriculum changes

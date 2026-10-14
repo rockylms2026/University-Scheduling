@@ -191,7 +191,7 @@ create or replace function public.class_kind(cid text) returns text
 language sql stable security definer set search_path = public as $$
   select case when not c.is_ge then 'major'
               when c.house_dept = 'Religious Education' then 'reldept'
-              when c.house_dept is null or c.house_dept = 'General Education' then 'gedept'
+              when (c.house_dept is null or c.house_dept = 'General Education') and not public.may_teach(c.course, c.department) then 'gedept'
               when public.may_teach(c.course, c.department) then 'own'
               else 'borrowed' end
   from public.classes c where c.id = cid
@@ -201,8 +201,7 @@ $$;
 create or replace function public.own_ge_left(d text) returns int
 language sql stable security definer set search_path = public as $$
   select count(*)::int from public.classes c
-  where c.department = d and c.is_ge and c.house_dept is distinct from 'General Education'
-    and c.house_dept is distinct from 'Religious Education'
+  where c.department = d and c.is_ge and c.house_dept is distinct from 'Religious Education'
     and public.may_teach(c.course, d)
     and not exists (select 1 from public.bookings b where b.class_id = c.id)
 $$;
