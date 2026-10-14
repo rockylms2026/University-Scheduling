@@ -138,6 +138,8 @@ def time_options(uni: University, kind: str) -> list[Option]:
     elif kind in ("pe", "double"):
         for a, b in (("Mon", "Wed"), ("Mon", "Fri"), ("Wed", "Fri")):
             opts += [Option(f"{p.name} {a[0]}{b[0]}", on(p, (a, b))) for p in mwf]
+        if kind == "double":    # REL 403: two MWF periods on different days only
+            return opts
         for p, q in zip(mwf, mwf[1:]):
             if p.end == q.start:    # two adjacent periods, not across lunch
                 for d in p.days:

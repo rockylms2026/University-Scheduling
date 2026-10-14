@@ -1,5 +1,5 @@
 # Campus Space Plan: classrooms, laboratories, and PE venues.
-# Source: Campus Space Plan and University Class Time Frame documents.
+# Source: Campus Space Plan and University Class Time Frame documents (labs updated to the final time frame).
 
 # Departments housed in each building. Classes are placed in their
 # department's building when possible.
@@ -24,9 +24,9 @@ buildings:
 # GE classes, use its own college's classrooms.
 classrooms:
   CSBS: [DIW 201, DIW 202, DIW 203, DIW 301, DIW 302, DIW 303, DIW 304,
-         MAL 201, MAL 202, MAL 203, MAL 301, TIN 203, TIN 204, TIN 301, TIN 302,
+         MAL 301, TIN 203, TIN 204, TIN 301, TIN 302,
          KAT 301, KAT 302, KAT 303, DAN 201, DAN 202, DAN 203, DAN 301, DAN 302]
-  CILS: [SIN 202, SIN 203, SIN 302, SIN 303, TAL 202, TAL 203, TAL 302, TAL 303, LIW 201, LIW 202]
+  CILS: [SIN 202, SIN 203, SIN 302, SIN 303, LIW 201, LIW 202]
   CBAPA: [SIP 201, SIP 202, SIP 203, SIP 301, SIP 302, SIP 303,
           TIY 201, TIY 202, TIY 203, TIY 301, TIY 302, YAM 203, YAM 204, YAM 302, YAM 303]
   COE: [DUN 201, DUN 202, DUN 203, DUN 301, DUN 302, DUN 303,
@@ -44,13 +44,13 @@ seminar_rooms:
 # room; other blocks are allowed only when these are full (penalised).
 # Lecture parts of laboratory courses may also meet in the course's lab.
 labs:
-  css_computer_lab: {rooms: [DIW 204], blocks: [LA, LE]}
+  css_computer_lab: {rooms: [DIW 205], blocks: [LA, LE]}
   psych_lab: {rooms: [DIW 108], blocks: [LA, LE]}
-  audio_studio: {rooms: [TIN 104], blocks: [LC, LD, LG]}
-  video_studio: {rooms: [TIN 105], blocks: [LC, LD, LG]}
-  editing_lab: {rooms: [TIN 201], blocks: [LC, LD, LG]}
-  photo_lab: {rooms: [TIN 202], blocks: [LC, LD, LG]}
-  cisc_computer_lab: {rooms: [SIN 201, SIN 301, TAL 104, TAL 201, TAL 301]}
+  audio_studio: {rooms: [MAL 201], blocks: [LC, LD, LG]}
+  video_studio: {rooms: [MAL 202], blocks: [LC, LD, LG]}
+  editing_lab: {rooms: [MAL 203], blocks: [LC, LD, LG]}
+  photo_lab: {rooms: [MAL 204], blocks: [LC, LD, LG]}
+  cisc_computer_lab: {rooms: [SIN 108, SIN 201, SIN 301]}   # SIN 108 is the networking laboratory
   lib_tech_lab: {rooms: [LIW 104]}
   cbe_computer_lab: {rooms: [SIP 204], blocks: [LB, LD, LF, LG]}
   kitchen: {rooms: [YAM 104], blocks: [LA, LC]}
