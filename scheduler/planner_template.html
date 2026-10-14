@@ -791,7 +791,8 @@ const isBooked = (cls) => cls.meetings.every((m) => bookings[`${cls.id}|${m.part
 function classKind(cls) {
   if (!isGE(cls.course)) return "major";
   if (cls.house === "Religious Education") return "reldept";
-  if (!cls.house || cls.house === "General Education") return "gedept";
+  // A GE Department course is the department's own when it may also teach it (PHIL 190 for Political Science).
+  if (!cls.house || cls.house === "General Education") return mayTeach(cls.course, progDept(cls.section)) ? "own" : "gedept";
   return mayTeach(cls.course, progDept(cls.section)) ? "own" : "borrowed";
 }
 // GE classes of the sections of a department that it may teach and has not booked. Mirrors own_ge_left().
@@ -2878,9 +2879,12 @@ function openPick(clsId, part) {
   if (classKind(cls) === "borrowed" && requestOf(cls)) {    // the instructor asked before
     state.draft.askDept = requestOf(cls).department; state.draft.askTeacher = t?.key || "*";
   }
-  // Jump to the class's own section on the booking desk.
+  // Jump to the class's own section on the booking desk, unless the open section already lists it
+  // (a track course such as PSYC 351 shows in BSP 3A and 3B: stay there instead of moving to BSP 3-C).
   const sec = DATA.sections[cls.section];
-  state.view = "timetable"; state.college = DATA.programs[sec.program].college; state.program = sec.program; state.section = cls.section;
+  const shown = state.view === "timetable" && state.section && DATA.sections[state.section] && sectionClasses(state.section).includes(cls);
+  state.view = "timetable"; state.college = DATA.programs[sec.program].college; state.program = sec.program;
+  if (!shown) state.section = cls.section;
   if (state.scope !== "ALL" && !unitScope() && state.scope !== state.college) state.scope = "ALL";
   if (unitScope()) state.scope = "ALL";
 }
