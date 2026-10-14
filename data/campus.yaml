@@ -7,9 +7,9 @@ buildings:
   DIW: {name: Diwa Hall, college: CSS, departments: [Psychology, Economics]}
   MAL: {name: Malaya Hall, college: CSS, departments: [Political Science]}
   TIN: {name: Tinig Hall, college: CSS, departments: [Communication]}
-  SIN: {name: Sinag Hall, college: CISC, departments: [Computer Science]}
-  TAL: {name: Tala Hall, college: CISC, departments: [Information Technology]}
-  LIW: {name: Liwanag Hall, college: CISC, departments: [Library and Information Science]}
+  SIN: {name: Sinag Hall, college: CICS, departments: [Computer Science]}
+  TAL: {name: Tala Hall, college: CICS, departments: [Information Technology]}
+  LIW: {name: Liwanag Hall, college: CICS, departments: [Library and Information Science]}
   SIP: {name: Sipag Hall, college: CBE, departments: [Accountancy]}
   TIY: {name: Tiyaga Hall, college: CBE, departments: [Business Administration, Entrepreneurship]}
   YAM: {name: Yaman Hall, college: CBE, departments: [Tourism and Hospitality Management]}
@@ -25,7 +25,7 @@ buildings:
 classrooms:
   CSS: [DIW 201, DIW 202, DIW 203, DIW 301, DIW 302, DIW 303, DIW 304,
         MAL 201, MAL 202, MAL 203, MAL 301, TIN 203, TIN 204, TIN 301, TIN 302]
-  CISC: [SIN 202, SIN 203, SIN 302, SIN 303, TAL 202, TAL 203, TAL 302, TAL 303, LIW 201, LIW 202]
+  CICS: [SIN 202, SIN 203, SIN 302, SIN 303, TAL 202, TAL 203, TAL 302, TAL 303, LIW 201, LIW 202]
   CBE: [SIP 201, SIP 202, SIP 203, SIP 301, SIP 302, SIP 303,
         TIY 201, TIY 202, TIY 203, TIY 301, TIY 302, YAM 203, YAM 204, YAM 302, YAM 303]
   COE: [DUN 201, DUN 202, DUN 203, DUN 301, DUN 302, DUN 303,
@@ -82,36 +82,31 @@ faculty_offices:
   CSS-P4: DIW 107-W03
   CSS-P5: DIW 107-W04
   CSS-E2: DIW 107-W05
-  CSS-E3: DIW 107-W06
   CSS-E4: DIW 107-W07
   CSS-E5: DIW 107-W08
   CSS-L1: MAL 101
   CSS-L2: MAL 102-W01
   CSS-L3: MAL 102-W02
   CSS-L4: MAL 102-W03
-  CSS-L5: MAL 102-W04
   CSS-M1: TIN 101
-  CSS-M2: TIN 102-W01
   CSS-M3: TIN 102-W02
   CSS-M4: TIN 102-W03
   CSS-M5: TIN 102-W04
-  CISC-C1: SIN 104
-  CISC-C2: SIN 106-W01
-  CISC-C3: SIN 106-W02
-  CISC-C4: SIN 106-W03
-  CISC-C5: SIN 106-W04
-  CISC-C6: SIN 106-W05
-  CISC-T1: TAL 101
-  CISC-T2: TAL 102-W01
-  CISC-T3: TAL 102-W02
-  CISC-T4: TAL 102-W03
-  CISC-T5: TAL 102-W04
-  CISC-T6: TAL 102-W05
-  CISC-B1: LIW 101
-  CISC-B2: LIW 102-W01
-  CISC-B3: LIW 102-W02
-  CISC-B4: LIW 102-W03
-  CISC-B5: LIW 102-W04
+  CICS-C1: SIN 104
+  CICS-C2: SIN 106-W01
+  CICS-C3: SIN 106-W02
+  CICS-C4: SIN 106-W03
+  CICS-C5: SIN 106-W04
+  CICS-C6: SIN 106-W05
+  CICS-T1: TAL 101
+  CICS-T2: TAL 102-W01
+  CICS-T3: TAL 102-W02
+  CICS-T4: TAL 102-W03
+  CICS-T5: TAL 102-W04
+  CICS-T6: TAL 102-W05
+  CICS-B1: LIW 101
+  CICS-B3: LIW 102-W02
+  CICS-B4: LIW 102-W03
   CBE-A1: SIP 104
   CBE-A2: SIP 106-W01
   CBE-A3: SIP 106-W02
@@ -125,7 +120,6 @@ faculty_offices:
   CBE-B5: TIY 104-W04
   CBE-B6: TIY 104-W05
   CBE-N2: TIY 104-W06
-  CBE-N3: TIY 104-W07
   CBE-N4: TIY 104-W08
   CBE-H1: YAM 101
   CBE-H2: YAM 102-W01

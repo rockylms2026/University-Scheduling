@@ -27,10 +27,11 @@ def seal_data_url() -> str:
     """The university seal as a data URL, for the top bar, the sign-in page and printed schedules."""
     import base64
     return "data:image/png;base64," + base64.b64encode(SEAL_PATH.read_bytes()).decode() if SEAL_PATH.exists() else ""
-KINDS = ["lecture", "lab_lecture", "lab", "pe", "uni", "nstp", "supervision"]
-COLLEGES = {"CSS": "College of Social Sciences", "CISC": "College of Information Sciences and Computing",
+KINDS = ["lecture", "lab_lecture", "lab", "pe", "uni", "double", "nstp", "supervision"]
+COLLEGES = {"CSS": "College of Social Sciences", "CICS": "College of Information and Computing Sciences",
             "CBE": "College of Business and Entrepreneurship", "COE": "College of Education",
-            "CCJPS": "College of Criminal Justice and Public Service", "GE": "General Education Department"}
+            "CCJPS": "College of Criminal Justice and Public Service", "GE": "General Education Department",
+            "RE": "Religious Education Department"}
 
 
 def holder_department(housed_by: str | None, program_dept: str) -> str | None:
@@ -41,6 +42,8 @@ def holder_department(housed_by: str | None, program_dept: str) -> str | None:
         return program_dept
     if housed_by.startswith("GE Department"):
         return "General Education"
+    if housed_by.startswith("Religious Education"):
+        return "Religious Education"
     m = re.match(r"Dept\. of (.+?) \(", housed_by)
     return m.group(1) if m else None
 
@@ -61,7 +64,7 @@ def ge_teaching_lists(uni: University, semester: int, dept_college: dict) -> dic
         if not k.course.is_core:
             continue
         house = holder_department(k.course.housed_by, uni.programs[k.section.program].department)
-        if house == "General Education":
+        if house in ("General Education", "Religious Education"):
             continue
         lists.setdefault(k.course.code, set()).add(house)
         if k.faculty and k.faculty.department != "General Education":

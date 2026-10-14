@@ -16,7 +16,7 @@ from .validate import faculty_load_summary, validate
 from .verify import verify
 
 COLLEGE_FILL = {
-    "CSS": "DCE9F7", "CISC": "DDF0E1", "CBE": "FCEBD3", "COE": "EADFF5",
+    "CSS": "DCE9F7", "CICS": "DDF0E1", "CBE": "FCEBD3", "COE": "EADFF5",
     "CCJPS": "F8DCDC", "CORE": "EEEEEE",
 }
 HEAD = PatternFill("solid", fgColor="2F3E4E")
@@ -150,7 +150,7 @@ def write_workbook(uni: University, schedules: dict[int, Schedule], path: Path |
         ("Needs approval: classes placed outside the time frame because no compliant time exists.", False),
         ("Plan notes: points in the loading plans that need a decision.", False),
         ("", False),
-        ("Colors: blue CSS, green CISC, orange CBE, purple COE, red CCJPS, gray GE; yellow = needs approval.", False),
+        ("Colors: blue CSS, green CICS, orange CBE, purple COE, red CCJPS, gray GE; yellow = needs approval.", False),
         ("TBA: GE sections that no college or GE Department plan assigns to a named teacher.", False),
         ("", False),
         ("Checks", True),

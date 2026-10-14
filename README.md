@@ -17,7 +17,7 @@ shared database, so everyone with access sees the same timetable.
 Builds conflict-free weekly timetables for every student section, faculty
 member, and room, from the university's planning documents:
 
-- the curricula and faculty loading plans of CSS, CISC, CBE, COE, and CCJPS,
+- the curricula and faculty loading plans of CSS, CICS, CBE, COE, and CCJPS,
 - the GE Department faculty and loading plan,
 - the University Class Time Frame (periods, lab blocks, practicum days), and
 - the Campus Space Plan (classrooms, laboratories, PE venues).
@@ -43,7 +43,7 @@ Hard rules (never broken; re-checked independently after every solve):
 - No teacher teaches more than 8 hours in a day.
 
 Preferences (kept when possible): labs in the blocks the time frame assigns
-to each lab room, CISC lab days by year level, at most 6 teaching hours a day,
+to each lab room, CICS lab days by year level, at most 6 teaching hours a day,
 compact student days, and classes in the department's own building.
 
 When the plans make a rule impossible to keep, the solver places the class

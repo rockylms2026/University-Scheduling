@@ -37,7 +37,7 @@ dean:
   name: Dr. Rocky Spencer A. Ricardo
   rank: Professor II
   email: rockyr
-  note: Leads academic affairs of all five colleges and the GE Department; chairs the Council of Associate Deans.
+  note: Leads academic affairs of all five colleges, the GE Department and the Religious Education Department; chairs the Council of Associate Deans.
 councils:
 - name: Academic Council
   kind: Governing body, not an office
@@ -66,9 +66,9 @@ colleges:
     - title: Psychology Laboratory Assistant
       name: Ms. Erika M. Dimaano
       email: erikad
-  CISC:
+  CICS:
     associate_dean:
-      faculty: CISC-AD
+      faculty: CICS-AD
       credentials: PhD Computer Science
     staff:
     - title: College Secretary
@@ -155,6 +155,16 @@ ge:
     faculty:
     - GE-G17
     - GE-G19
+religion:
+  coordinator:
+    faculty: RE-RE1
+  note: Reports to the Dean; office and faculty room in Lingkod Hall. Teaches the 8-credit religion sequence to all students of all five colleges.
+  faculty:
+  - RE-RE2
+  - RE-RE3
+  - RE-RE4
+  - RE-RE5
+  - RE-RE6
 support_units:
 - key: registrar
   short: Registrar
@@ -222,7 +232,7 @@ support_units:
   - title: Writing Center Coordinator
     faculty: GE-G8
   - title: Math and Statistics Center Coordinator
-    faculty: CISC-C5
+    faculty: CICS-C5
   - title: Administrative Assistant
     name: Ms. Lourdes P. Navales
     email: lourdesn
@@ -296,7 +306,6 @@ faculty_emails:
   CBE-H5: jasmins
   CBE-N1: ramilg
   CBE-N2: kristelr
-  CBE-N3: joela
   CBE-N4: aileenj
   CCJPS-AD: ianb
   CCJPS-D1: reynaldov
@@ -313,24 +322,22 @@ faculty_emails:
   CCJPS-W2: rheag
   CCJPS-W3: emmanueld
   CCJPS-W4: charissel
-  CISC-AD: doloresc
-  CISC-B1: evelynl
-  CISC-B2: rosalindg
-  CISC-B3: paulineg
-  CISC-B4: arvint
-  CISC-B5: graceb
-  CISC-C1: arnelm
-  CISC-C2: carlos
-  CISC-C3: jasminel
-  CISC-C4: noelf
-  CISC-C5: rheac
-  CISC-C6: kevind
-  CISC-T1: marivicp
-  CISC-T2: ramonv
-  CISC-T3: dianec
-  CISC-T4: francisi
-  CISC-T5: jennifers
-  CISC-T6: antoniom
+  CICS-AD: doloresc
+  CICS-B1: evelynl
+  CICS-B3: paulineg
+  CICS-B4: arvint
+  CICS-C1: arnelm
+  CICS-C2: carlos
+  CICS-C3: jasminel
+  CICS-C4: noelf
+  CICS-C5: rheac
+  CICS-C6: kevind
+  CICS-T1: marivicp
+  CICS-T2: ramonv
+  CICS-T3: dianec
+  CICS-T4: francisi
+  CICS-T5: jennifers
+  CICS-T6: antoniom
   COE-AD: hillaryr
   COE-E1: remediost
   COE-E2: analynv
@@ -355,16 +362,13 @@ faculty_emails:
   CSS-AD: marissap
   CSS-E1: florantem
   CSS-E2: imeldac
-  CSS-E3: ronnels
   CSS-E4: katrinal
   CSS-E5: joses
   CSS-L1: ernestod
   CSS-L2: mariela
   CSS-L3: rafaelb
   CSS-L4: paoloi
-  CSS-L5: lizas
   CSS-M1: teresitav
-  CSS-M2: gabrielo
   CSS-M3: danielr
   CSS-M4: patriciay
   CSS-M5: camillen
@@ -392,3 +396,9 @@ faculty_emails:
   GE-G7: bean
   GE-G8: rosemariea
   GE-G9: joshuac
+  RE-RE1: elijahs
+  RE-RE2: josephm
+  RE-RE3: estherp
+  RE-RE4: danielm
+  RE-RE5: benjaminc
+  RE-RE6: ruths

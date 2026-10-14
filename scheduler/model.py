@@ -29,7 +29,7 @@ class Course:
     lec: int = 3            # lecture contact hours per week
     lab: int = 0            # laboratory contact hours per week
     lab_rooms: tuple[str, ...] = ()   # lab room types, most preferred first
-    kind: str = "lecture"   # lecture | lab | pe | nstp | uni | field
+    kind: str = "lecture"   # lecture | lab | pe | nstp | uni | double | field
     college: str = "CORE"
     housed_by: str | None = None
     placement: tuple[str, ...] = ()   # field courses: days at the placement
@@ -63,7 +63,7 @@ class Program:
 
 @dataclass
 class Faculty:
-    key: str           # college-qualified ID, e.g. "CISC-C1"
+    key: str           # college-qualified ID, e.g. "CICS-C1"
     id: str
     name: str
     rank: str
@@ -398,7 +398,9 @@ def load_university(data_dir: Path = DATA_DIR) -> University:
                     else:
                         targets = [section_name(prog.code, year, block=b) for b in blocks]
                     for sname in targets:
-                        kid = f"S{sem}-{len(classes[sem]) + 1:04d}"
+                        # Stable id from the course and section ("S1-PSYC101-BSP1A"), so a class keeps
+                        # its bookings when other classes are added or removed.
+                        kid = f"S{sem}-{code}-{sname}".replace(" ", "")
                         k = Klass(kid, course, sections[sname], sem)
                         classes[sem].append(k)
                         index[(sem, code, sname)] = k

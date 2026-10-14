@@ -23,7 +23,7 @@ W_SHARED_ROOM = 6        # class placed in a Lingkod Hall overflow room
 W_ALT_LAB = 3            # lab in its second-choice lab room type
 W_LAB_LECTURE_IN_LAB = 1 # lecture part held in the laboratory
 W_OFF_BLOCK = 8          # lab in a block the time frame does not assign to its room
-W_LAB_DAY = 2            # CISC lab not on its year level's lab day
+W_LAB_DAY = 2            # CICS lab not on its year level's lab day
 W_FAC_LONG_DAY = 3       # per half-hour a teacher teaches beyond the preferred daily hours
 W_GAP = 2                # per extra block of classes in a student group's day (idle time)
 W_OUTSIDE_HOME = 1       # session outside its department's building (phase 2)
@@ -95,6 +95,8 @@ def build_meetings(classes: list[Klass]) -> list[Meeting]:
             meetings.append(Meeting(f"{k.id}-N", k, "NSTP", "nstp"))
         elif kind == "uni":
             meetings.append(Meeting(f"{k.id}-U", k, "Lec", "uni"))
+        elif kind == "double":     # two MWF periods a week (REL 403)
+            meetings.append(Meeting(f"{k.id}-D", k, "Lec", "double"))
         else:
             meetings.append(Meeting(f"{k.id}-L", k, "Lec", "lecture"))
     return meetings
@@ -133,7 +135,7 @@ def time_options(uni: University, kind: str) -> list[Option]:
         n = tf.nstp
         opts.append(Option("Sat lab", ((n.days[0], n.start, n.end),), W_EXCEPTION * 2, block="SAT",
                            exception="laboratory on Saturday morning (make-up slot)"))
-    elif kind == "pe":
+    elif kind in ("pe", "double"):
         for a, b in (("Mon", "Wed"), ("Mon", "Fri"), ("Wed", "Fri")):
             opts += [Option(f"{p.name} {a[0]}{b[0]}", on(p, (a, b))) for p in mwf]
         for p, q in zip(mwf, mwf[1:]):

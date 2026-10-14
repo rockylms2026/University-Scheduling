@@ -41,7 +41,7 @@ def cls(where):
 BSP = "program = 'BSP'"
 psy_major = cls(f"{BSP} and not is_ge")
 eco_major = cls("department = 'Economics' and not is_ge")
-cisc_major = cls("college = 'CISC' and not is_ge")
+cisc_major = cls("college = 'CICS' and not is_ge")
 own_ge = cls(f"{BSP} and course = 'PSYC 160'")                       # Psychology may teach it
 gedept = cls(f"{BSP} and course = 'PE 101'")                         # GE Department
 sw_own = cls("department = 'Social Work' and course = 'PSYC 160'")   # Social Work may teach it too
@@ -60,12 +60,15 @@ psql("""insert into staff (email, full_name, role, college, department) values
   ('chair.entrep@u.edu','Chair Entrepreneurship','chair','CBE','Entrepreneurship'),
   ('adean.ccjps@u.edu','Assoc Dean CCJPS','associate_dean','CCJPS',null),
   ('adean.css@u.edu','Assoc Dean CSS','associate_dean','CSS',null),
-  ('adean.cisc@u.edu','Assoc Dean CISC','associate_dean','CISC',null),
+  ('adean.cisc@u.edu','Assoc Dean CICS','associate_dean','CICS',null),
   ('ge@u.edu','GE Coordinator','ge_coordinator',null,null),
+  ('re@u.edu','Religious Education Coordinator','re_coordinator',null,null),
   ('dean@u.edu','Dean','dean',null,null) on conflict do nothing;
   update settings set ge_open=false where id=1;
   delete from bookings where class_id in (select id from classes where department in ('Psychology','Social Work','Criminology','Entrepreneurship'));
   delete from teacher_changes where class_id in (select id from classes where department in ('Psychology','Social Work','Criminology','Entrepreneurship'));
+  delete from bookings where class_id in (select id from classes where house_dept = 'Religious Education');
+  delete from teacher_changes where class_id in (select id from classes where house_dept = 'Religious Education');
   delete from ge_requests; delete from ge_decisions; delete from submissions;""")
 
 
@@ -173,6 +176,9 @@ expect("associate dean books own college major", True, bk(eco_major), "adean.css
 expect("associate dean cannot book other college", False, bk(cisc_major), "adean.css@u.edu")
 
 # GE Coordinator: GE Department courses, last
+rel = cls("course = 'REL 103A' and section = 'BSP 1A'")
+expect("REL 103A is a Religious Education class", True, f"select class_kind('{rel}')", ADMIN, contains="reldept")
+expect("Religious Education Coordinator blocked until opened", False, bk(rel), "re@u.edu")
 expect("GE Coordinator blocked until opened", False, bk(gedept), "ge@u.edu")
 expect("chair cannot open GE", True, "update settings set ge_open=true where id=1; select ge_open from settings", "chair.psy@u.edu", contains="f")
 expect("chair cannot book a GE Department course", False, bk(gedept), "chair.psy@u.edu")
@@ -181,6 +187,14 @@ expect("GE Coordinator books GE Department course", True, bk(gedept, "M7 MWF"), 
 expect("GE Department course needs no approval", True, f"select needs_approval('{gedept}')", "ge@u.edu", contains="f")
 expect("GE Coordinator cannot book department-held GE", False, bk(own_ge), "ge@u.edu")
 expect("GE Coordinator cannot book majors", False, bk(psy_major, "M4 MWF"), "ge@u.edu")
+expect("Religious Education Coordinator books a religion class", True, bk(rel, "M8 MWF"), "re@u.edu")
+expect("religion class needs no approval", True, f"select needs_approval('{rel}')", "re@u.edu", contains="f")
+expect("Religious Education Coordinator picks a religion teacher", True, tc(rel, "RE-RE2"), "re@u.edu")
+expect("Religious Education Coordinator cannot pick another department's teacher", False, tc(rel, "CSS-P1"), "re@u.edu")
+expect("Religious Education Coordinator cannot book GE Department courses", False, bk(gedept, "M2 MWF"), "re@u.edu")
+expect("Religious Education Coordinator cannot book majors", False, bk(psy_major, "M5 MWF"), "re@u.edu")
+expect("GE Coordinator cannot book religion classes", False, bk(rel, "M6 MWF"), "ge@u.edu")
+expect("chair cannot book religion classes", False, bk(rel, "M6 MWF"), "chair.psy@u.edu")
 expect("dean books anything", True, bk(cisc_major), "dean@u.edu")
 
 # Admin

@@ -27,7 +27,7 @@ def test_changes_become_overrides(tmp_path):
     k = classes[("CS 230", "BSCS 2A")]
     choices = _choices(uni, Meeting("x", k, "Lec", "lab_lecture"), {})
     assert {c.option.label for c in choices} == {"M2 MW"}
-    assert {c.pool for c in choices} == {"classrooms:CISC"}
+    assert {c.pool for c in choices} == {"classrooms:CICS"}
     ban = next(k for k in uni.classes_for(2) if k.course.code == "BAN 403")
     assert not any(c.option.exception for c in _choices(uni, Meeting("y", ban, "Lec", "lab_lecture"), {}))
 

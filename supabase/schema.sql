@@ -10,6 +10,8 @@
 --   associate_dean     the classes of the sections of their own college (as a chair would),
 --                      and approves requests to departments of their college from other colleges
 --   ge_coordinator     courses of the GE Department, once the Registrar or Dean opens them, with no approval
+--   re_coordinator     religion courses of the Religious Education Department, opened together with the GE
+--                      Department, with its own faculty and no approval
 -- Everyone with a role can read the whole timetable, because conflict checks need it.
 --
 -- GE teaching lists (ge_teachers): the departments that may teach each GE course. A department
@@ -23,7 +25,7 @@
 create table if not exists public.faculty (
   key        text primary key,
   name       text not null,
-  college    text not null,          -- CSS, CISC, CBE, COE, CCJPS, GE
+  college    text not null,          -- CSS, CICS, CBE, COE, CCJPS, GE, RE
   department text not null,
   rank       text,
   designation text,
@@ -35,7 +37,7 @@ alter table public.faculty add column if not exists specialization text;
 alter table public.faculty add column if not exists degree text;
 
 create table if not exists public.classes (
-  id           text primary key,     -- e.g. S1-0646
+  id           text primary key,     -- e.g. S1-PSYC101-BSP1A (semester, course, section)
   sem          int  not null,
   course       text not null,
   section      text not null,
@@ -63,13 +65,16 @@ create table if not exists public.ge_teachers (
 create table if not exists public.staff (
   email      text primary key check (email = lower(email)),
   full_name  text not null default '',
-  role       text not null check (role in ('registrar', 'dean', 'associate_dean', 'chair', 'ge_coordinator')),
+  role       text not null,
   college    text,                   -- associate deans and chairs
   department text,                   -- chairs
   updated_at timestamptz not null default now(),
   check (role <> 'associate_dean' or college is not null),
   check (role <> 'chair' or (college is not null and department is not null))
 );
+alter table public.staff drop constraint if exists staff_role_check;
+alter table public.staff add constraint staff_role_check
+  check (role in ('registrar', 'dean', 'associate_dean', 'chair', 'ge_coordinator', 're_coordinator'));
 
 -- ---------- the schedule ----------
 create table if not exists public.bookings (
@@ -185,6 +190,7 @@ $$;
 create or replace function public.class_kind(cid text) returns text
 language sql stable security definer set search_path = public as $$
   select case when not c.is_ge then 'major'
+              when c.house_dept = 'Religious Education' then 'reldept'
               when c.house_dept is null or c.house_dept = 'General Education' then 'gedept'
               when public.may_teach(c.course, c.department) then 'own'
               else 'borrowed' end
@@ -196,6 +202,7 @@ create or replace function public.own_ge_left(d text) returns int
 language sql stable security definer set search_path = public as $$
   select count(*)::int from public.classes c
   where c.department = d and c.is_ge and c.house_dept is distinct from 'General Education'
+    and c.house_dept is distinct from 'Religious Education'
     and public.may_teach(c.course, d)
     and not exists (select 1 from public.bookings b where b.class_id = c.id)
 $$;
@@ -226,6 +233,10 @@ begin
   if kind = 'gedept' then
     select ge_open into ge_is_open from public.settings where id = 1;
     return me.role = 'ge_coordinator' and coalesce(ge_is_open, false);
+  end if;
+  if kind = 'reldept' then
+    select ge_open into ge_is_open from public.settings where id = 1;
+    return me.role = 're_coordinator' and coalesce(ge_is_open, false);
   end if;
   if kind = 'borrowed' then return false; end if;      -- booked only with an instructor, through book_borrowed()
   return (me.role = 'associate_dean' and c.college = me.college) or (me.role = 'chair' and c.department = me.department);
@@ -281,7 +292,9 @@ begin
     return public.can_decide(cid);
   end if;
   if not public.can_edit_class(cid) then return false; end if;
-  if t is null or me.role <> 'chair' then return true; end if;
+  if t is null then return true; end if;
+  if me.role = 're_coordinator' then return f.department = 'Religious Education'; end if;
+  if me.role <> 'chair' then return true; end if;
   return f.department = me.department;
 end $$;
 

@@ -685,11 +685,11 @@ const DAYS = DATA.days;
 const LUNCH = { Mon: [690, 750], Wed: [690, 750], Fri: [690, 750], Tue: [720, 810], Thu: [720, 810] };
 const DAY_MAX = { Mon: 8, Tue: 7.5, Wed: 8, Thu: 7.5, Fri: 8, Sat: 3 };     // teaching hours a room can hold each day
 const PART = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Supervision: "Practicum supervision" };
-const COLLEGE_KEYS = ["CSS", "CISC", "CBE", "COE", "CCJPS"];
-const SCOPES = [["ALL", "All colleges"], ["CSS", "CSS"], ["CISC", "CISC"], ["CBE", "CBE"], ["COE", "COE"], ["CCJPS", "CCJPS"], ["GE", "GE Department"]];
+const COLLEGE_KEYS = ["CSS", "CICS", "CBE", "COE", "CCJPS"];
+const SCOPES = [["ALL", "All colleges"], ["CSS", "CSS"], ["CICS", "CICS"], ["CBE", "CBE"], ["COE", "COE"], ["CCJPS", "CCJPS"], ["GE", "GE Department"], ["RE", "Religious Education"]];
 const VIEWS = [["home", "Home"], ["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["profiles", "Faculty Profiles"], ["rooms", "Rooms"], ["sections", "Sections"],
                ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["availability", "GE Availability"], ["submissions", "Submissions"], ["reports", "Reports"], ["org", "Organization"], ["settings", "Settings"]];
-const ROLE_NAME = { registrar: "Registrar", dean: "Dean", associate_dean: "Associate Dean", chair: "Department Chair", ge_coordinator: "GE Coordinator" };
+const ROLE_NAME = { registrar: "Registrar", dean: "Dean", associate_dean: "Associate Dean", chair: "Department Chair", ge_coordinator: "GE Coordinator", re_coordinator: "Religious Education Coordinator" };
 const TYPE_LABEL = { lec: "Lecture (major)", lab: "Laboratory block (3 h)", ge: "General education", pe: "PE", cwts: "CWTS (Saturday)", prac: "Practicum supervision" };
 const INTRO = new Set(DATA.intro || []);
 const $ = (id) => document.getElementById(id);
@@ -704,6 +704,11 @@ const findOpt = (kind, label) => optionsFor(kind).find((o) => o.label === label)
 const overlaps = (a, b) => a.day === b.day && a.start < b.end && b.start < a.end;
 const groupsOf = (section) => DATA.sections[section].groups;
 const isGE = (code) => DATA.courses[code].college === "CORE";
+// Religion courses (REL) belong to the core but are taught by the Religious Education Department.
+const isRel = (code) => /^Religious Education/.test(DATA.courses[code]?.usual || "");
+// The GE Department and Religious Education scopes show their own courses in every program.
+const unitScope = () => state.scope === "GE" || state.scope === "RE";
+const inUnit = (code) => (state.scope === "RE" ? isRel(code) : isGE(code) && !isRel(code));
 const progCollege = (section) => DATA.programs[DATA.sections[section].program].college;
 const numSort = (a, b) => a.localeCompare(b, undefined, { numeric: true });
 const typeOf = (kind, code) => kind === "lab" ? "lab" : kind === "pe" ? "pe" : kind === "nstp" ? "cwts" : kind === "supervision" ? "prac" : isGE(code) || kind === "uni" ? "ge" : "lec";
@@ -785,6 +790,7 @@ const isBooked = (cls) => cls.meetings.every((m) => bookings[`${cls.id}|${m.part
 // section may teach), or borrowed (a GE course the section asks another department for). Mirrors class_kind().
 function classKind(cls) {
   if (!isGE(cls.course)) return "major";
+  if (cls.house === "Religious Education") return "reldept";
   if (!cls.house || cls.house === "General Education") return "gedept";
   return mayTeach(cls.course, progDept(cls.section)) ? "own" : "borrowed";
 }
@@ -795,12 +801,17 @@ const requestOf = (cls) => requests[cls.id] || null;
 function editRight(cls) {
   if (!BACKEND || isAdmin()) return "";
   const col = progCollege(cls.section), dept = progDept(cls.section), kind = classKind(cls);
+  if (kind === "reldept") {
+    if (me.role !== "re_coordinator") return "View only: religion courses are scheduled by the Religious Education Coordinator, after the departments.";
+    return settings.geOpen ? "" : "View only: Religious Education schedules after the departments. The Dean or the Registrar opens it when the departments are done.";
+  }
   if (kind === "gedept") {
     if (me.role !== "ge_coordinator") return "View only: GE Department courses are scheduled by the GE Coordinator, after the departments.";
     return settings.geOpen ? "" : "View only: the GE Coordinator schedules last. The Dean or the Registrar opens GE Department scheduling when the departments are done.";
   }
   if (me.role === "associate_dean" && col !== me.college) return `View only: this class belongs to the ${DATA.colleges[col]}.`;
   if (me.role === "chair" && dept !== me.department) return `View only: this class belongs to the Department of ${dept}.`;
+  if (me.role === "re_coordinator") return "View only: the Religious Education Coordinator schedules religion courses only.";
   if (me.role !== "associate_dean" && me.role !== "chair") return "View only: the GE Coordinator schedules GE Department courses only.";
   if (kind === "borrowed") {
     const left = ownGeLeft(dept);
@@ -836,12 +847,13 @@ function teacherRight(cls) {
 function teacherAllowed(cls, key) {
   if (!key || !BACKEND || isAdmin()) return true;
   if (classKind(cls) === "borrowed") return DATA.teachers[key].dept === requestOf(cls)?.department;
+  if (me.role === "re_coordinator") return DATA.teachers[key].dept === "Religious Education";
   return !chairDept() || DATA.teachers[key].dept === chairDept();
 }
 function allowedScopes() {
   if (!BACKEND || isAdmin()) return SCOPES.map(([k]) => k);
   if (me.role === "chair" || me.role === "associate_dean") return [me.college];
-  return ["GE", "ALL"];
+  return me.role === "re_coordinator" ? ["RE", "ALL"] : ["GE", "ALL"];
 }
 function scheduleSig(cls) {
   return cls.meetings.map((m) => bookings[`${cls.id}|${m.part}`]).filter(Boolean).map((b) => `${b.part}:${b.pattern}`).sort().join(" ");
@@ -1071,21 +1083,21 @@ function rebuild() {
 const totalMeetings = DATA.classes.reduce((a, c) => a + c.meetings.length, 0);
 
 // ---------- college filter ----------
-function sectionInScope(s) { return state.scope === "ALL" || state.scope === "GE" || progCollege(s) === state.scope; }
+function sectionInScope(s) { return state.scope === "ALL" || unitScope() || progCollege(s) === state.scope; }
 function classInScope(c) {
   if (chairDept() && progDept(c.section) !== chairDept()) return false;
-  return state.scope === "ALL" || (state.scope === "GE" ? isGE(c.course) : progCollege(c.section) === state.scope);
+  return state.scope === "ALL" || (unitScope() ? inUnit(c.course) : progCollege(c.section) === state.scope);
 }
 function teacherInScope(k) { return chairDept() ? DATA.teachers[k].dept === chairDept() : state.scope === "ALL" || DATA.teachers[k].college === state.scope; }
-function roomInScope(n) { const r = DATA.rooms[n]; return state.scope === "ALL" || r.college === (state.scope === "GE" ? "SHARED" : state.scope); }
+function roomInScope(n) { const r = DATA.rooms[n]; return state.scope === "ALL" || state.scope === "RE" || r.college === (state.scope === "GE" ? "SHARED" : state.scope); }
 const programOk = (p) => !chairDept() || DATA.programs[p].dept === chairDept();
 function programsInScope() { return Object.keys(DATA.programs).filter((p) => programOk(p) && (state.scope === "ALL" || DATA.programs[p].college === state.scope)); }
 function sectionsInScope() {
   const out = [];
-  Object.keys(DATA.programs).forEach((p) => { if (programOk(p) && (state.scope === "ALL" || state.scope === "GE" || DATA.programs[p].college === state.scope)) out.push(...DATA.programs[p].sections); });
+  Object.keys(DATA.programs).forEach((p) => { if (programOk(p) && (state.scope === "ALL" || unitScope() || DATA.programs[p].college === state.scope)) out.push(...DATA.programs[p].sections); });
   return out;
 }
-const scopeName = () => chairDept() ? `the Department of ${chairDept()}` : state.scope === "ALL" ? "all colleges" : state.scope === "GE" ? "the GE Department" : DATA.colleges[state.scope];
+const scopeName = () => chairDept() ? `the Department of ${chairDept()}` : state.scope === "ALL" ? "all colleges" : state.scope === "GE" ? "the GE Department" : state.scope === "RE" ? "the Religious Education Department" : DATA.colleges[state.scope];
 
 // ---------- loads ----------
 function computeLoads() {
@@ -1155,7 +1167,7 @@ function evaluate(cls, meeting, opt, room, teacherKey) {
   if (meeting.kind === "lab") {
     const pref = DATA.labDays.find((p) => p.college === DATA.programs[sec.program].college && p.year === sec.year);
     if (pref && !(pref.blocks.includes(opt.block) && pref.days.includes(cands[0].day)))
-      out.push(["warn", `CISC guidance: Year ${sec.year} labs on ${pref.days.join("/")} ${pref.blocks.join("/")}`]);
+      out.push(["warn", `CICS guidance: Year ${sec.year} labs on ${pref.days.join("/")} ${pref.blocks.join("/")}`]);
   }
   const other = cls.meetings.filter((m) => m.part !== meeting.part).map((m) => bookings[`${cls.id}|${m.part}`]).filter(Boolean);
   other.forEach((b) => {
@@ -1528,6 +1540,7 @@ function homeItems() {
       const rej = waitingFor(d).filter((x) => x.a.state === "rejected").length;
       if (rej) act.push({ icon: "alert", cls: "bad", title: `${rej} borrowed GE class${rej > 1 ? "es were" : " was"} not approved`, text: "Book another time with a free instructor.", link: go("Approvals", 'data-view="approvals"') });
     }
+    if (me.role === "re_coordinator" && settings.geOpen && meet.done < meet.all) act.push({ icon: "clock", title: "Religious Education scheduling is open", text: `${meet.all - meet.done} class meetings of the religion courses still need a time.`, link: go("Open timetable", 'data-view="timetable"') });
     if (me.role === "ge_coordinator" && settings.geOpen && meet.done < meet.all) act.push({ icon: "clock", title: "GE Department scheduling is open", text: `${meet.all - meet.done} class meetings of the GE Department courses still need a time.`, link: go("Open timetable", 'data-view="timetable"') });
   }
   if (nConf) act.push({ icon: "alert", cls: "bad", title: `${nConf} conflict${nConf > 1 ? "s" : ""} to fix`, text: "Two bookings share a teacher, a room or a section at the same time, or a load rule is broken.", link: go("Conflicts", 'data-view="conflicts"') });
@@ -1570,7 +1583,7 @@ function renderHome(page) {
   if (BACKEND && submissions) Object.values(submissions).sort((a, b) => Date.parse(b.submitted_at) - Date.parse(a.submitted_at)).slice(0, 5)
     .forEach((r) => news.push(`<div><i class="good"></i><p style="margin:0"><b>Department of ${esc(r.department)} submitted</b><span>${esc(when(r.submitted_at))} · ${esc((r.submitted_by || "").split("@")[0])}</span></p></div>`));
   news.push(`<div><i class="${pub.cls}"></i><p style="margin:0"><b>${esc(pub.label)}</b><span>${lastSaved ? `Last change ${esc(when(lastSaved))}` : "No changes yet"}</span></p></div>`);
-  if (BACKEND) news.push(`<div><i class="${settings.geOpen ? "good" : "warn"}"></i><p style="margin:0"><b>GE Department scheduling is ${settings.geOpen ? "open" : "not open yet"}</b><span>${settings.geOpen ? "The GE Coordinator can book PE, CWTS and the other GE Department courses." : "The GE Coordinator books last, after the departments."}</span></p></div>`);
+  if (BACKEND) news.push(`<div><i class="${settings.geOpen ? "good" : "warn"}"></i><p style="margin:0"><b>GE Department and Religious Education scheduling is ${settings.geOpen ? "open" : "not open yet"}</b><span>${settings.geOpen ? "The GE Coordinator can book PE, CWTS and the other GE Department courses, and the Religious Education Coordinator the religion courses." : "The GE and Religious Education Coordinators book last, after the departments."}</span></p></div>`);
   page.innerHTML = `<div class="home">${heroArt()}
     <div class="homehead"><h1>${hello}${nm ? `, ${esc(nm)}` : ""}</h1><p>It's ${esc(today)}</p></div>
     <div class="homebody">
@@ -1600,7 +1613,7 @@ function kpis() {
   const secs = sectionsInScope();
   let full = 0, part = 0;
   secs.forEach((s) => {
-    const cl = DATA.classes.filter((c) => c.section === s && (state.scope !== "GE" || isGE(c.course)));
+    const cl = DATA.classes.filter((c) => c.section === s && (!unitScope() || inUnit(c.course)));
     const all = cl.reduce((a, c) => a + c.meetings.length, 0), done = cl.reduce((a, c) => a + c.meetings.filter((m) => bookings[`${c.id}|${m.part}`]).length, 0);
     if (all && done === all) full++; else if (done) part++;
   });
@@ -1989,7 +2002,7 @@ function progress(p) {
   return `${done}/${all}`;
 }
 function fixDesk() {
-  const colleges = chairDept() ? [me.college] : state.scope === "ALL" || state.scope === "GE" ? COLLEGE_KEYS : [state.scope];
+  const colleges = chairDept() ? [me.college] : state.scope === "ALL" || unitScope() ? COLLEGE_KEYS : [state.scope];
   if (!colleges.includes(state.college)) state.college = colleges[0];
   const progs = programsOf(state.college);
   if (!progs.includes(state.program)) state.program = progs[0] || null;
@@ -1997,7 +2010,7 @@ function fixDesk() {
   return colleges;
 }
 function renderTimetable(page) {
-  if (state.scope === "GE" && !state.pick) return renderGE(page, "timetable");
+  if (unitScope() && !state.pick) return renderGE(page, "timetable");
   const colleges = fixDesk();
   let nav = "";
   if (colleges.length > 1) nav += `<div class="row"><span class="navlabel">College</span><div class="pills">${colleges.map((c) =>
@@ -2052,11 +2065,12 @@ function sectionDesk() {
 function courseGroup(c) {
   const k = DATA.courses[c.course].kind;
   if (k === "pe" || k === "nstp" || k === "field") return "Others";
+  if (isRel(c.course)) return "Religion courses";
   if (isGE(c.course)) return "GE courses";
   return (DATA.programs[DATA.sections[c.section].program].specialization || []).includes(c.course) ? "Specialization courses" : "Major courses";
 }
 function courseGroups(classes) {
-  const order = ["Major courses", "Specialization courses", "GE courses", "Others"];
+  const order = ["Major courses", "Specialization courses", "GE courses", "Religion courses", "Others"];
   return order.map((g) => [g, classes.filter((c) => courseGroup(c) === g)]).filter(([, l]) => l.length);
 }
 function classRow(c, other) {
@@ -2222,7 +2236,7 @@ const words = (txt) => String(txt || "").toLowerCase().replace(/[^a-z\s-]/g, " "
 function teacherGroups(cls) {
   const title = new Set(words(DATA.courses[cls.course].title));
   const match = (k) => words(specOf(k)).filter((w) => title.has(w)).length;
-  const home = classKind(cls) === "gedept" ? "General Education" : progDept(cls.section);
+  const kind = classKind(cls), home = kind === "gedept" ? "General Education" : kind === "reldept" ? "Religious Education" : progDept(cls.section);
   const all = Object.keys(DATA.teachers).filter((k) => teacherAllowed(cls, k));
   const item = (k) => { const t = DATA.teachers[k], full = luFor(k) + cls.lu > t.max;
     return { key: k, score: match(k), full, text: `${t.name} · ${luFor(k)} of ${t.max} LU${full ? " · full" : ""}${t.dept === home ? "" : ` · ${t.dept}`}` }; };
@@ -2261,8 +2275,9 @@ function teacherOptions() {
 }
 // GE Department: its classes sit in every program's sections.
 function renderGE(page, from) {
-  const codes = Object.keys(DATA.courses).filter(isGE).filter((c) => DATA.classes.some((k) => k.course === c)).sort();
-  page.innerHTML = `${head(from === "timetable" ? "Timetable · GE Department" : "Courses · GE Department", "General education classes in every program's sections this semester. Open a section to book its time, room, and teacher.")}
+  const codes = Object.keys(DATA.courses).filter(inUnit).filter((c) => DATA.classes.some((k) => k.course === c)).sort();
+  const rel = state.scope === "RE", unit = rel ? "Religious Education" : "GE Department";
+  page.innerHTML = `${head(`${from === "timetable" ? "Timetable" : "Courses"} · ${unit}`, `${rel ? "Religion" : "General education"} classes in every program's sections this semester. Open a section to book its time, room, and teacher.`)}
     ${codes.map((code) => {
       const cls = DATA.classes.filter((c) => c.course === code);
       const done = cls.filter((c) => c.meetings.every((m) => bookings[`${c.id}|${m.part}`])).length;
@@ -2455,6 +2470,10 @@ function orgTree() {
     people.filter((x) => x !== lead).forEach((x) => add(pid(x), x, a.name, head));
   });
   O.ge.staff.map(orgStaff).forEach((x) => staffNode(x, "GE Department office", ge));
+  if (O.religion) {
+    const re = add(`f:${O.religion.coordinator.faculty}`, orgFac(O.religion.coordinator.faculty, "Religious Education Coordinator"), DATA.colleges.RE, dean);
+    if (re) O.religion.faculty.map((k) => orgFac(k)).filter(Boolean).forEach((x) => add(pid(x), x, DATA.colleges.RE, re));
+  }
   O.offices[1].staff.map(orgStaff).forEach((x) => staffNode(x, "Office of the Dean", dean));
   O.support_units.forEach((u) => {
     const h = add(`u:${u.key}`, orgHead(u.head), u.name, root);
@@ -2611,7 +2630,7 @@ function renderSections(page) {
   const secs = sectionsInScope();
   const rows = secs.map((s) => {
     const sec = DATA.sections[s];
-    const cl = DATA.classes.filter((c) => c.section === s && (state.scope !== "GE" || isGE(c.course)));
+    const cl = DATA.classes.filter((c) => c.section === s && (!unitScope() || inUnit(c.course)));
     const all = cl.reduce((a, c) => a + c.meetings.length, 0), done = cl.reduce((a, c) => a + c.meetings.filter((m) => bookings[`${c.id}|${m.part}`]).length, 0);
     const h = sessions.filter((x) => x.cls.section === s).reduce((a, x) => a + x.end - x.start, 0) / 60;
     const nc = conflicts.filter((c) => c.sev === "bad" && c.classes.some((k) => k.section === s)).length;
@@ -2620,13 +2639,13 @@ function renderSections(page) {
       <td>${nc ? `<span class="chip bad">${nc}</span>` : `<span class="chip good">0</span>`}</td><td>${sec.placement.join(", ") || "—"}</td>
       <td><button type="button" class="btn" data-opensection="${esc(s)}">Open</button> <button type="button" class="btn" data-print="section" data-id="${esc(s)}">Print…</button></td></tr>`;
   }).join("");
-  page.innerHTML = `${head("Sections", `${secs.length} block sections in ${esc(scopeName())}${state.scope === "GE" ? " (counting GE classes only)" : ""}.`)}
+  page.innerHTML = `${head("Sections", `${secs.length} block sections in ${esc(scopeName())}${unitScope() ? ` (counting ${state.scope === "RE" ? "religion" : "GE"} classes only)` : ""}.`)}
     <div class="card"><div class="tablebox" style="max-height:none"><table><thead><tr><th>Section</th><th>Program</th><th class="num">Year</th><th class="num">Meetings booked</th><th class="num">Hours/week</th><th>Conflicts</th><th>Practicum days</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
 // ===== Courses =====
 function renderCourses(page) {
-  if (state.scope === "GE") return renderGE(page, "courses");
+  if (unitScope()) return renderGE(page, "courses");
   const progs = programsInScope();
   if (!progs.includes(state.program)) state.program = progs[0];
   const prog = DATA.programs[state.program];
@@ -2674,7 +2693,7 @@ function renderConflicts(page) {
 function approvalList() {
   return DATA.classes.map((c) => ({ c, a: approvalOf(c) })).filter(({ c, a }) => {
     if (!a || a.state === "unscheduled") return false;
-    if (isAdmin() || me.role === "ge_coordinator") return true;
+    if (isAdmin() || me.role === "ge_coordinator" || me.role === "re_coordinator") return true;
     if (me.role === "chair") return progDept(c.section) === me.department || a.dept === me.department;
     return progCollege(c.section) === me.college || (a.dept && DATA.deptCollege[a.dept] === me.college);
   });
@@ -2793,14 +2812,14 @@ function renderSettings(page) {
         <div class="actions"><button type="submit" class="btn primary">Save person</button>${state.staffEdit ? `<button type="button" class="btn" data-staffedit="">Clear</button>` : ""}<span class="msg" id="stmsg"></span></div>
       </form><p class="small muted" style="margin:0">College applies to associate deans and chairs; department applies to chairs only.</p></div>` : "";
   const phase = isAdmin() ? `<div class="card"><h2>Scheduling phase</h2>
-      <label class="switch"><input type="checkbox" id="geOpen"${settings.geOpen ? " checked" : ""}> GE Department scheduling is open</label>
-      <p class="small muted" style="margin:0">The GE Coordinator schedules the GE Department courses (PE, CWTS, PHIL 190, PHIL 220, ARTS 101, ENGL 302) last, around the finished department schedules. Open it when the departments are done.</p></div>` : "";
+      <label class="switch"><input type="checkbox" id="geOpen"${settings.geOpen ? " checked" : ""}> GE Department and Religious Education scheduling is open</label>
+      <p class="small muted" style="margin:0">The GE Coordinator schedules the GE Department courses (PE, CWTS, PHIL 190, PHIL 220, ARTS 101, ENGL 302) last, around the finished department schedules, and the Religious Education Coordinator the religion courses (REL). Open it when the departments are done.</p></div>` : "";
   const account = `<div class="card form"><h2>Your account</h2><dl class="about"><dt>Name</dt><dd>${esc(me.name)}</dd><dt>Email</dt><dd>${esc(me.email)}</dd>
       <dt>Role</dt><dd>${esc(ROLE_NAME[me.role])}${me.department ? ` · ${esc(me.department)}` : ""}${me.college ? ` · ${esc(me.college)}` : ""}</dd></dl>
       <form id="passForm" style="display:grid;gap:10px"><label>New password<input id="nPass" type="password" minlength="8" autocomplete="new-password" required></label>
       <label>Type it again<input id="nPass2" type="password" minlength="8" autocomplete="new-password" required></label>
       <div class="actions"><button type="submit" class="btn primary">Change password</button><span class="msg good" id="pwmsg"></span></div></form></div>`;
-  const depts = [...new Set(Object.values(DATA.teachers).map((t) => t.dept))].filter((x) => x !== "General Education").sort();
+  const depts = [...new Set(Object.values(DATA.teachers).map((t) => t.dept))].filter((x) => x !== "General Education" && x !== "Religious Education").sort();
   const courses = Object.keys(geLists).length ? [...new Set([...Object.keys(DATA.geTeachers || {}), ...Object.keys(geLists)])].sort() : Object.keys(DATA.geTeachers || {}).sort();
   const lists = `<div class="card" style="grid-column:1/-1"><div class="cardhead"><h2>Who may teach each GE course</h2><span class="small muted">GE Department courses are not listed: the GE Coordinator schedules them</span></div>
       <p class="small muted" style="margin:0">A department teaches a GE course for its own sections when it is listed here. Other sections ask one of the listed departments.</p>
@@ -2855,8 +2874,8 @@ function openPick(clsId, part) {
   // Jump to the class's own section on the booking desk.
   const sec = DATA.sections[cls.section];
   state.view = "timetable"; state.college = DATA.programs[sec.program].college; state.program = sec.program; state.section = cls.section;
-  if (state.scope !== "ALL" && state.scope !== "GE" && state.scope !== state.college) state.scope = "ALL";
-  if (state.scope === "GE") state.scope = "ALL";
+  if (state.scope !== "ALL" && !unitScope() && state.scope !== state.college) state.scope = "ALL";
+  if (unitScope()) state.scope = "ALL";
 }
 function choosePattern(label) {
   state.draft.pattern = label;
@@ -2980,7 +2999,7 @@ const SEARCH = [].concat(
   Object.entries(DATA.teachers).map(([k, t]) => ({ kind: "Faculty", label: t.name, sub: `${t.dept} · ${t.college}`, go: () => { state.view = "faculty"; state.teacher = k; if (!teacherInScope(k)) state.scope = "ALL"; } })),
   Object.entries(DATA.rooms).map(([n, r]) => ({ kind: "Room", label: n, sub: `${roomKind(r)} · ${DATA.buildings[r.building] || r.building}`, go: () => { state.view = "rooms"; state.room = n; if (!roomInScope(n)) state.scope = "ALL"; } })),
   [...new Set(DATA.classes.map((c) => c.course))].map((code) => ({ kind: "Course", label: `${code} ${DATA.courses[code].title}`, sub: `${DATA.classes.filter((c) => c.course === code).length} sections`,
-    go: () => { const c = DATA.classes.find((x) => x.course === code); if (isGE(code)) { state.scope = "GE"; state.view = "courses"; } else { state.scope = "ALL"; state.view = "courses"; state.program = DATA.sections[c.section].program; } } })),
+    go: () => { const c = DATA.classes.find((x) => x.course === code); if (isGE(code)) { state.scope = isRel(code) ? "RE" : "GE"; state.view = "courses"; } else { state.scope = "ALL"; state.view = "courses"; state.program = DATA.sections[c.section].program; } } })),
 );
 let searchHits = [], searchOn = 0;
 function runSearch(q) {

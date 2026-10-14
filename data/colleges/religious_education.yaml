@@ -1,0 +1,20 @@
+# Religious Education Department (university-wide, separate from the GE Department;
+# reports to the Dean; office and faculty room in Lingkod Hall).
+# Source: Religious Education Department, Staffing and Teaching Loads (steady state).
+# It has no programs; its faculty teach the religion courses (REL) of every program.
+college: RE
+name: Religious Education Department
+# Religion faculty teach only religion courses, so the 4-preparation cap does not apply.
+prep_cap: null
+
+faculty:
+  RE1: {name: Dr. Elijah M. Sablan, rank: Associate Professor I, department: Religious Education, designation: Religious Education Coordinator, max_lu: 15}
+  RE2: {name: Mr. Joseph A. Malabanan, rank: Instructor III, department: Religious Education, designation: Faculty}
+  RE3: {name: Ms. Esther Joy C. Paguio, rank: Instructor III, department: Religious Education, designation: Faculty}
+  RE4: {name: Mr. Daniel S. Macalintal, rank: Instructor II, department: Religious Education, designation: Faculty}
+  RE5: {name: Mr. Benjamin T. Cuevas, rank: Instructor II, department: Religious Education, designation: Faculty}
+  RE6: {name: Ms. Ruth Anne L. Sarte, rank: Instructor II, department: Religious Education, designation: Faculty}
+
+# The plan gives each teacher a number of sections per course, not the sections themselves,
+# so the teachers are chosen in the scheduling system.
+loads: {}

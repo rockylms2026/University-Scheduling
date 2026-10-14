@@ -123,26 +123,26 @@ programs:
     department: Accountancy
     blocks: [A, B]
     curriculum:
-      1-1: [ACC 101, BUS 101, MATH 180, SOCS 195, PE 101, CWTS 101, UNI 103]
-      1-2: [ACC 102, BUS 110, ACC 220, COMM 120, FIL 207, HIST 220, PE 102, CWTS 102]
-      2-1: [ACC 201, ACC 210, ACC 221, MATH 350, PSYC 160, GAD 171, PE 201]
-      2-2: [ACC 202, ACC 211, ACC 230, ACC 240, STS 180, PE 202]
-      3-1: [ACC 203, ACC 231, ACC 241, ACC 250, ACC 301, ACC 222, PHIL 190]
-      3-2: [ACC 311, ACC 302, ACC 320, ACC 321, ACC 340, PHIL 220, ARTS 101]
-      4-1: [ACC 312, ACC 303, ACC 313, ACC 341, ACC 410, HIST 201, ENGL 302]
+      1-1: [ACC 101, BUS 101, MATH 180, SOCS 195, PE 101, CWTS 101, UNI 103, REL 103A]
+      1-2: [ACC 102, BUS 110, ACC 220, COMM 120, FIL 207, HIST 220, PE 102, CWTS 102, REL 103B]
+      2-1: [ACC 201, ACC 210, ACC 221, MATH 350, PSYC 160, GAD 171, PE 201, REL 203A]
+      2-2: [ACC 202, ACC 211, ACC 230, ACC 240, STS 180, PE 202, REL 203B]
+      3-1: [ACC 203, ACC 231, ACC 241, ACC 250, ACC 301, ACC 222, PHIL 190, REL 303A]
+      3-2: [ACC 311, ACC 302, ACC 320, ACC 321, ACC 340, PHIL 220, ARTS 101, REL 303B]
+      4-1: [ACC 312, ACC 303, ACC 313, ACC 341, ACC 410, HIST 201, ENGL 302, REL 403]
       4-2: [ACC 304, ACC 411, ACC 412, ACC 490]
   BSEntrep:
     name: Bachelor of Science in Entrepreneurship
     department: Entrepreneurship
-    blocks: [A, B]
+    blocks: [""]
     curriculum:
-      1-1: [ENT 101, BUS 101, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103]
-      1-2: [ENT 110, BUS 102, BUS 110, COMM 120, SOCS 195, PE 102, CWTS 102]
-      2-1: [ENT 201, ENT 203, BUS 201, MATH 350, FIL 207, PE 201]
-      2-2: [ENT 202, ENT 211, BUS 210, BUS 202, STS 180, PE 202]
-      3-1: [ENT 210, ENT 301, BUS 220, BUS 230, ENT 310, PHIL 190, ARTS 101]
-      3-2: [ENT 302, ENT 303, BUS 301, ENT 304, PHIL 220, ENGL 302, HIST 201]
-      4-1: [ENT 401, BUS 302, HIST 220, GAD 171]
+      1-1: [ENT 101, BUS 101, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103, REL 103A]
+      1-2: [ENT 110, BUS 102, BUS 110, COMM 120, SOCS 195, PE 102, CWTS 102, REL 103B]
+      2-1: [ENT 201, ENT 203, BUS 201, MATH 350, FIL 207, PE 201, REL 203A]
+      2-2: [ENT 202, ENT 211, BUS 210, BUS 202, STS 180, PE 202, REL 203B]
+      3-1: [ENT 210, ENT 301, BUS 220, BUS 230, ENT 310, PHIL 190, ARTS 101, REL 303A]
+      3-2: [ENT 302, ENT 303, BUS 301, ENT 304, PHIL 220, ENGL 302, HIST 201, REL 303B]
+      4-1: [ENT 401, BUS 302, HIST 220, GAD 171, REL 403]
       4-2: [ENT 490]
   BSBA:
     name: Bachelor of Science in Business Administration
@@ -152,26 +152,26 @@ programs:
     # blocks; "CODE @FM" means the course runs once for the FM group.
     tracks: {3: [FM, MKT, BAN], 4: [FM, MKT, BAN]}
     curriculum:
-      1-1: [BUS 101, BUS 110, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103]
-      1-2: [BUS 102, BUS 120, COMM 120, SOCS 195, FIL 207, PE 102, CWTS 102]
-      2-1: [BUS 121, BUS 201, BUS 210, STS 180, PE 201]
-      2-2: [BUS 211, BUS 202, BUS 213, MATH 350, GAD 171, PHIL 190, PE 202]
-      3-1: [BUS 220, BUS 230, FM 301 @FM, FM 303 @FM, MKT 301 @MKT, MKT 302 @MKT, BAN 301 @BAN, BAN 302 @BAN, PHIL 220, ARTS 101]
-      3-2: [BUS 301, BUS 303, BUS 214, FM 302 @FM, FM 304 @FM, MKT 303 @MKT, MKT 304 @MKT, BAN 303 @BAN, BAN 304 @BAN, ENGL 302, HIST 201]
-      4-1: [BUS 302, BUS 304, FM 401 @FM, FM 402 @FM, MKT 401 @MKT, MKT 402 @MKT, BAN 401 @BAN, BAN 402 @BAN, HIST 220]
+      1-1: [BUS 101, BUS 110, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103, REL 103A]
+      1-2: [BUS 102, BUS 120, COMM 120, SOCS 195, FIL 207, PE 102, CWTS 102, REL 103B]
+      2-1: [BUS 121, BUS 201, BUS 210, STS 180, PE 201, REL 203A]
+      2-2: [BUS 211, BUS 202, BUS 213, MATH 350, GAD 171, PHIL 190, PE 202, REL 203B]
+      3-1: [BUS 220, BUS 230, FM 301 @FM, FM 303 @FM, MKT 301 @MKT, MKT 302 @MKT, BAN 301 @BAN, BAN 302 @BAN, PHIL 220, ARTS 101, REL 303A]
+      3-2: [BUS 301, BUS 303, BUS 214, FM 302 @FM, FM 304 @FM, MKT 303 @MKT, MKT 304 @MKT, BAN 303 @BAN, BAN 304 @BAN, ENGL 302, HIST 201, REL 303B]
+      4-1: [BUS 302, BUS 304, FM 401 @FM, FM 402 @FM, MKT 401 @MKT, MKT 402 @MKT, BAN 401 @BAN, BAN 402 @BAN, HIST 220, REL 403]
       4-2: [FM 403 @FM, FM 404 @FM, MKT 403 @MKT, MKT 404 @MKT, BAN 403 @BAN, BAN 404 @BAN, BUS 490]
   BSTHM:
     name: Bachelor of Science in Tourism and Hospitality Management
     department: Tourism and Hospitality Management
     blocks: [A, B]
     curriculum:
-      1-1: [THM 101, THM 110, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103]
-      1-2: [THM 102, THM 111, THM 120, SOCS 195, COMM 120, PE 102, CWTS 102]
-      2-1: [THM 201, THM 202, THM 203, FIL 207, PE 201]
-      2-2: [THM 204, THM 210, THM 211, THM 230, MATH 350, STS 180, PE 202]
-      3-1: [THM 212, THM 220, THM 231, THM 301, THM 303, PHIL 190, ARTS 101]
-      3-2: [THM 302, THM 304, THM 305, THM 310, THM 320, PHIL 220, ENGL 302]
-      4-1: [THM 311, THM 321, HIST 201, HIST 220, GAD 171]
+      1-1: [THM 101, THM 110, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103, REL 103A]
+      1-2: [THM 102, THM 111, THM 120, SOCS 195, COMM 120, PE 102, CWTS 102, REL 103B]
+      2-1: [THM 201, THM 202, THM 203, FIL 207, PE 201, REL 203A]
+      2-2: [THM 204, THM 210, THM 211, THM 230, MATH 350, STS 180, PE 202, REL 203B]
+      3-1: [THM 212, THM 220, THM 231, THM 301, THM 303, PHIL 190, ARTS 101, REL 303A]
+      3-2: [THM 302, THM 304, THM 305, THM 310, THM 320, PHIL 220, ENGL 302, REL 303B]
+      4-1: [THM 311, THM 321, HIST 201, HIST 220, GAD 171, REL 403]
       4-2: [THM 490]
 
 faculty:
@@ -183,7 +183,6 @@ faculty:
   A5: {name: Ms. Abigail T. Flores, rank: Instructor III, department: Accountancy, designation: Faculty, degree: "Master of Business Administration; CPA", specialization: "Cost and management accounting, finance, management science"}
   N1: {name: Dr. Ramil S. Gonzales, rank: Associate Professor I, department: Entrepreneurship, designation: Department Chair, max_lu: 15, degree: "Doctor of Business Administration", specialization: "Business planning, strategy, operations"}
   N2: {name: Ms. Kristel A. Rivera, rank: Assistant Professor I, department: Entrepreneurship, designation: Faculty, degree: "Master of Business Administration (Marketing)", specialization: "Market research, digital marketing, ideation"}
-  N3: {name: Mr. Joel C. Aguilar, rank: Instructor III, department: Entrepreneurship, designation: Faculty, degree: "Master of Business Administration; CPA", specialization: "Accounting, pricing, taxation, finance"}
   N4: {name: Ms. Aileen R. Javier, rank: Instructor III, department: Entrepreneurship, designation: Incubation Coordinator, degree: "MS Entrepreneurship", specialization: "Innovation, social enterprise, SMEs"}
   B1: {name: Dr. Estela M. Torres, rank: Associate Professor I, department: Business Administration, designation: Department Chair, max_lu: 15, degree: "Doctor of Business Administration", specialization: "Strategic and operations management, research"}
   B2: {name: Mr. Rodel P. Morales, rank: Assistant Professor I, department: Business Administration, designation: Financial Management Coordinator, degree: "MBA (Financial Management); CPA", specialization: "Finance, accounting, taxation, business law"}
@@ -222,22 +221,21 @@ loads:
       - ACC 410: BSA 4A, BSA 4B
       - BUS 101: BSA 1A, BSA 1B
     N1:
-      - ENT 301: BSEntrep 3A, BSEntrep 3B
-      - ENT 401: BSEntrep 4A, BSEntrep 4B
+      - BUS 230: BSEntrep 3
+      - BUS 302: BSEntrep 4
+      - ENT 301: BSEntrep 3
+      - ENT 401: BSEntrep 4
     N2:
-      - BUS 230: BSEntrep 3A, BSEntrep 3B
-      - ENT 101: BSEntrep 1A, BSEntrep 1B
-      - ENT 201: BSEntrep 2A, BSEntrep 2B
-      - UNI 103: BSEntrep 1A, BSEntrep 1B
-    N3:
-      - BUS 101: BSEntrep 1A, BSEntrep 1B
-      - BUS 201: BSEntrep 2A, BSEntrep 2B
-      - ENT 203: BSEntrep 2A, BSEntrep 2B
-      - ENT 210: BSEntrep 3A, BSEntrep 3B
+      - BUS 201: BSEntrep 2
+      - ENT 101: BSEntrep 1
+      - ENT 201: BSEntrep 2
+      - UNI 103: BSEntrep 1
     N4:
-      - BUS 220: BSEntrep 3A, BSEntrep 3B
-      - BUS 302: BSEntrep 4A, BSEntrep 4B
-      - ENT 310: BSEntrep 3A, BSEntrep 3B
+      - BUS 101: BSEntrep 1
+      - BUS 220: BSEntrep 3
+      - ENT 203: BSEntrep 2
+      - ENT 210: BSEntrep 3
+      - ENT 310: BSEntrep 3
     B1:
       - BUS 110: BSBA 1A, BSBA 1B
       - BUS 302: BSBA 4A, BSBA 4B
@@ -307,21 +305,20 @@ loads:
       - ACC 240: BSA 2A, BSA 2B
       - ACC 321: BSA 3A, BSA 3B
     N1:
-      - ENT 304: BSEntrep 3A, BSEntrep 3B
-      - ENT 490: BSEntrep 4A, BSEntrep 4B
+      - BUS 210: BSEntrep 2
+      - BUS 301: BSEntrep 3
+      - ENT 304: BSEntrep 3
+      - ENT 490: BSEntrep 4
     N2:
-      - BUS 110: BSEntrep 1A, BSEntrep 1B
-      - ENT 110: BSEntrep 1A, BSEntrep 1B
-      - ENT 211: BSEntrep 2A, BSEntrep 2B
-    N3:
-      - BUS 102: BSEntrep 1A, BSEntrep 1B
-      - BUS 202: BSEntrep 2A, BSEntrep 2B
-      - BUS 301: BSEntrep 3A, BSEntrep 3B
+      - BUS 102: BSEntrep 1
+      - BUS 202: BSEntrep 2
+      - ENT 110: BSEntrep 1
+      - ENT 211: BSEntrep 2
     N4:
-      - BUS 210: BSEntrep 2A, BSEntrep 2B
-      - ENT 202: BSEntrep 2A, BSEntrep 2B
-      - ENT 302: BSEntrep 3A, BSEntrep 3B
-      - ENT 303: BSEntrep 3A, BSEntrep 3B
+      - BUS 110: BSEntrep 1
+      - ENT 202: BSEntrep 2
+      - ENT 302: BSEntrep 3
+      - ENT 303: BSEntrep 3
     B1:
       - BUS 301: BSBA 3A, BSBA 3B
       - BUS 303: BSBA 3A, BSBA 3B

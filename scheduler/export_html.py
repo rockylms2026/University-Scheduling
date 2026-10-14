@@ -18,16 +18,17 @@ TEMPLATE_PATH = Path(__file__).with_name("viewer_template.html")
 # (course kind, meeting part) -> time-option generator in solver.time_options
 KIND_OF_PART = {
     ("lab", "Lec"): "lab_lecture", ("lab", "Lab"): "lab", ("pe", "PE"): "pe",
-    ("nstp", "NSTP"): "nstp", ("uni", "Lec"): "uni", ("field", "Supervision"): "supervision",
+    ("nstp", "NSTP"): "nstp", ("uni", "Lec"): "uni", ("double", "Lec"): "double", ("field", "Supervision"): "supervision",
 }
-KINDS = ["lecture", "lab_lecture", "lab", "pe", "uni", "nstp", "supervision"]
+KINDS = ["lecture", "lab_lecture", "lab", "pe", "uni", "double", "nstp", "supervision"]
 
 
 def viewer_data(uni: University, schedules: dict[int, Schedule]) -> dict:
     tf = uni.timeframe
-    colleges = {"CSS": "Social Sciences", "CISC": "Information Sciences and Computing",
+    colleges = {"CSS": "Social Sciences", "CICS": "Information and Computing Sciences",
                 "CBE": "Business and Entrepreneurship", "COE": "Education",
-                "CCJPS": "Criminal Justice and Public Service", "GE": "General Education Department"}
+                "CCJPS": "Criminal Justice and Public Service", "GE": "General Education Department",
+                "RE": "Religious Education Department"}
     courses = {}
     teachers = {}
     sems = {}

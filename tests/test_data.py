@@ -13,7 +13,7 @@ def test_no_data_errors():
 
 
 def test_counts():
-    assert len(UNI.faculty) == 115            # CSS 21, CISC 18, CBE 21, COE 21, CCJPS 15, GE 19 (each college: its Associate Dean)
+    assert len(UNI.faculty) == 115            # CSS 21, CICS 18, CBE 21, COE 21, CCJPS 15, GE 19 (each college: its Associate Dean)
     ads = [f for f in UNI.faculty.values() if f.designation == "Associate Dean"]
     assert len(ads) == 5 and all(f.max_lu == 6 and f.class_cap == 2 and f.course_cap == 1 and f.prep_cap == 1 for f in ads)
     assert not any("GE Handler" in f.designation or "GE handler" in f.designation for f in UNI.faculty.values())
@@ -25,9 +25,10 @@ def test_counts():
 def test_loads_match_plan_summaries():
     # (faculty, semester) -> LU from the plans' load summary tables
     expected = {
-        ("CSS-P5", 1): 24, ("CSS-L5", 1): 23, ("CISC-C3", 1): 24, ("CISC-B4", 2): 16,
-        ("CBE-B4", 1): 17, ("CBE-H4", 2): 22, ("CCJPS-D2", 1): 7, ("CCJPS-W4", 2): 18,
-        ("COE-S13", 1): 16,   # 18 in the plan; SEF 405 is now a 3-LU lecture ("COE-E2", 2): 6, ("GE-G13", 1): 24, ("GE-G19", 2): 21,
+        ("CSS-P5", 1): 24, ("CSS-L4", 1): 18, ("CICS-C3", 1): 24, ("CICS-B4", 2): 18,
+        ("CBE-B4", 1): 17, ("CBE-H4", 2): 22, ("CCJPS-D2", 1): 7, ("CCJPS-W4", 2): 12,
+        ("COE-S13", 1): 16,   # 18 in the plan, which counts SEF 405 as a 5-LU lab; here it is a 3-LU lecture
+        ("GE-G13", 1): 22, ("GE-G19", 2): 18,
     }
     for (key, sem), lu in expected.items():
         assert faculty_load_summary(UNI, sem)[key]["lu"] == lu, key
@@ -78,7 +79,28 @@ def test_organization_chart_matches_faculty():
 
 def test_faculty_degrees_and_specializations():
     """Every faculty member has a highest degree; everyone from the loading plans also has a specialization."""
-    assert all(f.degree for f in UNI.faculty.values())
-    missing = [f.name for f in UNI.faculty.values() if not f.specialization and f.designation != "Associate Dean"]
+    # The Religious Education plan lists no degrees or specializations.
+    plans = [f for f in UNI.faculty.values() if f.department != "Religious Education"]
+    assert all(f.degree for f in plans)
+    missing = [f.name for f in plans if not f.specialization and f.designation != "Associate Dean"]
     assert not missing, missing
     assert UNI.faculty["CCJPS-R4"].specialization == "Criminalistics, photography, ballistics, questioned documents"
+
+
+def test_religion_and_one_section_programs():
+    """Every program takes the religion sequence; four programs run one section a year (2026-10 plans)."""
+    rel = {"1-1": "REL 103A", "1-2": "REL 103B", "2-1": "REL 203A", "2-2": "REL 203B", "3-1": "REL 303A", "3-2": "REL 303B", "4-1": "REL 403"}
+    for p in UNI.programs.values():
+        for key, code in rel.items():
+            y, s = map(int, key.split("-"))
+            assert code in [c for c, _ in p.curriculum[(y, s)]], (p.code, code)
+    assert UNI.courses["REL 403"].kind == "double" and UNI.courses["REL 103A"].kind == "uni"
+    for code in ("ABC", "ABEcon", "BLIS", "BSEntrep"):
+        assert all(b == [""] for b in UNI.programs[code].blocks.values()), code
+    assert "ABC 2" in UNI.sections and "ABC 2A" not in UNI.sections
+    for gone in ("CSS-L5", "CSS-M2", "CSS-E3", "CICS-B2", "CICS-B5", "CBE-N3"):
+        assert gone not in UNI.faculty
+    re = [f for f in UNI.faculty.values() if f.department == "Religious Education"]
+    assert len(re) == 6 and UNI.faculty["RE-RE1"].max_lu == 15
+    # class ids come from the semester, course and section, so they survive curriculum changes
+    assert UNI.classes[1][0].id.startswith("S1-") and any(k.id == "S1-REL403-BSP4C" for k in UNI.classes[1])
