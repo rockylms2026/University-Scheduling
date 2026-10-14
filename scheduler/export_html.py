@@ -25,9 +25,9 @@ KINDS = ["lecture", "lab_lecture", "lab", "pe", "uni", "double", "nstp", "superv
 
 def viewer_data(uni: University, schedules: dict[int, Schedule]) -> dict:
     tf = uni.timeframe
-    colleges = {"CSS": "Social Sciences", "CICS": "Information and Computing Sciences",
-                "CBE": "Business and Entrepreneurship", "COE": "Education",
-                "CCJPS": "Criminal Justice and Public Service", "GE": "General Education Department",
+    colleges = {"CSBS": "Social and Behavioral Sciences", "CILS": "Information and Library Science",
+                "CBAPA": "Business, Accountancy and Public Administration", "COE": "Education",
+                "GE": "General Education Department",
                 "RE": "Religious Education Department"}
     courses = {}
     teachers = {}

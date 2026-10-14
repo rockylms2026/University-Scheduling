@@ -1,28 +1,21 @@
-# College of Business and Entrepreneurship
-# Source: CBE Curricula and Faculty Loading Plan (steady state).
-# See ccjps.yaml for the course entry forms.
-college: CBE
-name: College of Business and Entrepreneurship
+# College of Business, Accountancy and Public Administration
+# Source: CBAPA Curricula and Faculty Loading Plan (final, steady state).
+#
+# Course entry forms:
+#   CODE: Title                                   lecture course, 3 credits, 3 h/week
+#   CODE: {title: ..., lab: <lab type>}           lab course, Lec 2 h + Lab 3 h (5 LU); lab types are in
+#                                                 data/campus.yaml (a list gives fallbacks, best first)
+#   CODE: {title: ..., kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+#                                                 internship / practicum: students are off campus on the
+#                                                 placement days; the teacher gets one weekly supervision period
+# Curriculum entries "CODE @X" run once for track group X (Years 3 and 4).
+# Loads list, per semester and faculty ID, "course: section, section, ...".
+college: CBAPA
+name: College of Business, Accountancy and Public Administration
 
 courses:
   BUS 101: Basic Microeconomics
-  BUS 102: Fundamentals of Accounting
   BUS 110: Principles of Management and Organization
-  BUS 120: Principles of Marketing
-  BUS 121: Basic Finance
-  BUS 201: "Business Law: Obligations and Contracts"
-  BUS 202: Income Taxation
-  BUS 210: Human Resource Management
-  BUS 211: Managerial Accounting
-  BUS 213: {title: Management Information Systems, lab: cbe_computer_lab}
-  BUS 214: Entrepreneurial Management
-  BUS 220: Good Governance and Corporate Social Responsibility
-  BUS 230: International Business and Trade
-  BUS 301: Operations Management and Total Quality Management
-  BUS 302: Strategic Management
-  BUS 303: Business Research
-  BUS 304: Thesis or Feasibility Study
-  BUS 490: {title: Business Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
   ACC 101: Financial Accounting and Reporting
   ACC 102: Conceptual Framework and Accounting Standards
   ACC 201: Intermediate Accounting 1
@@ -53,20 +46,22 @@ courses:
   ACC 411: "Integrated Review: Auditing and Taxation"
   ACC 412: "Integrated Review: Management Services and Business Law"
   ACC 490: {title: Accounting Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
-  ENT 101: Entrepreneurial Behavior
-  ENT 110: Opportunity Seeking and Ideation
-  ENT 201: Market Research and Consumer Behavior
-  ENT 202: Innovation Management
-  ENT 203: Pricing and Costing
-  ENT 210: Financial Management for Entrepreneurs
-  ENT 211: Digital Marketing and E-Commerce
-  ENT 301: Business Plan Preparation
-  ENT 302: Social Entrepreneurship
-  ENT 303: Family Business and SME Management
-  ENT 304: Franchising and Business Expansion
-  ENT 310: Supply Chain and Logistics for Small Business
-  ENT 401: Business Plan Implementation 1
-  ENT 490: {title: Business Plan Implementation 2, kind: field, credits: 6, placement: [Mon, Tue, Wed, Thu, Fri]}
+  BUS 102: Fundamentals of Accounting
+  BUS 120: Principles of Marketing
+  BUS 121: Basic Finance
+  BUS 201: "Business Law: Obligations and Contracts"
+  BUS 202: Income Taxation
+  BUS 210: Human Resource Management
+  BUS 211: Managerial Accounting
+  BUS 213: {title: Management Information Systems, lab: cbe_computer_lab}
+  BUS 214: Entrepreneurial Management
+  BUS 220: Good Governance and Corporate Social Responsibility
+  BUS 230: International Business and Trade
+  BUS 301: Operations Management and Total Quality Management
+  BUS 302: Strategic Management
+  BUS 303: Business Research
+  BUS 304: Thesis or Feasibility Study
+  BUS 490: {title: Business Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
   BAN 301: {title: Business Analytics Fundamentals, lab: cbe_computer_lab}
   BAN 302: {title: Data Management and Visualization, lab: cbe_computer_lab}
   BAN 303: {title: Predictive Analytics, lab: cbe_computer_lab}
@@ -116,6 +111,30 @@ courses:
   THM 320: Research in Tourism and Hospitality
   THM 321: Professional Development and Applied Ethics
   THM 490: {title: Tourism and Hospitality Practicum, kind: field, credits: 6, placement: [Mon, Tue, Wed, Thu, Fri]}
+  PAD 101: Introduction to Public Administration
+  PAD 102: Philippine Administrative System and Bureaucracy
+  PAD 104: Public Personnel Administration
+  PAD 105: Public Fiscal Administration
+  PAD 106: Organization and Management
+  PAD 201: Local Government Administration
+  PAD 202: Public Policy and Program Administration
+  PAD 203: Leadership and Ethics in Public Service
+  PAD 204: Research Methods in Public Administration
+  PAD 205: Government Accounting and Auditing
+  PAD 206: Development Administration
+  PAD 207: Human Resource Development in Government
+  PAD 301: "Project Planning, Monitoring, and Evaluation"
+  PAD 302: E-Governance and Public Sector Innovation
+  PAD 303: Disaster Risk Reduction and Management Administration
+  PAD 304: Public Enterprise and Public-Private Partnerships
+  PAD 305: Comparative Public Administration
+  PAD 306: Gender and Development in Governance
+  PAD 307: Administrative Law and Law on Public Officers
+  PAD 308: Public Procurement and Logistics Management
+  PAD 309: Citizen Participation and Civil Society
+  PAD 410: Thesis 1
+  PAD 420: Thesis 2
+  PAD 490: {title: Public Administration Internship, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
 
 programs:
   BSA:
@@ -123,43 +142,29 @@ programs:
     department: Accountancy
     blocks: [A, B]
     curriculum:
-      1-1: [ACC 101, BUS 101, MATH 180, SOCS 195, PE 101, CWTS 101, UNI 103, REL 103A]
-      1-2: [ACC 102, BUS 110, ACC 220, COMM 120, FIL 207, HIST 220, PE 102, CWTS 102, REL 103B]
-      2-1: [ACC 201, ACC 210, ACC 221, MATH 350, PSYC 160, GAD 171, PE 201, REL 203A]
-      2-2: [ACC 202, ACC 211, ACC 230, ACC 240, STS 180, PE 202, REL 203B]
+      1-1: [ACC 101, BUS 101, SOCS 195, PE 101, CWTS 101, UNI 103, REL 103A, FIL 207]
+      1-2: [ACC 102, BUS 110, ACC 220, COMM 120, HIST 220, PE 102, CWTS 102, REL 103B, MATH 180]
+      2-1: [ACC 201, ACC 210, ACC 221, PSYC 160, GAD 171, PE 201, REL 203A, STS 180]
+      2-2: [ACC 202, ACC 211, ACC 230, ACC 240, PE 202, REL 203B, MATH 350]
       3-1: [ACC 203, ACC 231, ACC 241, ACC 250, ACC 301, ACC 222, PHIL 190, REL 303A]
       3-2: [ACC 311, ACC 302, ACC 320, ACC 321, ACC 340, PHIL 220, ARTS 101, REL 303B]
       4-1: [ACC 312, ACC 303, ACC 313, ACC 341, ACC 410, HIST 201, ENGL 302, REL 403]
       4-2: [ACC 304, ACC 411, ACC 412, ACC 490]
-  BSEntrep:
-    name: Bachelor of Science in Entrepreneurship
-    department: Entrepreneurship
-    blocks: [""]
-    curriculum:
-      1-1: [ENT 101, BUS 101, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103, REL 103A]
-      1-2: [ENT 110, BUS 102, BUS 110, COMM 120, SOCS 195, PE 102, CWTS 102, REL 103B]
-      2-1: [ENT 201, ENT 203, BUS 201, MATH 350, FIL 207, PE 201, REL 203A]
-      2-2: [ENT 202, ENT 211, BUS 210, BUS 202, STS 180, PE 202, REL 203B]
-      3-1: [ENT 210, ENT 301, BUS 220, BUS 230, ENT 310, PHIL 190, ARTS 101, REL 303A]
-      3-2: [ENT 302, ENT 303, BUS 301, ENT 304, PHIL 220, ENGL 302, HIST 201, REL 303B]
-      4-1: [ENT 401, BUS 302, HIST 220, GAD 171, REL 403]
-      4-2: [ENT 490]
   BSBA:
     name: Bachelor of Science in Business Administration
     department: Business Administration
     blocks: [A, B]
-    # Years 3 and 4: major courses run in three major groups drawn from both
-    # blocks; "CODE @FM" means the course runs once for the FM group.
+    # Years 3 and 4: track courses run once per track group drawn from both blocks.
     tracks: {3: [FM, MKT, BAN], 4: [FM, MKT, BAN]}
     curriculum:
-      1-1: [BUS 101, BUS 110, MATH 180, PSYC 160, PE 101, CWTS 101, UNI 103, REL 103A]
-      1-2: [BUS 102, BUS 120, COMM 120, SOCS 195, FIL 207, PE 102, CWTS 102, REL 103B]
+      1-1: [BUS 101, BUS 110, PSYC 160, PE 101, CWTS 101, UNI 103, REL 103A, FIL 207]
+      1-2: [BUS 102, BUS 120, COMM 120, SOCS 195, PE 102, CWTS 102, REL 103B, MATH 180]
       2-1: [BUS 121, BUS 201, BUS 210, STS 180, PE 201, REL 203A]
       2-2: [BUS 211, BUS 202, BUS 213, MATH 350, GAD 171, PHIL 190, PE 202, REL 203B]
-      3-1: [BUS 220, BUS 230, FM 301 @FM, FM 303 @FM, MKT 301 @MKT, MKT 302 @MKT, BAN 301 @BAN, BAN 302 @BAN, PHIL 220, ARTS 101, REL 303A]
-      3-2: [BUS 301, BUS 303, BUS 214, FM 302 @FM, FM 304 @FM, MKT 303 @MKT, MKT 304 @MKT, BAN 303 @BAN, BAN 304 @BAN, ENGL 302, HIST 201, REL 303B]
-      4-1: [BUS 302, BUS 304, FM 401 @FM, FM 402 @FM, MKT 401 @MKT, MKT 402 @MKT, BAN 401 @BAN, BAN 402 @BAN, HIST 220, REL 403]
-      4-2: [FM 403 @FM, FM 404 @FM, MKT 403 @MKT, MKT 404 @MKT, BAN 403 @BAN, BAN 404 @BAN, BUS 490]
+      3-1: [BUS 220, BUS 230, FM 301 @FM, MKT 302 @MKT, BAN 301 @BAN, FM 303 @FM, MKT 301 @MKT, BAN 302 @BAN, PHIL 220, ARTS 101, REL 303A]
+      3-2: [BUS 301, BUS 303, BUS 214, FM 302 @FM, MKT 303 @MKT, BAN 303 @BAN, FM 304 @FM, MKT 304 @MKT, BAN 304 @BAN, ENGL 302, HIST 201, REL 303B]
+      4-1: [BUS 302, BUS 304, FM 401 @FM, MKT 401 @MKT, BAN 401 @BAN, FM 402 @FM, MKT 402 @MKT, BAN 402 @BAN, REL 403]
+      4-2: [FM 403 @FM, MKT 403 @MKT, BAN 403 @BAN, FM 404 @FM, MKT 404 @MKT, BAN 404 @BAN, BUS 490, HIST 220]
   BSTHM:
     name: Bachelor of Science in Tourism and Hospitality Management
     department: Tourism and Hospitality Management
@@ -173,6 +178,19 @@ programs:
       3-2: [THM 302, THM 304, THM 305, THM 310, THM 320, PHIL 220, ENGL 302, REL 303B]
       4-1: [THM 311, THM 321, HIST 201, HIST 220, GAD 171, REL 403]
       4-2: [THM 490]
+  ABPA:
+    name: Bachelor of Arts in Public Administration
+    department: Public Administration
+    blocks: [""]
+    curriculum:
+      1-1: [PAD 101, SOCS 195, COMM 120, PE 101, CWTS 101, UNI 103, REL 103A, FIL 207]
+      1-2: [PAD 102, PAD 106, PSYC 160, PE 102, CWTS 102, REL 103B, MATH 180]
+      2-1: [PAD 104, PAD 105, PAD 201, PHIL 190, PE 201, REL 203A, STS 180]
+      2-2: [PAD 202, PAD 207, PAD 307, PAD 203, PAD 302, PE 202, REL 203B, MATH 350]
+      3-1: [PAD 204, PAD 206, PAD 205, PAD 305, PAD 309, PHIL 220, ARTS 101, REL 303A]
+      3-2: [PAD 301, PAD 303, PAD 304, PAD 306, PAD 308, ENGL 302, HIST 201, REL 303B]
+      4-1: [PAD 410, HIST 220, GAD 171, REL 403]
+      4-2: [PAD 420, PAD 490]
 
 faculty:
   AD: {name: Dr. Fernando E. Ferrer, rank: Professor I, department: Accountancy, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2, degree: "Doctor of Business Administration; CPA"}   # teaches at most two 3-unit classes of one course
@@ -181,9 +199,6 @@ faculty:
   A3: {name: Ms. Charmaine D. Uy, rank: Assistant Professor I, department: Accountancy, designation: Review Coordinator, degree: "MS Accountancy; CPA", specialization: "Financial accounting and reporting"}
   A4: {name: Mr. Jerico M. Valencia, rank: Assistant Professor I, department: Accountancy, designation: Internship Coordinator, degree: "MS Accountancy; CPA, CIA", specialization: "Auditing, assurance, information systems"}
   A5: {name: Ms. Abigail T. Flores, rank: Instructor III, department: Accountancy, designation: Faculty, degree: "Master of Business Administration; CPA", specialization: "Cost and management accounting, finance, management science"}
-  N1: {name: Dr. Ramil S. Gonzales, rank: Associate Professor I, department: Entrepreneurship, designation: Department Chair, max_lu: 15, degree: "Doctor of Business Administration", specialization: "Business planning, strategy, operations"}
-  N2: {name: Ms. Kristel A. Rivera, rank: Assistant Professor I, department: Entrepreneurship, designation: Faculty, degree: "Master of Business Administration (Marketing)", specialization: "Market research, digital marketing, ideation"}
-  N4: {name: Ms. Aileen R. Javier, rank: Instructor III, department: Entrepreneurship, designation: Incubation Coordinator, degree: "MS Entrepreneurship", specialization: "Innovation, social enterprise, SMEs"}
   B1: {name: Dr. Estela M. Torres, rank: Associate Professor I, department: Business Administration, designation: Department Chair, max_lu: 15, degree: "Doctor of Business Administration", specialization: "Strategic and operations management, research"}
   B2: {name: Mr. Rodel P. Morales, rank: Assistant Professor I, department: Business Administration, designation: Financial Management Coordinator, degree: "MBA (Financial Management); CPA", specialization: "Finance, accounting, taxation, business law"}
   B3: {name: Ms. Liezl G. Castro, rank: Assistant Professor I, department: Business Administration, designation: Marketing Coordinator, degree: "MBA (Marketing)", specialization: "Marketing, consumer behavior, sales"}
@@ -195,6 +210,10 @@ faculty:
   H3: {name: Ms. Trisha M. Samonte, rank: Assistant Professor I, department: Tourism and Hospitality Management, designation: Faculty, degree: "MS Tourism", specialization: "Tourism geography, tour operations, ecotourism"}
   H4: {name: Mr. Lorenzo D. Buenaventura, rank: Assistant Professor I, department: Tourism and Hospitality Management, designation: Practicum Coordinator, degree: "MBA (Hospitality Management)", specialization: "Lodging, front office, hospitality marketing and law"}
   H5: {name: Ms. Jasmin L. Sarmiento, rank: Instructor II, department: Tourism and Hospitality Management, designation: Faculty, degree: "MA Korean Studies; BS Tourism", specialization: "Korean language, events, multicultural workplaces"}
+  D1: {name: Dr. Reynaldo C. Villamor, rank: Associate Professor I, department: Public Administration, designation: Department Chair, max_lu: 15, degree: "Doctor of Public Administration", specialization: "Public policy, governance, research"}
+  D2: {name: Ms. Lorna G. Fabian, rank: Assistant Professor I, department: Public Administration, designation: Faculty, degree: "Master in Public Administration; CPA", specialization: "Fiscal administration, government accounting, procurement"}
+  D3: {name: Mr. Joel R. Macapagal, rank: Instructor III, department: Public Administration, designation: Internship Coordinator, degree: "Master in Public Administration", specialization: "Local governance, disaster management, civil society"}
+  D4: {name: Atty. Kristine D. Ramos, rank: Instructor III, department: Public Administration, designation: Faculty, degree: "JD; Master in Public Administration; member of the Philippine Bar", specialization: "Administrative law, personnel administration, ethics, gender"}
 
 loads:
   1:
@@ -220,25 +239,9 @@ loads:
       - ACC 241: BSA 3A, BSA 3B
       - ACC 410: BSA 4A, BSA 4B
       - BUS 101: BSA 1A, BSA 1B
-    N1:
-      - BUS 230: BSEntrep 3
-      - BUS 302: BSEntrep 4
-      - ENT 301: BSEntrep 3
-      - ENT 401: BSEntrep 4
-    N2:
-      - BUS 201: BSEntrep 2
-      - ENT 101: BSEntrep 1
-      - ENT 201: BSEntrep 2
-      - UNI 103: BSEntrep 1
-    N4:
-      - BUS 101: BSEntrep 1
-      - BUS 220: BSEntrep 3
-      - ENT 203: BSEntrep 2
-      - ENT 210: BSEntrep 3
-      - ENT 310: BSEntrep 3
     B1:
-      - BUS 110: BSBA 1A, BSBA 1B
       - BUS 302: BSBA 4A, BSBA 4B
+      - BUS 304: BSBA 4A, BSBA 4B
     B2:
       - BUS 101: BSBA 1A, BSBA 1B
       - FM 301: BSBA 3-FM
@@ -247,23 +250,23 @@ loads:
       - FM 402: BSBA 4-FM
     B3:
       - BUS 201: BSBA 2A, BSBA 2B
-      - BUS 304: BSBA 4A, BSBA 4B
-      - MKT 301: BSBA 3-MKT
+      - BUS 210: BSBA 2A, BSBA 2B
       - MKT 302: BSBA 3-MKT
+      - MKT 402: BSBA 4-MKT
     B4:
       - BAN 301: BSBA 3-BAN
       - BAN 302: BSBA 3-BAN
       - BAN 402: BSBA 4-BAN
       - UNI 103: BSBA 1A, BSBA 1B
     B5:
-      - BUS 210: BSBA 2A, BSBA 2B
+      - BUS 110: BSBA 1A, BSBA 1B
       - BUS 220: BSBA 3A, BSBA 3B
       - BUS 230: BSBA 3A, BSBA 3B
     B6:
       - BAN 401: BSBA 4-BAN
       - BUS 121: BSBA 2A, BSBA 2B
+      - MKT 301: BSBA 3-MKT
       - MKT 401: BSBA 4-MKT
-      - MKT 402: BSBA 4-MKT
     H1:
       - THM 101: BSTHM 1A, BSTHM 1B
       - THM 311: BSTHM 4A, BSTHM 4B
@@ -282,6 +285,22 @@ loads:
       - THM 220: BSTHM 3A, BSTHM 3B
       - THM 231: BSTHM 3A, BSTHM 3B
       - THM 301: BSTHM 3A, BSTHM 3B
+    D1:
+      - PAD 101: ABPA 1
+      - PAD 206: ABPA 3
+      - PAD 305: ABPA 3
+      - PAD 410: ABPA 4
+    D2:
+      - PAD 105: ABPA 2
+      - PAD 205: ABPA 3
+      - UNI 103: ABPA 1
+    D3:
+      - PAD 201: ABPA 2
+      - PAD 204: ABPA 3
+      - PAD 309: ABPA 3
+    D4:
+      - PAD 104: ABPA 2
+      - COMM 120: BLIS 1
   2:
     A1:
       - ACC 340: BSA 3A, BSA 3B
@@ -304,48 +323,33 @@ loads:
       - ACC 211: BSA 2A, BSA 2B
       - ACC 240: BSA 2A, BSA 2B
       - ACC 321: BSA 3A, BSA 3B
-    N1:
-      - BUS 210: BSEntrep 2
-      - BUS 301: BSEntrep 3
-      - ENT 304: BSEntrep 3
-      - ENT 490: BSEntrep 4
-    N2:
-      - BUS 102: BSEntrep 1
-      - BUS 202: BSEntrep 2
-      - ENT 110: BSEntrep 1
-      - ENT 211: BSEntrep 2
-    N4:
-      - BUS 110: BSEntrep 1
-      - ENT 202: BSEntrep 2
-      - ENT 302: BSEntrep 3
-      - ENT 303: BSEntrep 3
     B1:
+      - BUS 102: BSBA 1A, BSBA 1B
       - BUS 301: BSBA 3A, BSBA 3B
-      - BUS 303: BSBA 3A, BSBA 3B
     B2:
       - FM 302: BSBA 3-FM
       - FM 304: BSBA 3-FM
       - FM 403: BSBA 4-FM
       - FM 404: BSBA 4-FM
     B3:
-      - BUS 102: BSBA 1A, BSBA 1B
       - BUS 120: BSBA 1A, BSBA 1B
+      - BUS 214: BSBA 3A, BSBA 3B
       - MKT 303: BSBA 3-MKT
-      - MKT 403: BSBA 4-MKT
+      - MKT 404: BSBA 4-MKT
     B4:
+      - BAN 303: BSBA 3-BAN
       - BAN 304: BSBA 3-BAN
       - BAN 403: BSBA 4-BAN
       - BAN 404: BSBA 4-BAN
-      - BUS 202: BSBA 2A, BSBA 2B
     B5:
+      - BUS 202: BSBA 2A, BSBA 2B
       - BUS 211: BSBA 2A, BSBA 2B
-      - BUS 214: BSBA 3A, BSBA 3B
       - BUS 490: BSBA 4A, BSBA 4B
     B6:
-      - BAN 303: BSBA 3-BAN
       - BUS 213: BSBA 2A, BSBA 2B
+      - BUS 303: BSBA 3A, BSBA 3B
       - MKT 304: BSBA 3-MKT
-      - MKT 404: BSBA 4-MKT
+      - MKT 403: BSBA 4-MKT
     H1:
       - THM 102: BSTHM 1A, BSTHM 1B
       - THM 320: BSTHM 3A, BSTHM 3B
@@ -364,3 +368,21 @@ loads:
       - THM 111: BSTHM 1A, BSTHM 1B
       - THM 230: BSTHM 2A, BSTHM 2B
       - THM 490: BSTHM 4A, BSTHM 4B
+    D1:
+      - PAD 102: ABPA 1
+      - PAD 202: ABPA 2
+      - PAD 420: ABPA 4
+    D2:
+      - PAD 106: ABPA 1
+      - PAD 304: ABPA 3
+      - PAD 308: ABPA 3
+    D3:
+      - PAD 203: ABPA 2
+      - PAD 301: ABPA 3
+      - PAD 303: ABPA 3
+      - PAD 490: ABPA 4
+    D4:
+      - PAD 207: ABPA 2
+      - PAD 302: ABPA 2
+      - PAD 306: ABPA 3
+      - PAD 307: ABPA 2

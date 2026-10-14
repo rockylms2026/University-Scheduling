@@ -40,15 +40,15 @@ nstp: {day: Sat, time: ["08:00", "11:00"]}
 faculty_preferred_max_hours_per_day: 6
 faculty_max_hours_per_day: 8
 
-# CICS guidance: give each year level a fixed lab day so labs of the same
+# CILS guidance (formerly CISC): give each year level a fixed lab day so labs of the same
 # year never collide. Used as a preference, not a rule (Year 2 BSCS has three
 # lab courses in the first semester, more than two blocks on one day).
 lab_day_preferences:
-  - {college: CICS, year: 1, days: [Fri], blocks: [LA, LC]}
-  - {college: CICS, year: 2, days: [Tue], blocks: [LE, LG]}
-  - {college: CICS, year: 3, days: [Thu], blocks: [LE, LG]}
-  - {college: CICS, year: 4, days: [Fri], blocks: [LB, LD]}
+  - {college: CILS, year: 1, days: [Fri], blocks: [LA, LC]}
+  - {college: CILS, year: 2, days: [Tue], blocks: [LE, LG]}
+  - {college: CILS, year: 3, days: [Thu], blocks: [LE, LG]}
+  - {college: CILS, year: 4, days: [Fri], blocks: [LB, LD]}
 
 # Times individual faculty cannot teach, by faculty key (college-ID).
-# Example:  CSS-P1: [{day: Fri, from: "12:30", to: "16:30"}]
+# Example:  CSBS-P1: [{day: Fri, from: "12:30", to: "16:30"}]
 faculty_unavailable: {}

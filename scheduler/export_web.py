@@ -11,6 +11,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import yaml
+
 from .export_planner import TEMPLATE_PATH, planner_data, seal_data_url
 from .model import University
 
@@ -46,7 +48,11 @@ def seed_sql(uni: University, semester: int) -> str:
                " department = excluded.department, rank = excluded.rank, designation = excluded.designation, max_lu = excluded.max_lu,"
                " degree = excluded.degree, specialization = coalesce(public.faculty.specialization, excluded.specialization);")
     keys = "(values " + ", ".join(f"({q(k)})" for k in sorted(data["teachers"])) + ") as s(key)"
-    out.append(FACULTY_MIGRATION.replace("{keys}", keys))
+    renames = (yaml.safe_load(RENAMES_PATH.read_text()) or {}).get("renames") or {} if RENAMES_PATH.exists() else {}
+    moves = "(values " + ", ".join(f"({q(a)}, {q(b)})" for a, b in sorted(renames.items())) + ") as r(old_key, new_key)" if renames else None
+    depts = "(values " + ", ".join(f"({q(d)}, {q(c)})" for d, c in sorted(data["deptCollege"].items())) + ") as d(department, college)"
+    out.append(FACULTY_MIGRATION.replace("{keys}", keys).replace("{depts}", depts)
+               .replace("{moves}", moves or "(select null::text as old_key, null::text as new_key where false) as r"))
     rows = []
     for c in data["classes"]:
         prog = data["programs"][data["sections"][c["section"]]["program"]]
@@ -60,26 +66,31 @@ def seed_sql(uni: University, semester: int) -> str:
     out.append(CLASS_MIGRATION.replace("{sem}", str(semester)).replace("{ids}", ids))
     rows = [f"({q(code)}, {q(d)}, {q(data['deptCollege'][d])})" for code, depts in data["geTeachers"].items() for d in depts]
     out.append("-- Departments that may teach each GE course (kept as edited on the Settings page).\n"
-               "update public.ge_teachers set college = 'CICS' where college = 'CISC';\n"
+               f"delete from public.ge_teachers where department not in (select department from {depts});\n"
+               f"update public.ge_teachers t set college = d.college from {depts} where t.department = d.department;\n"
                "insert into public.ge_teachers (course, department, college) values\n  " + ",\n  ".join(rows)
                + "\non conflict (course, department) do nothing;")
     out.append("-- Working tables made by an earlier version of this script.\ndrop schema if exists seed cascade;")
     return "\n".join(out) + "\n"
 
 
-# The College of Information and Computing Sciences was called CISC in earlier data: its faculty keys
-# change from CISC-.. to CICS-.. (typed specializations and chosen teachers move along). Faculty no
-# longer in the plans are removed, and so are the teachers chosen from them.
-FACULTY_MIGRATION = """-- CISC is now CICS. Move what points at the old faculty keys to the new ones.
-update public.faculty n set specialization = o.specialization from public.faculty o
-  where o.key like 'CISC-%' and n.key = 'CICS-' || substr(o.key, 6) and o.specialization is not null;
-update public.classes set plan_teacher = 'CICS-' || substr(plan_teacher, 6) where plan_teacher like 'CISC-%';
-update public.teacher_changes set teacher = 'CICS-' || substr(teacher, 6) where teacher like 'CISC-%';
-update public.ge_decisions set teacher = 'CICS-' || substr(teacher, 6) where teacher like 'CISC-%';
-update public.staff set college = 'CICS' where college = 'CISC';
-update public.ge_requests set college = 'CICS' where college = 'CISC';
-update public.instructor_requests set college = 'CICS' where college = 'CISC';
-update public.submissions set college = 'CICS' where college = 'CISC';
+# When the colleges were reorganized, faculty keys changed (data/faculty_key_renames.yaml): what the
+# database holds under an old key moves to the new one. Every college code is set again from the
+# department. Faculty no longer in the plans are removed, and so are the teachers chosen from them.
+RENAMES_PATH = ROOT / "data" / "faculty_key_renames.yaml"
+FACULTY_MIGRATION = """-- Faculty keys that changed: move typed specializations and chosen teachers to the new keys.
+update public.faculty n set specialization = o.specialization from public.faculty o, {moves}
+  where o.key = r.old_key and n.key = r.new_key and o.specialization is not null;
+update public.classes c set plan_teacher = r.new_key from {moves} where c.plan_teacher = r.old_key;
+update public.teacher_changes t set teacher = r.new_key from {moves} where t.teacher = r.old_key;
+update public.ge_decisions t set teacher = r.new_key from {moves} where t.teacher = r.old_key;
+-- College codes follow the departments.
+update public.staff s set college = d.college from {depts} where s.role = 'chair' and s.department = d.department;
+update public.staff set college = case college when 'CSS' then 'CSBS' when 'CICS' then 'CILS' when 'CISC' then 'CILS'
+  when 'CBE' then 'CBAPA' else college end where role = 'associate_dean';
+update public.ge_requests t set college = d.college from {depts} where t.department = d.department;
+update public.instructor_requests t set college = d.college from {depts} where t.department = d.department;
+update public.submissions t set college = d.college from {depts} where t.department = d.department;
 -- Faculty no longer in the plans: clear the classes given to them, then remove them.
 update public.classes set plan_teacher = null where plan_teacher is not null and plan_teacher not in (select key from {keys});
 delete from public.teacher_changes where teacher is not null and teacher not in (select key from {keys});
@@ -88,13 +99,18 @@ delete from public.faculty where key not in (select key from {keys});"""
 
 # Class ids are now made from the course and the section (S1-PSYC101-BSP1A). Bookings, teachers and
 # requests made under an older id move to the class with the same course and section. Programs that
-# now run one section a year (ABC, ABEcon, BLIS, BSEntrep) keep what was booked for their Section A.
+# now run one section a year keep what was booked for their Section A. BS Psychology Years 3 and 4 were
+# sections C and IO and are now A and B with track groups 3-C and 3-IO: track courses go to the group,
+# common courses of C to A and of IO to B.
 # Classes that no longer exist are removed with what was booked for them.
 CLASS_MIGRATION = """-- Move what was booked under older class ids to the same course and section.
 with keep as (select id from {ids}),
   m as (select o.id as old_id, n.id as new_id from public.classes o
     join public.classes n on n.sem = o.sem and n.course = o.course
-     and (n.section = o.section or (o.section ~ '^(ABC|ABEcon|BLIS|BSEntrep) [1-4]A$' and n.section = left(o.section, -1)))
+     and (n.section = o.section
+       or (o.section ~ '^(ABC|ABEcon|BLIS|BSEntrep) [1-4]A$' and n.section = left(o.section, -1))
+       or (o.section ~ '^BSP [34]C$' and n.section in (left(o.section, 5) || '-C', left(o.section, 5) || 'A'))
+       or (o.section ~ '^BSP [34]IO$' and n.section in (left(o.section, 5) || '-IO', left(o.section, 5) || 'B')))
     where o.sem = {sem} and o.id not in (select id from keep) and n.id in (select id from keep)),
   b as (update public.bookings b set class_id = m.new_id from m
     where b.class_id = m.old_id and not exists (select 1 from public.bookings x where x.class_id = m.new_id and x.part = b.part) returning 1),

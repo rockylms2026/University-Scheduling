@@ -25,7 +25,7 @@
 create table if not exists public.faculty (
   key        text primary key,
   name       text not null,
-  college    text not null,          -- CSS, CICS, CBE, COE, CCJPS, GE, RE
+  college    text not null,          -- CSBS, CILS, CBAPA, COE, GE, RE
   department text not null,
   rank       text,
   designation text,

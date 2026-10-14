@@ -1,6 +1,6 @@
 # Office of the Vice President for Academic Affairs: organizational chart.
 # Source: VPAA Organizational Chart (revised), with the Registrar's corrections:
-# College of Social Sciences, GE Coordinator at marial@laucv.edu, no GE handler duties,
+# four colleges (CSBS, CILS, CBAPA, COE), GE Coordinator at marial@laucv.edu, no GE handler duties,
 # Associate Deans also teach. Faculty (names, ranks, departments, duties) come from the
 # college files; this file adds the offices, staff and reporting lines around them.
 vpaa:
@@ -37,24 +37,24 @@ dean:
   name: Dr. Rocky Spencer A. Ricardo
   rank: Professor II
   email: rockyr
-  note: Leads academic affairs of all five colleges, the GE Department and the Religious Education Department; chairs the Council of Associate Deans.
+  note: Leads academic affairs of all four colleges and the Religious Education Department; chairs the Council of Associate Deans.
 councils:
 - name: Academic Council
   kind: Governing body, not an office
   lines:
   - 'Chair: the University President; vice chair: the VPAA'
-  - 'Members: the Dean, the five Associate Deans, the GE Coordinator, the University Registrar, and the University Librarian'
+  - 'Members: the Dean, the four Associate Deans, the GE Coordinator, the University Registrar, and the University Librarian'
   - Elected faculty representatives, 1 to 2 per college
   - 'Secretary: the University Secretary'
 - name: Council of Associate Deans
   kind: Coordinating body
   lines:
-  - 'Chair: the Dean; members: the five Associate Deans and the GE Coordinator'
+  - 'Chair: the Dean; members: the four Associate Deans and the GE Coordinator'
   - Meets twice a month on scheduling, loading, and curriculum
 colleges:
-  CSS:
+  CSBS:
     associate_dean:
-      faculty: CSS-AD
+      faculty: CSBS-AD
       credentials: PhD Social Psychology
     staff:
     - title: College Secretary
@@ -66,9 +66,15 @@ colleges:
     - title: Psychology Laboratory Assistant
       name: Ms. Erika M. Dimaano
       email: erikad
-  CICS:
+    - title: College Secretary
+      name: Ms. Gemma P. Talosig
+      email: gemmat
+    - title: Crime Laboratory Technician
+      name: Mr. Ronald V. Bagunu
+      email: ronaldb
+  CILS:
     associate_dean:
-      faculty: CICS-AD
+      faculty: CILS-AD
       credentials: PhD Computer Science
     staff:
     - title: College Secretary
@@ -83,9 +89,9 @@ colleges:
     - title: Computer Laboratory Technician
       name: Ms. Aiza R. Malana
       email: aizam
-  CBE:
+  CBAPA:
     associate_dean:
-      faculty: CBE-AD
+      faculty: CBAPA-AD
       credentials: Doctor of Business Administration; CPA
     staff:
     - title: College Secretary
@@ -105,22 +111,11 @@ colleges:
     - title: Educational Technology Laboratory Technician
       name: Mr. Mark Anthony S. Garces
       email: markg
-  CCJPS:
-    associate_dean:
-      faculty: CCJPS-AD
-      credentials: PhD Criminal Justice; RCrim
-    staff:
-    - title: College Secretary
-      name: Ms. Gemma P. Talosig
-      email: gemmat
-    - title: Crime Laboratory Technician
-      name: Mr. Ronald V. Bagunu
-      email: ronaldb
 ge:
   coordinator:
     faculty: GE-G1
     credentials: PhD Philosophy
-  note: Reports to the Dean; housed in Lingkod Hall. Teaches Art Appreciation, Critical Thinking, Ethics, PE, Research and Professional Writing, and CWTS to all colleges.
+  note: Under the Office of the VPAA; housed in Lingkod Hall. Teaches Art Appreciation, Critical Thinking, Ethics, PE, Research and Professional Writing, and CWTS to all colleges.
   staff:
   - title: Administrative Assistant
     name: Ms. Herminia S. Lucban
@@ -130,13 +125,10 @@ ge:
     note: Led by the GE Coordinator
     faculty:
     - GE-G2
-    - GE-G3
     - GE-G4
-  - name: Humanities
+  - name: Arts and Humanities
     faculty:
-    - GE-G5
     - GE-G6
-    - GE-G7
   - name: Writing
     faculty:
     - GE-G8
@@ -148,8 +140,6 @@ ge:
     - GE-G12
     - GE-G13
     - GE-G14
-    - GE-G15
-    - GE-G16
     - GE-G18
   - name: NSTP Office (CWTS)
     faculty:
@@ -158,7 +148,7 @@ ge:
 religion:
   coordinator:
     faculty: RE-RE1
-  note: Reports to the Dean; office and faculty room in Lingkod Hall. Teaches the 8-credit religion sequence to all students of all five colleges.
+  note: Reports to the Dean; office and faculty room in Lingkod Hall. Teaches the 8-credit religion sequence to all students of all four colleges.
   faculty:
   - RE-RE2
   - RE-RE3
@@ -232,7 +222,6 @@ support_units:
   - title: Writing Center Coordinator
     faculty: GE-G8
   - title: Math and Statistics Center Coordinator
-    faculty: CICS-C5
   - title: Administrative Assistant
     name: Ms. Lourdes P. Navales
     email: lourdesn
@@ -287,63 +276,42 @@ support_units:
     name: Mr. Carlo J. Tumamao
     email: carlot
 faculty_emails:
-  CBE-A1: leonorav
-  CBE-A2: ronaldom
-  CBE-A3: charmaineu
-  CBE-A4: jericov
-  CBE-A5: abigailf
-  CBE-AD: fernandof
-  CBE-B1: estelat
-  CBE-B2: rodelm
-  CBE-B3: liezlc
-  CBE-B4: adrianr
-  CBE-B5: josephiner
-  CBE-B6: francisg
-  CBE-H1: mariloup
-  CBE-H2: paolog
-  CBE-H3: trishas
-  CBE-H4: lorenzob
-  CBE-H5: jasmins
-  CBE-N1: ramilg
-  CBE-N2: kristelr
-  CBE-N4: aileenj
-  CCJPS-AD: ianb
-  CCJPS-D1: reynaldov
-  CCJPS-D2: lornaf
-  CCJPS-D3: joelm
-  CCJPS-D4: kristiner
-  CCJPS-R1: nestora
-  CCJPS-R2: celester
-  CCJPS-R3: herminiob
-  CCJPS-R4: janinec
-  CCJPS-R5: rodrigos
-  CCJPS-R6: marjoriep
-  CCJPS-W1: evangelines
-  CCJPS-W2: rheag
-  CCJPS-W3: emmanueld
-  CCJPS-W4: charissel
-  CICS-AD: doloresc
-  CICS-B1: evelynl
-  CICS-B3: paulineg
-  CICS-B4: arvint
-  CICS-C1: arnelm
-  CICS-C2: carlos
-  CICS-C3: jasminel
-  CICS-C4: noelf
-  CICS-C5: rheac
-  CICS-C6: kevind
-  CICS-T1: marivicp
-  CICS-T2: ramonv
-  CICS-T3: dianec
-  CICS-T4: francisi
-  CICS-T5: jennifers
-  CICS-T6: antoniom
+  CBAPA-A1: leonorav
+  CBAPA-A2: ronaldom
+  CBAPA-A3: charmaineu
+  CBAPA-A4: jericov
+  CBAPA-A5: abigailf
+  CBAPA-AD: fernandof
+  CBAPA-B1: estelat
+  CBAPA-B2: rodelm
+  CBAPA-B3: liezlc
+  CBAPA-B4: adrianr
+  CBAPA-B5: josephiner
+  CBAPA-B6: francisg
+  CBAPA-D1: reynaldov
+  CBAPA-D2: lornaf
+  CBAPA-D3: joelm
+  CBAPA-D4: kristiner
+  CBAPA-H1: mariloup
+  CBAPA-H2: paolog
+  CBAPA-H3: trishas
+  CBAPA-H4: lorenzob
+  CBAPA-H5: jasmins
+  CILS-AD: doloresc
+  CILS-B1: evelynl
+  CILS-B3: paulineg
+  CILS-B4: arvint
+  CILS-T1: marivicp
+  CILS-T2: ramonv
+  CILS-T3: dianec
+  CILS-T4: francisi
+  CILS-T5: jennifers
+  CILS-T6: antoniom
   COE-AD: hillaryr
   COE-E1: remediost
   COE-E2: analynv
   COE-E3: virgilioq
   COE-E4: josefinao
-  COE-E5: arielb
   COE-S1: teresae
   COE-S10: divinam
   COE-S11: amadon
@@ -352,6 +320,7 @@ faculty_emails:
   COE-S14: rosariog
   COE-S15: biancav
   COE-S16: jonathanb
+  COE-S17: alvins
   COE-S2: manuelf
   COE-S4: juliusn
   COE-S5: rebeccam
@@ -359,41 +328,42 @@ faculty_emails:
   COE-S7: rodolfou
   COE-S8: kimberlys
   COE-S9: rogeliol
-  CSS-AD: marissap
-  CSS-E1: florantem
-  CSS-E2: imeldac
-  CSS-E4: katrinal
-  CSS-E5: joses
-  CSS-L1: ernestod
-  CSS-L2: mariela
-  CSS-L3: rafaelb
-  CSS-L4: paoloi
-  CSS-M1: teresitav
-  CSS-M3: danielr
-  CSS-M4: patriciay
-  CSS-M5: camillen
-  CSS-P1: rowenad
-  CSS-P2: kristinel
-  CSS-P3: joaquine
-  CSS-P4: benedictm
-  CSS-P5: angelicat
+  CSBS-AD: marissap
+  CSBS-L1: ernestod
+  CSBS-L2: mariela
+  CSBS-L3: rafaelb
+  CSBS-L4: paoloi
+  CSBS-L5: lizas
+  CSBS-M1: teresitav
+  CSBS-M3: danielr
+  CSBS-M4: patriciay
+  CSBS-P1: rowenad
+  CSBS-P2: kristinel
+  CSBS-P3: joaquine
+  CSBS-P4: benedictm
+  CSBS-P5: angelicat
+  CSBS-R1: ianb
+  CSBS-R2: celester
+  CSBS-R3: herminiob
+  CSBS-R4: janinec
+  CSBS-R5: rodrigos
+  CSBS-R6: marjoriep
+  CSBS-W1: evangelines
+  CSBS-W2: rheag
+  CSBS-W3: emmanueld
+  CSBS-W4: charissel
   GE-G1: marial
   GE-G10: kathleenr
   GE-G11: danicas
   GE-G12: dennisc
   GE-G13: rowenam
   GE-G14: markt
-  GE-G15: irenem
-  GE-G16: paulos
   GE-G17: maricarb
   GE-G18: ramone
   GE-G19: liezelc
   GE-G2: bernardoa
-  GE-G3: francist
   GE-G4: angelicas
-  GE-G5: hannaha
   GE-G6: lorenzog
-  GE-G7: bean
   GE-G8: rosemariea
   GE-G9: joshuac
   RE-RE1: elijahs

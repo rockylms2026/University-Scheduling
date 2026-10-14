@@ -12,9 +12,9 @@ def test_changes_become_overrides(tmp_path):
     shutil.copytree(DATA_DIR, data)
     uni = load_university(data)
     items = [
-        {"type": "assign", "sem": 1, "course": "MATH 180", "section": "BSA 1A", "newTeacher": "Ms. Ana Cruz"},
-        {"type": "assign", "sem": 1, "course": "MATH 180", "section": "BSA 1B", "teacher": "COE-S8"},
-        {"type": "move", "sem": 1, "course": "CS 230", "section": "BSCS 2A", "part": "Lec", "pattern": "M2 MW", "room": "SIN 202"},
+        {"type": "assign", "sem": 1, "course": "FIL 207", "section": "BSA 1A", "newTeacher": "Ms. Ana Cruz"},
+        {"type": "assign", "sem": 1, "course": "FIL 207", "section": "BSA 1B", "teacher": "COE-S8"},
+        {"type": "move", "sem": 1, "course": "IT 210", "section": "BSIT 2A", "part": "Lec", "pattern": "M2 MW", "room": "SIN 202"},
         {"type": "approve", "sem": 2, "course": "BAN 403", "section": "BSBA 4-BAN", "part": "Lec", "decision": "another_time"},
     ]
     counts = apply_changes(items, uni, data)
@@ -22,12 +22,12 @@ def test_changes_become_overrides(tmp_path):
 
     uni = load_university(data)
     classes = {(k.course.code, k.section.name): k for k in uni.classes_for(1)}
-    assert classes[("MATH 180", "BSA 1A")].faculty.name == "Ms. Ana Cruz"
-    assert classes[("MATH 180", "BSA 1B")].faculty.key == "COE-S8"
-    k = classes[("CS 230", "BSCS 2A")]
+    assert classes[("FIL 207", "BSA 1A")].faculty.name == "Ms. Ana Cruz"
+    assert classes[("FIL 207", "BSA 1B")].faculty.key == "COE-S8"
+    k = classes[("IT 210", "BSIT 2A")]
     choices = _choices(uni, Meeting("x", k, "Lec", "lab_lecture"), {})
     assert {c.option.label for c in choices} == {"M2 MW"}
-    assert {c.pool for c in choices} == {"classrooms:CICS"}
+    assert {c.pool for c in choices} == {"classrooms:CILS"}
     ban = next(k for k in uni.classes_for(2) if k.course.code == "BAN 403")
     assert not any(c.option.exception for c in _choices(uni, Meeting("y", ban, "Lec", "lab_lecture"), {}))
 

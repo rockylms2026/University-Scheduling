@@ -63,7 +63,7 @@ class Program:
 
 @dataclass
 class Faculty:
-    key: str           # college-qualified ID, e.g. "CICS-C1"
+    key: str           # college-qualified ID, e.g. "CILS-T1"
     id: str
     name: str
     rank: str

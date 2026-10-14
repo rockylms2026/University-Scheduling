@@ -1,8 +1,17 @@
-# College of Information and Computing Sciences
-# Source: CICS Curricula and Faculty Loading Plan (steady state).
-# See ccjps.yaml for the course entry forms.
-college: CICS
-name: College of Information and Computing Sciences
+# College of Information and Library Science
+# Source: CILS Curricula and Faculty Loading Plan (final, steady state).
+#
+# Course entry forms:
+#   CODE: Title                                   lecture course, 3 credits, 3 h/week
+#   CODE: {title: ..., lab: <lab type>}           lab course, Lec 2 h + Lab 3 h (5 LU); lab types are in
+#                                                 data/campus.yaml (a list gives fallbacks, best first)
+#   CODE: {title: ..., kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+#                                                 internship / practicum: students are off campus on the
+#                                                 placement days; the teacher gets one weekly supervision period
+# Curriculum entries "CODE @X" run once for track group X (Years 3 and 4).
+# Loads list, per semester and faculty ID, "course: section, section, ...".
+college: CILS
+name: College of Information and Library Science
 
 courses:
   CCS 101: {title: Introduction to Computing, lab: [cisc_computer_lab, lib_tech_lab]}
@@ -11,27 +20,6 @@ courses:
   CCS 201: {title: Data Structures and Algorithms, lab: [cisc_computer_lab, lib_tech_lab]}
   CCS 202: {title: Information Management, lab: [cisc_computer_lab, lib_tech_lab]}
   CCS 301: {title: Applications Development and Emerging Technologies, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 110: Discrete Structures 1
-  CS 120: Calculus for Computing
-  CS 210: Discrete Structures 2
-  CS 220: Linear Algebra for Computing
-  CS 230: {title: Object-Oriented Programming, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 240: {title: Computer Architecture and Organization, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 250: Algorithms and Complexity
-  CS 310: Automata Theory and Formal Languages
-  CS 320: {title: Operating Systems, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 330: {title: Networks and Communications, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 340: Programming Languages
-  CS 350: {title: Software Engineering 1, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 360: {title: Software Engineering 2, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 370: Human-Computer Interaction
-  CS 380: {title: Information Assurance and Security, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 390: {title: Intelligent Systems, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 391: {title: Machine Learning, lab: [cisc_computer_lab, lib_tech_lab]}
-  CS 410: Social Issues and Professional Practice
-  CS 430: Thesis 1
-  CS 440: Thesis 2
-  CS 490: {title: Practicum (Industry Immersion), kind: field, credits: 6, placement: [Mon, Wed, Fri]}
   IT 110: Discrete Mathematics
   IT 120: Introduction to Human-Computer Interaction
   IT 130: {title: Platform Technologies, lab: [cisc_computer_lab, lib_tech_lab]}
@@ -79,28 +67,15 @@ courses:
   LIS 490: {title: Library Practicum, kind: field, credits: 6, placement: [Mon, Wed, Fri]}
 
 programs:
-  BSCS:
-    name: Bachelor of Science in Computer Science
-    department: Computer Science
-    blocks: [A, B]
-    curriculum:
-      1-1: [CCS 101, CCS 102, CS 110, SOCS 195, MATH 180, PE 101, CWTS 101, UNI 103, REL 103A]
-      1-2: [CCS 103, CS 120, CS 210, COMM 120, PE 102, CWTS 102, REL 103B]
-      2-1: [CCS 201, CS 230, CS 220, CS 240, PSYC 160, PE 201, REL 203A]
-      2-2: [CCS 202, CS 250, CS 320, CS 340, FIL 207, PE 202, REL 203B]
-      3-1: [CS 310, CS 330, CS 350, CS 390, MATH 350, ARTS 101, PHIL 190, REL 303A]
-      3-2: [CS 360, CCS 301, CS 380, CS 391, CS 370, PHIL 220, STS 180, REL 303B]
-      4-1: [CS 430, CS 410, HIST 201, HIST 220, ENGL 302, GAD 171, REL 403]
-      4-2: [CS 440, CS 490]
   BSIT:
     name: Bachelor of Science in Information Technology
     department: Information Technology
     blocks: [A, B]
     curriculum:
-      1-1: [CCS 101, CCS 102, IT 110, COMM 120, MATH 180, PE 101, CWTS 101, UNI 103, REL 103A]
-      1-2: [CCS 103, IT 130, IT 220, PE 102, CWTS 102, REL 103B]
-      2-1: [CCS 201, IT 210, IT 230, STS 180, MATH 350, SOCS 195, PE 201, REL 203A]
-      2-2: [CCS 202, IT 240, IT 120, PSYC 160, FIL 207, PE 202, REL 203B]
+      1-1: [CCS 101, CCS 102, IT 110, COMM 120, PE 101, CWTS 101, UNI 103, REL 103A]
+      1-2: [CCS 103, IT 130, IT 220, PE 102, CWTS 102, REL 103B, MATH 180]
+      2-1: [CCS 201, IT 210, IT 230, STS 180, SOCS 195, PE 201, REL 203A, PSYC 160]
+      2-2: [CCS 202, IT 240, IT 120, FIL 207, PE 202, REL 203B, MATH 350]
       3-1: [IT 250, IT 310, IT 330, IT 360, IT 370, ENGL 302, PHIL 190, REL 303A]
       3-2: [IT 320, IT 340, IT 350, CCS 301, IT 380, PHIL 220, ARTS 101, REL 303B]
       4-1: [IT 430, IT 390, IT 410, HIST 201, HIST 220, GAD 171, REL 403]
@@ -112,21 +87,15 @@ programs:
     curriculum:
       1-1: [LIS 101, LIS 102, COMM 120, MATH 180, PE 101, CWTS 101, UNI 103, REL 103A]
       1-2: [LIS 110, LIS 210, PSYC 160, FIL 207, PE 102, CWTS 102, REL 103B]
-      2-1: [LIS 201, LIS 211, LIS 230, SOCS 195, MATH 350, ENGL 302, PE 201, REL 203A]
+      2-1: [LIS 201, LIS 211, LIS 230, SOCS 195, ENGL 302, PE 201, REL 203A]
       2-2: [LIS 202, LIS 212, LIS 213, LIS 303, STS 180, PE 202, REL 203B]
       3-1: [LIS 220, LIS 240, LIS 301, LIS 304, LIS 330, PHIL 190, ARTS 101, REL 303A]
       3-2: [LIS 302, LIS 250, LIS 310, LIS 311, PHIL 220, HIST 201, REL 303B]
-      4-1: [LIS 410, LIS 320, HIST 220, GAD 171, REL 403]
-      4-2: [LIS 420, LIS 490]
+      4-1: [LIS 410, LIS 320, GAD 171, REL 403]
+      4-2: [LIS 420, LIS 490, HIST 220]
 
 faculty:
-  AD: {name: Dr. Dolores R. Cayaban, rank: Associate Professor V, department: Computer Science, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2, degree: "PhD Computer Science"}   # teaches at most two 3-unit classes of one course
-  C1: {name: Dr. Arnel P. Macaraeg, rank: Associate Professor I, department: Computer Science, designation: Department Chair, max_lu: 15, degree: "PhD Computer Science", specialization: "Algorithms, theory of computation"}
-  C2: {name: Mr. Carlo Miguel D. Santiago, rank: Assistant Professor I, department: Computer Science, designation: Thesis and Practicum Coordinator, degree: "MS Computer Science (Software Engineering)", specialization: "Software engineering, programming"}
-  C3: {name: Dr. Jasmine T. Lorenzo, rank: Assistant Professor II, department: Computer Science, designation: Research Coordinator, degree: "PhD Computer Science (Machine Learning)", specialization: "Intelligent systems, machine learning, data"}
-  C4: {name: Mr. Noel B. Ferrer, rank: Instructor III, department: Computer Science, designation: Laboratory Coordinator, degree: "MS Computer Science (Systems)", specialization: "Architecture, operating systems, networks, security"}
-  C5: {name: Ms. Rhea Anne L. Cruz, rank: Assistant Professor I, department: Computer Science, designation: Faculty, degree: "MS Applied Mathematics", specialization: "Discrete mathematics, calculus, statistics"}
-  C6: {name: Mr. Kevin S. Domingo, rank: Instructor II, department: Computer Science, designation: Faculty, degree: "Master in Information Technology", specialization: "Programming, applications development, HCI"}
+  AD: {name: Dr. Dolores R. Cayaban, rank: Associate Professor V, department: Information Technology, designation: Associate Dean, max_lu: 6, prep_cap: 1, course_cap: 1, class_cap: 2, degree: "PhD Computer Science"}   # teaches at most two 3-unit classes of one course
   T1: {name: Dr. Marivic S. Pascual, rank: Associate Professor I, department: Information Technology, designation: Department Chair, max_lu: 15, degree: "Doctor in Information Technology", specialization: "Systems integration, IT management"}
   T2: {name: Mr. Ramon J. Villareal, rank: Assistant Professor I, department: Information Technology, designation: Laboratory Coordinator, degree: "Master in Information Technology; Cisco-certified", specialization: "Networking, cloud, systems administration"}
   T3: {name: Ms. Diane Mae R. Caballero, rank: Instructor III, department: Information Technology, designation: Faculty, degree: "Master in Information Technology", specialization: "Programming, web and mobile development, UX"}
@@ -139,128 +108,78 @@ faculty:
 
 loads:
   1:
-    C1:
-      - CCS 201: BSCS 2B
-      - CS 310: BSCS 3A, BSCS 3B
-      - CS 410: BSCS 4B
-    C2:
-      - CS 230: BSCS 2A, BSCS 2B
-      - CS 350: BSCS 3A, BSCS 3B
-      - CS 430: BSCS 4B
-      - UNI 103: BSCS 1A
-    C3:
-      - CCS 201: BSCS 2A
-      - CS 390: BSCS 3A, BSCS 3B
-      - MATH 350: BLIS 2, ABEcon 2, BSSW 2
-    C4:
-      - CS 240: BSCS 2A, BSCS 2B
-      - CS 330: BSCS 3A, BSCS 3B
-      - CS 430: BSCS 4A
-    C5:
-      - CS 110: BSCS 1A, BSCS 1B
-      - CS 220: BSCS 2A, BSCS 2B
-      - MATH 350: BSCS 3A, BSCS 3B, BSIT 2A, BSIT 2B
-    C6:
-      - CCS 101: BSCS 1A, BSCS 1B
-      - CCS 102: BSCS 1A, BSCS 1B
-      - CS 410: BSCS 4A
-      - UNI 103: BSCS 1B
     T1:
-      - IT 360: BSIT 3A
-      - IT 410: BSIT 4A, BSIT 4B
-      - IT 430: BSIT 4A, BSIT 4B
-    T2:
       - CCS 201: BSIT 2A, BSIT 2B
+      - IT 250: BSIT 3B
+    T2:
       - IT 230: BSIT 2A, BSIT 2B
+      - IT 330: BSIT 3A, BSIT 3B
       - UNI 103: BSIT 1A
-      - STS 180: ABC 2
+      - STS 180: BSBA 2B
     T3:
       - IT 210: BSIT 2A, BSIT 2B
-      - IT 360: BSIT 3B
+      - IT 360: BSIT 3A
       - IT 370: BSIT 3A, BSIT 3B
       - UNI 103: BSIT 1B
     T4:
-      - CCS 102: BSIT 1A
-      - IT 330: BSIT 3A, BSIT 3B
       - IT 390: BSIT 4A, BSIT 4B
-      - STS 180: BSIT 2B
+      - IT 410: BSIT 4A, BSIT 4B
+      - IT 430: BSIT 4A, BSIT 4B
+      - STS 180: BSIT 2A, BSIT 2B
     T5:
-      - IT 250: BSIT 3A, BSIT 3B
+      - CCS 102: BSIT 1A, BSIT 1B
       - IT 310: BSIT 3A, BSIT 3B
-      - STS 180: BSP 1B
+      - STS 180: BSP 1A
     T6:
       - CCS 101: BSIT 1A, BSIT 1B
-      - CCS 102: BSIT 1B
       - IT 110: BSIT 1A, BSIT 1B
-      - STS 180: BSIT 2A
+      - IT 250: BSIT 3A
+      - IT 360: BSIT 3B
     B1:
       - LIS 240: BLIS 3
       - LIS 320: BLIS 4
       - LIS 330: BLIS 3
       - LIS 410: BLIS 4
+      - UNI 103: BLIS 1
     B3:
       - LIS 101: BLIS 1
-      - LIS 201: BLIS 2
       - LIS 211: BLIS 2
       - LIS 230: BLIS 2
+      - LIS 304: BLIS 3
+      - STS 180: BSP 1B, ABC 2, BSA 2A, BSA 2B
     B4:
       - LIS 102: BLIS 1
+      - LIS 201: BLIS 2
       - LIS 220: BLIS 3
       - LIS 301: BLIS 3
-      - LIS 304: BLIS 3
-      - UNI 103: BLIS 1
+      - STS 180: BSBA 2A, ABPA 2
   2:
-    C1:
-      - CS 210: BSCS 1A, BSCS 1B
-      - CS 250: BSCS 2A, BSCS 2B
-      - CS 340: BSCS 2A
-    C2:
-      - CCS 202: BSCS 2A, BSCS 2B
-      - CS 360: BSCS 3A, BSCS 3B
-      - CS 490: BSCS 4A
-    C3:
-      - CCS 103: BSCS 1B
-      - CS 120: BSCS 1B
-      - CS 391: BSCS 3A, BSCS 3B
-      - CS 440: BSCS 4A, BSCS 4B
-    C4:
-      - CS 320: BSCS 2A, BSCS 2B
-      - CS 380: BSCS 3A, BSCS 3B
-      - CS 490: BSCS 4B
-    C5:
-      - CS 120: BSCS 1A
-      - MATH 350: ABPS 2B, BSBA 2A, BSBA 2B, BSTHM 2A, BSTHM 2B, BSCrim 2A, BSCrim 2B
-    C6:
-      - CCS 103: BSCS 1A
-      - CCS 301: BSCS 3A, BSCS 3B
-      - CS 340: BSCS 2B
-      - CS 370: BSCS 3A, BSCS 3B
     T1:
-      - CCS 301: BSIT 3A, BSIT 3B
-      - IT 320: BSIT 3B
-    T2:
-      - IT 240: BSIT 2A, BSIT 2B
-      - IT 350: BSIT 3B
-      - IT 490: BSIT 4A, BSIT 4B
-      - STS 180: ABPS 3B
-    T3:
-      - CCS 103: BSIT 1A, BSIT 1B
-      - IT 120: BSIT 2A, BSIT 2B
-      - IT 220: BSIT 1B
-      - IT 440: BSIT 4A
-    T4:
-      - IT 340: BSIT 3A, BSIT 3B
-      - IT 350: BSIT 3A
-      - IT 380: BSIT 3A, BSIT 3B
-      - IT 440: BSIT 4B
-    T5:
       - CCS 202: BSIT 2A, BSIT 2B
-      - IT 320: BSIT 3A
-      - STS 180: BSCS 3A, BSCS 3B, BLIS 2
+      - CCS 301: BSIT 3A
+    T2:
+      - IT 340: BSIT 3A
+      - IT 350: BSIT 3B
+      - IT 380: BSIT 3A, BSIT 3B
+      - IT 490: BSIT 4A, BSIT 4B
+    T3:
+      - CCS 301: BSIT 3B
+      - IT 120: BSIT 2A, BSIT 2B
+      - IT 220: BSIT 1A, BSIT 1B
+      - IT 340: BSIT 3B
+    T4:
+      - IT 240: BSIT 2A, BSIT 2B
+      - IT 350: BSIT 3A
+      - IT 440: BSIT 4A, BSIT 4B
+      - STS 180: BLIS 2
+    T5:
+      - CCS 103: BSIT 1A
+      - IT 320: BSIT 3A, BSIT 3B
+      - STS 180: BSCrim 3B, BSTHM 2A, BSTHM 2B
     T6:
+      - CCS 103: BSIT 1B
       - IT 130: BSIT 1A, BSIT 1B
-      - IT 220: BSIT 1A
-      - STS 180: ABPS 3A, BSTHM 2A, BSCrim 3B
+      - STS 180: ABPS 3A, ABPS 3B, BSCrim 3A
     B1:
       - LIS 110: BLIS 1
       - LIS 212: BLIS 2

@@ -685,8 +685,8 @@ const DAYS = DATA.days;
 const LUNCH = { Mon: [690, 750], Wed: [690, 750], Fri: [690, 750], Tue: [720, 810], Thu: [720, 810] };
 const DAY_MAX = { Mon: 8, Tue: 7.5, Wed: 8, Thu: 7.5, Fri: 8, Sat: 3 };     // teaching hours a room can hold each day
 const PART = { Lec: "Lecture", Lab: "Laboratory", PE: "PE", NSTP: "CWTS", Supervision: "Practicum supervision" };
-const COLLEGE_KEYS = ["CSS", "CICS", "CBE", "COE", "CCJPS"];
-const SCOPES = [["ALL", "All colleges"], ["CSS", "CSS"], ["CICS", "CICS"], ["CBE", "CBE"], ["COE", "COE"], ["CCJPS", "CCJPS"], ["GE", "GE Department"], ["RE", "Religious Education"]];
+const COLLEGE_KEYS = ["CSBS", "CILS", "CBAPA", "COE"];
+const SCOPES = [["ALL", "All colleges"], ["CSBS", "CSBS"], ["CILS", "CILS"], ["CBAPA", "CBAPA"], ["COE", "COE"], ["GE", "GE Department"], ["RE", "Religious Education"]];
 const VIEWS = [["home", "Home"], ["dashboard", "Dashboard"], ["timetable", "Timetable"], ["faculty", "Faculty Loads"], ["profiles", "Faculty Profiles"], ["rooms", "Rooms"], ["sections", "Sections"],
                ["courses", "Courses"], ["conflicts", "Conflicts"], ["approvals", "Approvals"], ["availability", "GE Availability"], ["submissions", "Submissions"], ["reports", "Reports"], ["org", "Organization"], ["settings", "Settings"]];
 const ROLE_NAME = { registrar: "Registrar", dean: "Dean", associate_dean: "Associate Dean", chair: "Department Chair", ge_coordinator: "GE Coordinator", re_coordinator: "Religious Education Coordinator" };
@@ -716,7 +716,7 @@ const roomKind = (r) => r.pool.startsWith("classrooms") ? "Classroom" : r.pool.s
 const WARN_ICON = `<svg class="warnico" viewBox="0 0 16 16" aria-label="Conflict" role="img"><path fill="currentColor" d="M8 1 15.5 14.5H.5L8 1Zm-.9 5v4.2h1.8V6H7.1Zm0 5.4v1.7h1.8v-1.7H7.1Z"/></svg>`;
 
 // ---------- state ----------
-const state = { view: "home", scope: "ALL", college: "CSS", program: null, section: null, teacher: null, room: null,
+const state = { view: "home", scope: "ALL", college: "CSBS", program: null, section: null, teacher: null, room: null,
                 gridMode: "section", gridKey: {}, queueQuery: "", conflictType: "", pick: null, draft: null };
 try { Object.assign(state, JSON.parse(localStorage.getItem("cs-nav2") || "{}"), { pick: null, draft: null }); } catch (e) {}
 function remember() {
@@ -1173,7 +1173,7 @@ function evaluate(cls, meeting, opt, room, teacherKey) {
   if (meeting.kind === "lab") {
     const pref = DATA.labDays.find((p) => p.college === DATA.programs[sec.program].college && p.year === sec.year);
     if (pref && !(pref.blocks.includes(opt.block) && pref.days.includes(cands[0].day)))
-      out.push(["warn", `CICS guidance: Year ${sec.year} labs on ${pref.days.join("/")} ${pref.blocks.join("/")}`]);
+      out.push(["warn", `CILS guidance: Year ${sec.year} labs on ${pref.days.join("/")} ${pref.blocks.join("/")}`]);
   }
   const other = cls.meetings.filter((m) => m.part !== meeting.part).map((m) => bookings[`${cls.id}|${m.part}`]).filter(Boolean);
   other.forEach((b) => {
@@ -2469,7 +2469,7 @@ function orgTree() {
     });
     u.staff.map(orgStaff).forEach((x) => staffNode(x, `${DATA.colleges[c]} office`, ad));
   });
-  const ge = add(`f:${O.ge.coordinator.faculty}`, { ...orgFac(O.ge.coordinator.faculty, "GE Coordinator"), credentials: O.ge.coordinator.credentials }, DATA.colleges.GE, dean);
+  const ge = add(`f:${O.ge.coordinator.faculty}`, { ...orgFac(O.ge.coordinator.faculty, "GE Coordinator"), credentials: O.ge.coordinator.credentials }, DATA.colleges.GE, root);   // under the VPAA
   O.ge.areas.forEach((a) => {
     const people = a.faculty.map((k) => orgFac(k)).filter(Boolean);
     const lead = /led by the GE Coordinator/i.test(a.note || "") ? null : people.find((x) => x.title !== "Faculty");
@@ -2803,7 +2803,7 @@ function renderSettings(page) {
   if (!BACKEND) return;
   const colleges = COLLEGE_KEYS;
   const deptsOf = (col) => [...new Set(Object.values(DATA.teachers).filter((t) => t.college === col).map((t) => t.dept))].sort();
-  const ed = state.staffEdit || { email: "", full_name: "", role: "chair", college: "CSS", department: deptsOf("CSS")[0] };
+  const ed = state.staffEdit || { email: "", full_name: "", role: "chair", college: "CSBS", department: deptsOf("CSBS")[0] };
   const people = isAdmin() ? `<div class="card" style="grid-column:1/-1"><div class="cardhead"><h2>People and roles</h2><span class="small muted">${staffList.length} accounts</span></div>
       <p class="small muted" style="margin:0">Create each person's login in Supabase (Authentication → Users → Add user), then give their email a role here. An email with no role can sign in but sees nothing.</p>
       <div class="scroll"><table><thead><tr><th>Email</th><th>Name</th><th>Role</th><th>College</th><th>Department</th><th></th></tr></thead><tbody>
@@ -2815,7 +2815,7 @@ function renderSettings(page) {
         <label>Name<input id="stName" value="${esc(ed.full_name)}"></label>
         <label>Role<select id="stRole">${Object.entries(ROLE_NAME).map(([k, l]) => `<option value="${k}"${ed.role === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>
         <label>College<select id="stCollege">${colleges.map((c) => `<option${ed.college === c ? " selected" : ""}>${c}</option>`).join("")}</select></label>
-        <label>Department<select id="stDept">${deptsOf(ed.college || "CSS").map((d) => `<option${ed.department === d ? " selected" : ""}>${esc(d)}</option>`).join("")}</select></label>
+        <label>Department<select id="stDept">${deptsOf(ed.college || "CSBS").map((d) => `<option${ed.department === d ? " selected" : ""}>${esc(d)}</option>`).join("")}</select></label>
         <div class="actions"><button type="submit" class="btn primary">Save person</button>${state.staffEdit ? `<button type="button" class="btn" data-staffedit="">Clear</button>` : ""}<span class="msg" id="stmsg"></span></div>
       </form><p class="small muted" style="margin:0">College applies to associate deans and chairs; department applies to chairs only.</p></div>` : "";
   const phase = isAdmin() ? `<div class="card"><h2>Scheduling phase</h2>

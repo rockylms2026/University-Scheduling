@@ -1,6 +1,15 @@
 # College of Education
-# Source: COE Curricula and Faculty Loading Plan (steady state).
-# Generated layout; see ccjps.yaml for the course entry forms.
+# Source: COE Curricula and Faculty Loading Plan (final, steady state).
+#
+# Course entry forms:
+#   CODE: Title                                   lecture course, 3 credits, 3 h/week
+#   CODE: {title: ..., lab: <lab type>}           lab course, Lec 2 h + Lab 3 h (5 LU); lab types are in
+#                                                 data/campus.yaml (a list gives fallbacks, best first)
+#   CODE: {title: ..., kind: field, credits: 6, placement: [Mon, Wed, Fri]}
+#                                                 internship / practicum: students are off campus on the
+#                                                 placement days; the teacher gets one weekly supervision period
+# Curriculum entries "CODE @X" run once for track group X (Years 3 and 4).
+# Loads list, per semester and faculty ID, "course: section, section, ...".
 college: COE
 name: College of Education
 # Year 1 introductory courses (excluded from the 4-preparation cap).
@@ -133,7 +142,7 @@ programs:
       1-1: [ED 101, ED 102, MATH 180, SOCS 195, PE 101, CWTS 101, PSYC 160, UNI 103, REL 103A]
       1-2: [EED 110, EED 130, EED 120, COMM 120, FIL 207, PE 102, CWTS 102, REL 103B]
       2-1: [ED 201, ED 202, ED 204, EED 101, EED 140, EED 150, PE 201, REL 203A]
-      2-2: [ED 203, EED 111, EED 131, EED 121, EED 141, MATH 350, PE 202, REL 203B]
+      2-2: [ED 203, EED 111, EED 131, EED 121, EED 141, PE 202, REL 203B]
       3-1: [ED 301, ED 303, ED 304, EED 102, EED 151, EED 160, EED 180, PHIL 190, REL 303A]
       3-2: [ED 302, EED 152, EED 161, EED 170, EED 190, PHIL 220, ARTS 101, STS 180, REL 303B]
       4-1: [ED 401, ED 402, EED 181, ENGL 302, HIST 201, HIST 220, GAD 171, REL 403]
@@ -145,8 +154,8 @@ programs:
     curriculum:
       1-1: [ED 101, SEE 101, MATH 180, PSYC 160, COMM 120, CWTS 101, PE 101, UNI 103, REL 103A]
       1-2: [ED 102, SEE 102, SEE 103, SEE 104, SOCS 195, CWTS 102, PE 102, REL 103B]
-      2-1: [ED 201, ED 202, ED 204, SEE 201, SEE 202, MATH 350, PHIL 190, PE 201, REL 203A]
-      2-2: [ED 203, SEE 203, SEE 204, SEE 205, FIL 207, STS 180, GAD 171, PE 202, REL 203B]
+      2-1: [ED 201, ED 202, ED 204, SEE 201, SEE 202, PHIL 190, PE 201, REL 203A]
+      2-2: [ED 203, SEE 203, SEE 204, SEE 205, FIL 207, STS 180, PE 202, GAD 171, REL 203B]
       3-1: [ED 301, ED 303, ED 304, SEE 301, SEE 302, SEE 303, PHIL 220, ENGL 302, REL 303A]
       3-2: [ED 302, SEE 304, SEE 305, SEE 306, SEE 307, ARTS 101, HIST 201, HIST 220, REL 303B]
       4-1: [ED 401, ED 402, SEE 401, SEE 402, SEE 403, SEE 404, SEE 405, REL 403]
@@ -158,8 +167,8 @@ programs:
     curriculum:
       1-1: [ED 101, SEM 101, MATH 180, PSYC 160, COMM 120, CWTS 101, PE 101, UNI 103, REL 103A]
       1-2: [ED 102, SEM 102, SEM 103, SEM 104, SOCS 195, CWTS 102, PE 102, REL 103B]
-      2-1: [ED 201, ED 202, ED 204, SEM 201, SEM 202, MATH 350, PHIL 190, PE 201, REL 203A]
-      2-2: [ED 203, SEM 203, SEM 204, SEM 205, FIL 207, STS 180, GAD 171, PE 202, REL 203B]
+      2-1: [ED 201, ED 202, ED 204, SEM 201, SEM 202, PHIL 190, PE 201, REL 203A]
+      2-2: [ED 203, SEM 203, SEM 204, SEM 205, FIL 207, STS 180, PE 202, GAD 171, REL 203B]
       3-1: [ED 301, ED 303, ED 304, SEM 301, SEM 302, SEM 303, PHIL 220, ENGL 302, REL 303A]
       3-2: [ED 302, SEM 304, SEM 305, SEM 306, SEM 307, ARTS 101, HIST 201, HIST 220, REL 303B]
       4-1: [ED 401, ED 402, SEM 401, SEM 402, SEM 403, SEM 404, SEM 405, REL 403]
@@ -171,8 +180,8 @@ programs:
     curriculum:
       1-1: [ED 101, SES 101, MATH 180, PSYC 160, COMM 120, CWTS 101, PE 101, UNI 103, REL 103A]
       1-2: [ED 102, SES 102, SES 103, SES 104, SOCS 195, CWTS 102, PE 102, REL 103B]
-      2-1: [ED 201, ED 202, ED 204, SES 201, SES 202, MATH 350, PHIL 190, PE 201, REL 203A]
-      2-2: [ED 203, SES 203, SES 204, SES 205, FIL 207, STS 180, GAD 171, PE 202, REL 203B]
+      2-1: [ED 201, ED 202, ED 204, SES 201, SES 202, PHIL 190, PE 201, REL 203A]
+      2-2: [ED 203, SES 203, SES 204, SES 205, FIL 207, STS 180, PE 202, GAD 171, REL 203B]
       3-1: [ED 301, ED 303, ED 304, SES 301, SES 302, SES 303, PHIL 220, ENGL 302, REL 303A]
       3-2: [ED 302, SES 304, SES 305, SES 306, SES 307, ARTS 101, HIST 201, HIST 220, REL 303B]
       4-1: [ED 401, ED 402, SES 401, SES 402, SES 403, SES 404, SES 405, REL 403]
@@ -184,8 +193,8 @@ programs:
     curriculum:
       1-1: [ED 101, SEF 101, MATH 180, PSYC 160, COMM 120, CWTS 101, PE 101, UNI 103, REL 103A]
       1-2: [ED 102, SEF 102, SEF 103, SEF 104, SOCS 195, CWTS 102, PE 102, REL 103B]
-      2-1: [ED 201, ED 202, ED 204, SEF 201, SEF 202, MATH 350, PHIL 190, PE 201, REL 203A]
-      2-2: [ED 203, SEF 203, SEF 204, SEF 205, FIL 207, STS 180, GAD 171, PE 202, REL 203B]
+      2-1: [ED 201, ED 202, ED 204, SEF 201, SEF 202, PHIL 190, PE 201, REL 203A]
+      2-2: [ED 203, SEF 203, SEF 204, SEF 205, FIL 207, STS 180, PE 202, GAD 171, REL 203B]
       3-1: [ED 301, ED 303, ED 304, SEF 301, SEF 302, SEF 303, PHIL 220, ENGL 302, REL 303A]
       3-2: [ED 302, SEF 304, SEF 305, SEF 306, SEF 307, ARTS 101, HIST 201, HIST 220, REL 303B]
       4-1: [ED 401, ED 402, SEF 401, SEF 402, SEF 403, SEF 404, SEF 405, REL 403]
@@ -208,201 +217,205 @@ faculty:
   S14: {name: Ms. Rosario F. Guevarra, rank: Instructor II, department: Secondary Education, designation: Faculty, degree: "MA History; LPT", specialization: "Philippine history, Rizal studies, heritage"}
   S15: {name: Ms. Bianca Mae T. Villanueva, rank: Instructor II, department: Secondary Education, designation: Faculty, degree: "MA English Language Teaching; LPT", specialization: "Grammar, macroskills, purposive communication"}
   S16: {name: Mr. Jonathan R. Belmonte, rank: Instructor II, department: Secondary Education, designation: Faculty, degree: "MS Mathematics Education; LPT", specialization: "Calculus, discrete mathematics, statistics"}
+  S17: {name: Mr. Alvin R. Sarmiento, rank: Instructor I, department: Secondary Education, designation: Faculty, degree: "MA History; LPT", specialization: "Philippine history, Rizal studies"}
   E1: {name: Dr. Remedios A. Tamayo, rank: Associate Professor I, department: Elementary Education, designation: Department Chair, max_lu: 15, degree: "PhD Elementary Education; LPT", specialization: "Curriculum, multigrade teaching, research"}
   E2: {name: Ms. Analyn F. Vasquez, rank: Assistant Professor I, department: Elementary Education, designation: Faculty, degree: "MAEd Reading; LPT", specialization: "Reading, literacy, English language arts"}
   E3: {name: Mr. Virgilio S. Quijano, rank: Assistant Professor I, department: Elementary Education, designation: Field Study and Internship Coordinator, degree: "MAEd Mathematics; LPT", specialization: "Mathematics and science teaching, assessment"}
   E4: {name: Ms. Josefina R. Obispo, rank: Instructor III, department: Elementary Education, designation: Faculty, degree: "MA Filipino; LPT", specialization: "Filipino, social studies, values education"}
-  E5: {name: Mr. Ariel M. Baltazar, rank: Instructor III, department: Elementary Education, designation: Faculty, degree: "MAEd Music, Arts, Physical Education, and Health; LPT", specialization: "MAPEH, EPP, technology for teaching"}
 
 loads:
   1:
     S1:
       - ED 204: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 2
     S2:
-      - ED 301: BSEd-F 3
-      - ED 401: BSEd-E 4, BSEd-M 4, BSEd-SS 4, BSEd-F 4, BEEd 4
-      - ED 402: BSEd-M 4, BEEd 4
+      - ED 304: BSEd-E 3, BSEd-SS 3, BSEd-F 3
+      - PSYC 160: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1
     S4:
-      - ED 402: BSEd-E 4, BSEd-SS 4, BSEd-F 4
+      - ED 402: BSEd-E 4, BSEd-SS 4, BSEd-F 4, BEEd 4
       - SEE 403: BSEd-E 4
       - SEM 405: BSEd-M 4
-      - SES 404: BSEd-SS 4
     S5:
       - ED 101: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1
-      - SEE 101: BSEd-E 1
+      - SEE 202: BSEd-E 2
       - SEE 401: BSEd-E 4
-      - SEE 405: BSEd-E 4
+      - SEE 404: BSEd-E 4
     S6:
       - ED 303: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3, BEEd 3
-      - SEE 303: BSEd-E 3
-      - SEE 402: BSEd-E 4
-      - SEE 404: BSEd-E 4
-    S7:
-      - ED 301: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BEEd 3
-      - SEM 101: BSEd-M 1
-      - SEM 201: BSEd-M 2
-      - SEM 403: BSEd-M 4
-      - SEM 404: BSEd-M 4
-    S8:
-      - SEM 202: BSEd-M 2
-      - SEM 301: BSEd-M 3
-      - SEM 302: BSEd-M 3
-      - SEM 303: BSEd-M 3
-      - MATH 350: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2
-    S9:
-      - SES 302: BSEd-SS 3
-      - SES 303: BSEd-SS 3
-      - SES 405: BSEd-SS 4
-      - HIST 220: BEEd 4, BSCS 4A, BSBA 4B, BSTHM 4B, ABPA 4
-    S10:
-      - SES 101: BSEd-SS 1
-      - SES 202: BSEd-SS 2
-      - SES 401: BSEd-SS 4
-      - SES 403: BSEd-SS 4
-      - HIST 201: BEEd 4, BSP 3C, ABPS 3A, BSCS 4B
-    S11:
-      - SEF 202: BSEd-F 2
-      - SEF 303: BSEd-F 3
-      - SEF 403: BSEd-F 4
-      - FIL 207: BSEntrep 2, BSTHM 2A, BSCrim 3A
-    S12:
-      - SEF 101: BSEd-F 1
-      - SEF 201: BSEd-F 2
-      - SEF 302: BSEd-F 3
-      - SEF 404: BSEd-F 4
-      - FIL 207: BSTHM 2B, BSCrim 3B
-    S13:
-      - SEF 301: BSEd-F 3
-      - SEF 401: BSEd-F 4
-      - SEF 402: BSEd-F 4
-      - SEF 405: BSEd-F 4
-      - UNI 103: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
-    S14:
-      - SES 201: BSEd-SS 2
-      - SES 301: BSEd-SS 3
-      - SES 402: BSEd-SS 4
-      - SOCS 195: BEEd 1
-      - HIST 220: ABPS 3A, ABPS 3B, BSTHM 4A, BSSW 4
-    S15:
-      - SEE 201: BSEd-E 2
-      - SEE 202: BSEd-E 2
+      - SEE 101: BSEd-E 1
       - SEE 301: BSEd-E 3
       - SEE 302: BSEd-E 3
-      - COMM 120: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
-    S16:
+    S7:
+      - ED 301: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3, BEEd 3
+      - SEM 301: BSEd-M 3
+      - SEM 302: BSEd-M 3
+      - SEM 404: BSEd-M 4
+    S8:
+      - SEM 101: BSEd-M 1
       - SEM 401: BSEd-M 4
       - SEM 402: BSEd-M 4
-      - MATH 180: BSP 1A, BSP 1B, ABPS 1A, ABPS 1B, ABC 1, BSSW 1
+      - SEM 403: BSEd-M 4
+      - MATH 180: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BEEd 1
+    S9:
+      - SES 101: BSEd-SS 1
+      - SES 201: BSEd-SS 2
+      - SES 202: BSEd-SS 2
+      - SES 301: BSEd-SS 3
+      - HIST 201: BEEd 4, ABPS 3A, ABPS 3B, ABC 2
+    S10:
+      - SES 302: BSEd-SS 3
+      - SES 303: BSEd-SS 3
+      - SES 404: BSEd-SS 4
+      - SOCS 195: BEEd 1
+      - HIST 220: ABPS 3B, ABC 4, ABPA 4
+    S11:
+      - SEF 101: BSEd-F 1
+      - SEF 201: BSEd-F 2
+      - SEF 303: BSEd-F 3
+      - SEF 401: BSEd-F 4
+      - FIL 207: ABPS 1B, BSCrim 3B, BSA 1A, BSBA 1A
+    S12:
+      - SEF 402: BSEd-F 4
+      - SEF 404: BSEd-F 4
+      - SEF 405: BSEd-F 4
+      - UNI 103: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
+      - FIL 207: ABPS 1A, BSCrim 3A, BSBA 1B
+    S13:
+      - SEF 202: BSEd-F 2
+      - SEF 301: BSEd-F 3
+      - SEF 302: BSEd-F 3
+      - SEF 403: BSEd-F 4
+      - FIL 207: BSA 1B, BSTHM 2A, BSTHM 2B, ABPA 1
+    S14:
+      - SES 401: BSEd-SS 4
+      - SES 402: BSEd-SS 4
+      - SES 403: BSEd-SS 4
+      - SES 405: BSEd-SS 4
+      - HIST 220: BEEd 4, BSSW 4, BSIT 4A, BSTHM 4B
+    S15:
+      - SEE 201: BSEd-E 2
+      - SEE 303: BSEd-E 3
+      - SEE 402: BSEd-E 4
+      - SEE 405: BSEd-E 4
+      - COMM 120: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
+    S16:
+      - SEM 201: BSEd-M 2
+      - SEM 202: BSEd-M 2
+      - SEM 303: BSEd-M 3
+      - MATH 180: BSEd-F 1, BSP 1A, BSP 1B, ABC 1, BSCrim 1A
+    S17:
+      - HIST 201: BSCrim 4A, BSCrim 4B, BSIT 4A, BSIT 4B, BSA 4A, BSA 4B, BSTHM 4A, BSTHM 4B
     E1:
-      - ED 304: BSEd-E 3, BSEd-M 3, BSEd-F 3, BEEd 3
+      - ED 102: BEEd 1
+      - ED 304: BSEd-M 3, BEEd 3
       - EED 181: BEEd 4
+      - UNI 103: BEEd 1
     E2:
-      - ED 202: BSEd-SS 2
+      - ED 202: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 2
+      - EED 151: BEEd 3
       - EED 180: BEEd 3
       - GAD 171: BEEd 4
-      - PSYC 160: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1
     E3:
+      - ED 401: BSEd-E 4, BSEd-M 4, BSEd-SS 4, BSEd-F 4, BEEd 4
+      - ED 402: BSEd-M 4
       - EED 101: BEEd 2
       - EED 102: BEEd 3
-      - MATH 180: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1, BEEd 1, BSCS 1A
     E4:
       - ED 201: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 2
-      - ED 304: BSEd-SS 3
       - EED 140: BEEd 2
-      - UNI 103: BEEd 1
-    E5:
-      - ED 102: BEEd 1
-      - ED 202: BSEd-E 2, BSEd-M 2, BSEd-F 2, BEEd 2
       - EED 150: BEEd 2
-      - EED 151: BEEd 3
       - EED 160: BEEd 3
   2:
     S1:
-      - ED 102: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
-    S2:
-      - ED 302: BSEd-SS 3
       - ED 490: BSEd-E 4, BSEd-M 4, BSEd-SS 4, BSEd-F 4, BEEd 4
+    S2:
+      - ED 203: BSEd-M 2, BSEd-SS 2, BSEd-F 2
+      - ED 302: BSEd-E 3, BSEd-M 3, BSEd-SS 3
     S4:
-      - ED 203: BSEd-E 2, BSEd-SS 2, BEEd 2
-      - STS 180: BSEd-E 2
+      - ED 203: BSEd-E 2
+      - ED 302: BSEd-F 3
+      - STS 180: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 3
     S5:
+      - SEE 102: BSEd-E 1
       - SEE 205: BSEd-E 2
       - SEE 304: BSEd-E 3
-      - SEE 307: BSEd-E 3
-    S6:
-      - SEE 104: BSEd-E 1
-      - SEE 203: BSEd-E 2
-      - SEE 204: BSEd-E 2
       - SEE 306: BSEd-E 3
-      - COMM 120: BEEd 1
+    S6:
+      - ED 102: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
+      - SEE 204: BSEd-E 2
+      - SEE 307: BSEd-E 3
     S7:
-      - ED 302: BSEd-E 3, BSEd-M 3, BSEd-F 3, BEEd 3
-      - SEM 104: BSEd-M 1
-      - SEM 307: BSEd-M 3
-    S8:
-      - SEM 102: BSEd-M 1
-      - SEM 103: BSEd-M 1
-      - SEM 203: BSEd-M 2
       - SEM 205: BSEd-M 2
+      - SEM 304: BSEd-M 3
+      - SEM 307: BSEd-M 3
+      - MATH 180: ABPS 1A, BSIT 1B, BSA 1A, BSBA 1A, BSBA 1B
+    S8:
+      - SEM 103: BSEd-M 1
+      - SEM 104: BSEd-M 1
+      - SEM 203: BSEd-M 2
+      - SEM 305: BSEd-M 3
+      - MATH 180: ABPS 1B, BSIT 1A, BSA 1B, ABPA 1
     S9:
-      - SES 104: BSEd-SS 1
-      - SES 306: BSEd-SS 3
-      - HIST 201: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3, ABEcon 3, BLIS 3
+      - SES 203: BSEd-SS 2
+      - SES 204: BSEd-SS 2
+      - SES 305: BSEd-SS 3
+      - SES 307: BSEd-SS 3
+      - HIST 220: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3
     S10:
       - SES 103: BSEd-SS 1
-      - SES 204: BSEd-SS 2
+      - SES 104: BSEd-SS 1
       - SES 205: BSEd-SS 2
-      - SES 305: BSEd-SS 3
-      - HIST 220: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3
+      - SES 306: BSEd-SS 3
+      - SOCS 195: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
     S11:
       - SEF 103: BSEd-F 1
+      - SEF 205: BSEd-F 2
+      - SEF 305: BSEd-F 3
+      - FIL 207: BSSW 1, BSIT 2A, BLIS 1
+    S12:
       - SEF 104: BSEd-F 1
       - SEF 204: BSEd-F 2
       - SEF 306: BSEd-F 3
-      - FIL 207: BSP 1A, BSBA 1A, ABPA 1, BSSW 1
-    S12:
+      - SEF 307: BSEd-F 3
+      - FIL 207: BSEd-M 2, BSEd-F 2
+    S13:
       - SEF 102: BSEd-F 1
       - SEF 203: BSEd-F 2
-      - SEF 307: BSEd-F 3
-      - FIL 207: ABEcon 1, BSCS 2A, BSCS 2B, BSIT 2B, BSBA 1B
-    S13:
-      - SEF 205: BSEd-F 2
       - SEF 304: BSEd-F 3
-      - SEF 305: BSEd-F 3
-      - FIL 207: BSEd-M 2, BSP 1B, ABC 1, BSIT 2A, BSA 1B
+      - FIL 207: BSEd-E 2, BSEd-SS 2, BEEd 1
     S14:
       - SES 102: BSEd-SS 1
-      - SES 203: BSEd-SS 2
       - SES 304: BSEd-SS 3
-      - SES 307: BSEd-SS 3
-      - SOCS 195: BSEd-E 1, BSEd-M 1, BSEd-SS 1, BSEd-F 1
+      - HIST 220: BSP 3B, BSCrim 4A, BLIS 4, BSA 1B, BSBA 4A, BSBA 4B
     S15:
-      - SEE 102: BSEd-E 1
       - SEE 103: BSEd-E 1
+      - SEE 104: BSEd-E 1
+      - SEE 203: BSEd-E 2
       - SEE 305: BSEd-E 3
+      - COMM 120: BEEd 1
     S16:
+      - SEM 102: BSEd-M 1
       - SEM 204: BSEd-M 2
-      - SEM 304: BSEd-M 3
-      - SEM 305: BSEd-M 3
       - SEM 306: BSEd-M 3
-      - MATH 350: BEEd 2
+      - MATH 350: ABPS 2A, BSCrim 2A, BSSW 2, BSIT 2B, BSA 2B
+    S17:
+      - HIST 201: BSEd-E 3, BSEd-M 3, BSEd-SS 3, BSEd-F 3, BLIS 3, BSBA 3A, BSBA 3B, ABPA 3
     E1:
+      - ED 203: BEEd 2
+      - EED 161: BEEd 3
       - EED 190: BEEd 3
     E2:
+      - ED 302: BEEd 3
       - EED 130: BEEd 1
       - EED 131: BEEd 2
+      - EED 152: BEEd 3
       - GAD 171: BSEd-E 2, BSEd-M 2, BSEd-SS 2, BSEd-F 2
     E3:
       - EED 110: BEEd 1
       - EED 111: BEEd 2
-      - STS 180: BSEd-M 2, BSEd-SS 2, BSEd-F 2, BEEd 3
+      - MATH 350: ABPS 2B, BSCrim 2B, BSIT 2A, BSA 2A, BSBA 2A, BSBA 2B
     E4:
       - EED 120: BEEd 1
       - EED 121: BEEd 2
       - EED 141: BEEd 2
       - EED 170: BEEd 3
-      - FIL 207: BSEd-E 2, BSEd-SS 2, BSEd-F 2, BEEd 1
-    E5:
-      - ED 203: BSEd-M 2, BSEd-F 2
-      - EED 152: BEEd 3
-      - EED 161: BEEd 3
+      - FIL 207: BSP 1A, BSP 1B, ABC 1, BSIT 2B

@@ -4,33 +4,33 @@
 # Departments housed in each building. Classes are placed in their
 # department's building when possible.
 buildings:
-  DIW: {name: Diwa Hall, college: CSS, departments: [Psychology, Economics]}
-  MAL: {name: Malaya Hall, college: CSS, departments: [Political Science]}
-  TIN: {name: Tinig Hall, college: CSS, departments: [Communication]}
-  SIN: {name: Sinag Hall, college: CICS, departments: [Computer Science]}
-  TAL: {name: Tala Hall, college: CICS, departments: [Information Technology]}
-  LIW: {name: Liwanag Hall, college: CICS, departments: [Library and Information Science]}
-  SIP: {name: Sipag Hall, college: CBE, departments: [Accountancy]}
-  TIY: {name: Tiyaga Hall, college: CBE, departments: [Business Administration, Entrepreneurship]}
-  YAM: {name: Yaman Hall, college: CBE, departments: [Tourism and Hospitality Management]}
+  DIW: {name: Diwa Hall, college: CSBS, departments: [Psychology]}
+  MAL: {name: Malaya Hall, college: CSBS, departments: [Political Science]}
+  TIN: {name: Tinig Hall, college: CSBS, departments: [Communication]}
+  KAT: {name: Katarungan Hall, college: CSBS, departments: [Criminology]}
+  DAN: {name: Dangal Hall, college: CSBS, departments: [Social Work, Public Administration]}
+  SIN: {name: Sinag Hall, college: CILS, departments: [Information Technology]}
+  TAL: {name: Tala Hall, college: CILS, departments: [Information Technology]}
+  LIW: {name: Liwanag Hall, college: CILS, departments: [Library and Information Science]}
+  SIP: {name: Sipag Hall, college: CBAPA, departments: [Accountancy]}
+  TIY: {name: Tiyaga Hall, college: CBAPA, departments: [Business Administration]}
+  YAM: {name: Yaman Hall, college: CBAPA, departments: [Tourism and Hospitality Management]}
   DUN: {name: Dunong Hall, college: COE, departments: [Secondary Education]}
   GAB: {name: Gabay Hall, college: COE, departments: [Elementary Education]}
   TAN: {name: Tanglaw Hall, college: COE, departments: [Secondary Education]}
-  KAT: {name: Katarungan Hall, college: CCJPS, departments: [Criminology]}
-  DAN: {name: Dangal Hall, college: CCJPS, departments: [Public Administration, Social Work]}
-  LIN: {name: Lingkod Hall, college: CCJPS, departments: [General Education]}
+  LIN: {name: Lingkod Hall, college: GE, departments: [General Education, Religious Education]}
 
 # Each college's classrooms (45 seats). A section's classes, including its
 # GE classes, use its own college's classrooms.
 classrooms:
-  CSS: [DIW 201, DIW 202, DIW 203, DIW 301, DIW 302, DIW 303, DIW 304,
-        MAL 201, MAL 202, MAL 203, MAL 301, TIN 203, TIN 204, TIN 301, TIN 302]
-  CICS: [SIN 202, SIN 203, SIN 302, SIN 303, TAL 202, TAL 203, TAL 302, TAL 303, LIW 201, LIW 202]
-  CBE: [SIP 201, SIP 202, SIP 203, SIP 301, SIP 302, SIP 303,
-        TIY 201, TIY 202, TIY 203, TIY 301, TIY 302, YAM 203, YAM 204, YAM 302, YAM 303]
+  CSBS: [DIW 201, DIW 202, DIW 203, DIW 301, DIW 302, DIW 303, DIW 304,
+         MAL 201, MAL 202, MAL 203, MAL 301, TIN 203, TIN 204, TIN 301, TIN 302,
+         KAT 301, KAT 302, KAT 303, DAN 201, DAN 202, DAN 203, DAN 301, DAN 302]
+  CILS: [SIN 202, SIN 203, SIN 302, SIN 303, TAL 202, TAL 203, TAL 302, TAL 303, LIW 201, LIW 202]
+  CBAPA: [SIP 201, SIP 202, SIP 203, SIP 301, SIP 302, SIP 303,
+          TIY 201, TIY 202, TIY 203, TIY 301, TIY 302, YAM 203, YAM 204, YAM 302, YAM 303]
   COE: [DUN 201, DUN 202, DUN 203, DUN 301, DUN 302, DUN 303,
         GAB 201, GAB 202, GAB 301, GAB 302, TAN 104, TAN 201, TAN 202, TAN 301]
-  CCJPS: [KAT 301, KAT 302, KAT 303, DAN 201, DAN 202, DAN 203, DAN 301, DAN 302]
 
 # Lingkod Hall overflow classrooms and testing room, for any college that
 # runs short (used only when a college's own rooms are full).
@@ -38,7 +38,7 @@ shared_classrooms: [LIN 203, LIN 204, LIN 301, LIN 302, LIN 303]
 
 # Seminar rooms (24 seats) for small groups such as the BSBA major groups.
 seminar_rooms:
-  CBE: [SIP 304]
+  CBAPA: [SIP 304]
 
 # Laboratory rooms. "blocks" are the lab blocks the time frame assigns to the
 # room; other blocks are allowed only when these are full (penalised).
@@ -75,57 +75,43 @@ pe_venues:
 
 # Faculty offices (Campus Space Plan, part VIII), by faculty key.
 faculty_offices:
-  CSS-P1: DIW 104
-  CSS-E1: DIW 105
-  CSS-P2: DIW 107-W01
-  CSS-P3: DIW 107-W02
-  CSS-P4: DIW 107-W03
-  CSS-P5: DIW 107-W04
-  CSS-E2: DIW 107-W05
-  CSS-E4: DIW 107-W07
-  CSS-E5: DIW 107-W08
-  CSS-L1: MAL 101
-  CSS-L2: MAL 102-W01
-  CSS-L3: MAL 102-W02
-  CSS-L4: MAL 102-W03
-  CSS-M1: TIN 101
-  CSS-M3: TIN 102-W02
-  CSS-M4: TIN 102-W03
-  CSS-M5: TIN 102-W04
-  CICS-C1: SIN 104
-  CICS-C2: SIN 106-W01
-  CICS-C3: SIN 106-W02
-  CICS-C4: SIN 106-W03
-  CICS-C5: SIN 106-W04
-  CICS-C6: SIN 106-W05
-  CICS-T1: TAL 101
-  CICS-T2: TAL 102-W01
-  CICS-T3: TAL 102-W02
-  CICS-T4: TAL 102-W03
-  CICS-T5: TAL 102-W04
-  CICS-T6: TAL 102-W05
-  CICS-B1: LIW 101
-  CICS-B3: LIW 102-W02
-  CICS-B4: LIW 102-W03
-  CBE-A1: SIP 104
-  CBE-A2: SIP 106-W01
-  CBE-A3: SIP 106-W02
-  CBE-A4: SIP 106-W03
-  CBE-A5: SIP 106-W04
-  CBE-B1: TIY 101
-  CBE-N1: TIY 102
-  CBE-B2: TIY 104-W01
-  CBE-B3: TIY 104-W02
-  CBE-B4: TIY 104-W03
-  CBE-B5: TIY 104-W04
-  CBE-B6: TIY 104-W05
-  CBE-N2: TIY 104-W06
-  CBE-N4: TIY 104-W08
-  CBE-H1: YAM 101
-  CBE-H2: YAM 102-W01
-  CBE-H3: YAM 102-W02
-  CBE-H4: YAM 102-W03
-  CBE-H5: YAM 102-W04
+  CSBS-P1: DIW 104
+  CSBS-P2: DIW 107-W01
+  CSBS-P3: DIW 107-W02
+  CSBS-P4: DIW 107-W03
+  CSBS-P5: DIW 107-W04
+  CSBS-L1: MAL 101
+  CSBS-L2: MAL 102-W01
+  CSBS-L3: MAL 102-W02
+  CSBS-L4: MAL 102-W03
+  CSBS-M1: TIN 101
+  CSBS-M3: TIN 102-W02
+  CSBS-M4: TIN 102-W03
+  CILS-T1: TAL 101
+  CILS-T2: TAL 102-W01
+  CILS-T3: TAL 102-W02
+  CILS-T4: TAL 102-W03
+  CILS-T5: TAL 102-W04
+  CILS-T6: TAL 102-W05
+  CILS-B1: LIW 101
+  CILS-B3: LIW 102-W02
+  CILS-B4: LIW 102-W03
+  CBAPA-A1: SIP 104
+  CBAPA-A2: SIP 106-W01
+  CBAPA-A3: SIP 106-W02
+  CBAPA-A4: SIP 106-W03
+  CBAPA-A5: SIP 106-W04
+  CBAPA-B1: TIY 101
+  CBAPA-B2: TIY 104-W01
+  CBAPA-B3: TIY 104-W02
+  CBAPA-B4: TIY 104-W03
+  CBAPA-B5: TIY 104-W04
+  CBAPA-B6: TIY 104-W05
+  CBAPA-H1: YAM 101
+  CBAPA-H2: YAM 102-W01
+  CBAPA-H3: YAM 102-W02
+  CBAPA-H4: YAM 102-W03
+  CBAPA-H5: YAM 102-W04
   COE-S1: DUN 104
   COE-S2: DUN 106-W01
   COE-S4: DUN 106-W02
@@ -139,34 +125,29 @@ faculty_offices:
   COE-E2: GAB 102-W01
   COE-E3: GAB 102-W02
   COE-E4: GAB 102-W03
-  COE-E5: GAB 102-W04
   COE-S9: TAN 101-W01
   COE-S10: TAN 101-W02
   COE-S11: TAN 101-W03
   COE-S12: TAN 101-W04
   COE-S13: TAN 101-W05
   COE-S14: TAN 101-W06
-  CCJPS-R1: KAT 104
-  CCJPS-R2: KAT 106-W01
-  CCJPS-R3: KAT 106-W02
-  CCJPS-R4: KAT 106-W03
-  CCJPS-R5: KAT 106-W04
-  CCJPS-R6: KAT 106-W05
-  CCJPS-D1: DAN 101
-  CCJPS-W1: DAN 102
-  CCJPS-D2: DAN 104-W01
-  CCJPS-D3: DAN 104-W02
-  CCJPS-D4: DAN 104-W03
-  CCJPS-W2: DAN 104-W04
-  CCJPS-W3: DAN 104-W05
-  CCJPS-W4: DAN 104-W06
+  CSBS-R2: KAT 106-W01
+  CSBS-R3: KAT 106-W02
+  CSBS-R4: KAT 106-W03
+  CSBS-R5: KAT 106-W04
+  CSBS-R6: KAT 106-W05
+  CBAPA-D1: DAN 101
+  CSBS-W1: DAN 102
+  CBAPA-D2: DAN 104-W01
+  CBAPA-D3: DAN 104-W02
+  CBAPA-D4: DAN 104-W03
+  CSBS-W2: DAN 104-W04
+  CSBS-W3: DAN 104-W05
+  CSBS-W4: DAN 104-W06
   GE-G1: LIN 101
   GE-G2: LIN 104-W01
-  GE-G3: LIN 104-W02
   GE-G4: LIN 104-W03
-  GE-G5: LIN 104-W04
   GE-G6: LIN 104-W05
-  GE-G7: LIN 104-W06
   GE-G8: LIN 105-W01
   GE-G9: LIN 105-W02
   GE-G10: LIN 105-W03
@@ -174,8 +155,6 @@ faculty_offices:
   GE-G12: LIN 201-W01
   GE-G13: LIN 201-W02
   GE-G14: LIN 201-W03
-  GE-G15: LIN 201-W04
-  GE-G16: LIN 201-W05
   GE-G18: LIN 201-W06
   GE-G17: LIN 202-W01
   GE-G19: LIN 202-W02

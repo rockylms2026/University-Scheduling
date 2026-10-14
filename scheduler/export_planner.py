@@ -28,14 +28,14 @@ def seal_data_url() -> str:
     import base64
     return "data:image/png;base64," + base64.b64encode(SEAL_PATH.read_bytes()).decode() if SEAL_PATH.exists() else ""
 KINDS = ["lecture", "lab_lecture", "lab", "pe", "uni", "double", "nstp", "supervision"]
-COLLEGES = {"CSS": "College of Social Sciences", "CICS": "College of Information and Computing Sciences",
-            "CBE": "College of Business and Entrepreneurship", "COE": "College of Education",
-            "CCJPS": "College of Criminal Justice and Public Service", "GE": "General Education Department",
+COLLEGES = {"CSBS": "College of Social and Behavioral Sciences", "CILS": "College of Information and Library Science",
+            "CBAPA": "College of Business, Accountancy and Public Administration", "COE": "College of Education",
+            "GE": "General Education Department",
             "RE": "Religious Education Department"}
 
 
 def holder_department(housed_by: str | None, program_dept: str) -> str | None:
-    """The department that holds a GE course: "Dept. of Psychology (CSS)" -> "Psychology"."""
+    """The department that holds a GE course: "Dept. of Psychology (CSBS)" -> "Psychology"."""
     if not housed_by:
         return None
     if housed_by.startswith("Program"):
