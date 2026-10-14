@@ -19,7 +19,10 @@ def test_counts():
     assert not any("GE Handler" in f.designation or "GE handler" in f.designation for f in UNI.faculty.values())
     assert len(UNI.programs) == 16
     assert {p.college for p in UNI.programs.values()} == {"CSBS", "CILS", "CBAPA", "COE"}
-    assert len(UNI.campus.pool("classrooms:CSBS")) == 23
+    assert len(UNI.campus.pool("classrooms:CSBS")) == 20   # MAL 201 to 203 became studios (final time frame)
+    assert len(UNI.campus.pool("classrooms:CILS")) == 6
+    assert [r.name for r in UNI.campus.rooms if r.pool == "lab:cisc_computer_lab"] == ["SIN 108", "SIN 201", "SIN 301"]
+    assert all(len({d for d, _, _ in o.intervals}) == 2 for o in time_options(UNI, "double"))   # REL 403: two days
     assert len(UNI.campus.pool("classrooms:CBAPA")) == 15
 
 
