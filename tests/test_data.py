@@ -19,11 +19,13 @@ def test_counts():
     assert not any("GE Handler" in f.designation or "GE handler" in f.designation for f in UNI.faculty.values())
     assert len(UNI.programs) == 16
     assert {p.college for p in UNI.programs.values()} == {"CSBS", "CILS", "CBAPA", "COE"}
-    assert len(UNI.campus.pool("classrooms:CSBS")) == 20   # MAL 201 to 203 became studios (final time frame)
-    assert len(UNI.campus.pool("classrooms:CILS")) == 6
+    # Campus Space Plan (final): 54 classrooms, 17 + 6 + 15 + 13 plus 3 shared overflow rooms
+    rooms = {c: len(UNI.campus.pool(f"classrooms:{c}")) for c in ("CSBS", "CILS", "CBAPA", "COE")}
+    assert rooms == {"CSBS": 17, "CILS": 6, "CBAPA": 15, "COE": 13}
+    assert len(UNI.campus.pool("shared")) == 3
+    assert set(UNI.campus.buildings) == {"DIW", "MAL", "KAT", "SIN", "LIW", "LIN", "SIP", "TIY", "YAM", "DUN", "GAB", "TAN"}
     assert [r.name for r in UNI.campus.rooms if r.pool == "lab:cisc_computer_lab"] == ["SIN 108", "SIN 201", "SIN 301"]
     assert all(len({d for d, _, _ in o.intervals}) == 2 for o in time_options(UNI, "double"))   # REL 403: two days
-    assert len(UNI.campus.pool("classrooms:CBAPA")) == 15
 
 
 def test_loads_match_plan_summaries():
